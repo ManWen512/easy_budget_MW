@@ -1,131 +1,226 @@
 "use client";
 
-import BarChart from "@/components/barChart";
 import Home from "../page";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
-export default function monthEntryPage() {
+export default function MonthEntryPage() {
+  const [monthEntries, setMonthEntries] = useState([]);
+  const [totalIncome, setTotalIncome] = useState(0);
+  const [totalOutcome, setTotalOutcome] = useState(0);
+  const [totalBalance, setTotalBalance] = useState(0)
+  const date = new Date();
+  const [year, setYear] = useState(date.getFullYear());
+  const [month, setMonth] = useState(date.getMonth()+1); // 1 for January
+  const [isLoading, setIsLoading] = useState(true); // Loading state
+  const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entry`;
+  const router = useRouter();
+
+  const fetchEntries = async (year, month) => {
+    setIsLoading(true); // Set loading state before fetching
+    try {
+      const response = await fetch(
+        `${mainUrl}/monthEntry?year=${year}&month=${month}`
+      );
+      if (!response.ok) throw new Error("Network response was not ok");
+      const data = await response.json();
+      setMonthEntries(data.entries);
+      setTotalIncome(data.totalIncome);
+      setTotalOutcome(data.totalOutcome);
+      setTotalBalance(data.totalBalance);
+    } catch (error) {
+      console.error("Error fetching entries:", error);
+    } finally {
+      setIsLoading(false); // Set loading state to false after fetching
+    }
+  };
+
+  // Initial data fetch and whenever month/year changes
+  useEffect(() => {
+    fetchEntries(year, month);
+  }, [year, month]);
+
+  // Helper function to handle month navigation
+  const handleMonthChange = (direction) => {
+    if (direction === "prev") {
+      if (month === 1) {
+        setMonth(12);
+        setYear(year - 1);
+      } else {
+        setMonth(month - 1);
+      }
+    } else if (direction === "next") {
+      if (month === 12) {
+        setMonth(1);
+        setYear(year + 1);
+      } else {
+        setMonth(month + 1);
+      }
+    }
+  };
+
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+   // Handle row click to navigate to the detail page
+   const handleRowClick = (id) => {
+    router.push(`/monthEntry/${id}`);
+  };
+
   return (
     <Home>
-      <div className="static">
-        <div className="flex justify-center content-center">
-          <div className="mr-3">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="3"
-              stroke="currentColor"
-              class="size-12"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M15.75 19.5 8.25 12l7.5-7.5"
-              />
-            </svg>
+      <div className="flex justify-center content-center">
+        <div className="flex justify-center content-center items-center mb-5">
+          <button
+            onClick={() => handleMonthChange("prev")}
+            className="text-3xl mr-3"
+          >
+            ◀
+          </button>
+          <div className="rounded-2xl w-1/2 text-center block p-3 bg-black border border-gray-200">
+            <div className="text-1xl text-white font-bold">{`${
+              monthNames[month - 1]
+            } ${year}`}</div>
           </div>
-          <div className="mb-5 rounded-2xl text-center block w-1/4 p-3 bg-black border border-gray-200 rounded-lg">
-            <div className="text-1xl  text-white">January 2024</div>
-          </div>
-          <div className="ml-3">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="3"
-              stroke="currentColor"
-              class="size-12"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="m8.25 4.5 7.5 7.5-7.5 7.5"
-              />
-            </svg>
-          </div>
-        </div>
-        <div className="mb-2 rounded-3xl text-center block w-1/4 p-3 bg-black border border-gray-200 rounded-lg">
-          <div className="text-1xl  text-white">1st week</div>
-        </div>
-
-        {/* 1st one */}
-        <div className="grid grid-cols-4 gap-5 flex justify-between mb-2">
-          <div className="rounded-3xl  text-center block  p-3 bg-black border border-gray-200 rounded-lg">
-            <div className="text-1xl  text-white">1.1.2024</div>
-          </div>
-          <div>
-            <div className="rounded-2xl  text-center block p-3  bg-yellow-600 border border-gray-200 rounded-lg">
-              <div className="text-1xl  text-white">Food meat 1kg Food</div>
-            </div>
-          </div>
-          <div>
-            <div className="rounded-2xl  text-center block p-3 w-1/2 bg-black border border-gray-200 rounded-lg">
-              <div className="text-1xl  text-white">5$</div>
-            </div>
-          </div>
-          <div className="flex justify-start">
-            <div>
-              <button className="mr-5 bg-yellow-950 hover:bg-yellow-800 text-white font-bold py-3 px-6 rounded-2xl ">
-                Edit
-              </button>
-            </div>
-            <div>
-              <button className="bg-yellow-950 hover:bg-yellow-800 text-white font-bold py-3 px-6 rounded-2xl ">
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* 2nd one */}
-        <div className="grid grid-cols-4 gap-5 flex justify-between mb-2">
-          <div className="rounded-3xl  text-center block  p-3 bg-black border border-gray-200 rounded-lg">
-            <div className="text-1xl  text-white">1.1.2024</div>
-          </div>
-          <div>
-            <div className="rounded-2xl text-center block p-3 px-10 bg-yellow-600 border border-gray-200 rounded-lg">
-              <div className="text-1xl  text-white">Toy meat 1kg</div>
-            </div>
-          </div>
-          <div>
-            <div className="rounded-2xl  text-center block p-3 w-1/2 bg-black border border-gray-200 rounded-lg">
-              <div className="text-1xl  text-white">5$</div>
-            </div>
-          </div>
-          <div className="flex justify-start">
-            <div>
-              <button className="mr-5 bg-yellow-950 hover:bg-yellow-800 text-white font-bold py-3 px-6 rounded-2xl ">
-                Edit
-              </button>
-            </div>
-            <div>
-              <button className="bg-yellow-950 hover:bg-yellow-800 text-white font-bold py-3 px-6 rounded-2xl ">
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* total */}
-        <div className="grid grid-cols-2 gap-5">
-          <div className="flex justify-end">
-            <div className="rounded-2xl text-center block p-3 px-10 bg-black border border-gray-200 rounded-lg">
-              <div className="text-1xl  text-white">Total</div>
-            </div>
-          </div>
-          <div className="flex justify-start">
-            <div className="rounded-2xl text-center block p-3 w-1/4 bg-black border border-gray-200 rounded-lg">
-              <div className="text-1xl  text-white">10$</div>
-            </div>
-          </div>
-        </div>
-
-
-        <div className="absolute bottom-10 right-10">
-          <button className="bg-yellow-950 hover:bg-yellow-800 text-white font-bold py-4 px-6 rounded-2xl ">
-            Add New
+          <button
+            onClick={() => handleMonthChange("next")}
+            className="text-3xl ml-3"
+          >
+            ▶
           </button>
         </div>
+      </div>
+
+      <div>
+        {isLoading ? (
+          <div className="flex space-x-2 justify-center items-center h-screen">
+            <div className="animate-bounce bg-yellow-900 rounded-full h-8 w-4"></div>
+            <div className="animate-bounce bg-yellow-900 rounded-full h-6 w-4"></div>
+            <div className="animate-bounce bg-yellow-900 rounded-full h-8 w-4"></div>
+          </div>
+        ) : monthEntries.length > 0 ? (
+          <>
+            <table className="min-w-full border-separate border-spacing-2 ">
+              <thead>
+                <tr>
+                  <th className="rounded-2xl py-3 px-6 bg-yellow-950 text-left text-xs font-semibold text-white uppercase tracking-wider border-b">
+                    Date
+                  </th>
+                  <th className="rounded-2xl py-3 px-6 bg-yellow-950 text-left text-xs font-semibold text-white uppercase tracking-wider border-b">
+                    Categories
+                  </th>
+                  <th className="rounded-2xl py-3 px-6 bg-yellow-950 text-left text-xs font-semibold text-white uppercase tracking-wider border-b">
+                    Cost
+                  </th>
+                  <th className="rounded-2xl py-3 px-6 bg-yellow-950 text-left text-xs font-semibold text-white uppercase tracking-wider border-b">
+                    Card
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {monthEntries.map((item, index) => {
+                  // Format the current entry's date as DD-MM-YYYY
+                  const currentDate = new Date(
+                    item.dateTime
+                  ).toLocaleDateString("en-GB", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  });
+
+                  // Check if the current entry's date is the same as the previous entry's date
+                  const previousDate =
+                    index > 0
+                      ? new Date(
+                          monthEntries[index - 1].dateTime
+                        ).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        })
+                      : null;
+                  return (
+                    <>
+                      <tr
+                        className={`border-b cursor-pointer ${
+                          item.type === "INCOME"
+                            ? "bg-green-100 hover:bg-green-200"
+                            : "bg-red-100 hover:bg-red-200"
+                        }`}
+                        onClick={() => handleRowClick(item.id)} // Navigate on row click
+                      >
+                        <td className={`${currentDate !== previousDate ? "rounded-2xl py-4 px-6 text-sm text-gray-700" :'bg-yellow-300 cursor-default'} `}>
+                          {currentDate !== previousDate && currentDate}
+                        </td>
+                        <td className="rounded-2xl py-4 px-6 text-sm text-gray-700">
+                          {item.category.name}
+                        </td>
+                        <td className="rounded-2xl py-4 px-6 text-sm text-gray-700">
+                          {item.cost}
+                        </td>
+                        <td className="rounded-2xl py-4 px-6 text-sm text-gray-700">
+                          {item.account.name.charAt(0).toUpperCase() +
+                            item.account.name.slice(1)}
+                        </td>
+                      </tr>
+                    </>
+                  );
+                })}
+                <tr className="">
+                  <td></td>
+                  {totalIncome !== 0 && (
+                    <>
+                      <td className="rounded-2xl border-b bg-yellow-100 rounded-2xl py-4 px-6 font-bold text-gray-700">
+                        Total Income
+                      </td>
+                      <td className="rounded-2xl border-b bg-yellow-100 py-4 px-6 font-bold  text-gray-700">
+                        {totalIncome}$
+                      </td>
+                    </>
+                  )}
+                </tr>
+                <tr className="">
+                  <td></td>
+
+                  {totalOutcome !== 0 && (
+                    <>
+                      <td className="rounded-2xl border-b bg-yellow-100 rounded-2xl py-4 px-6 font-bold text-gray-700">
+                        Total Outcome
+                      </td>
+                      <td className="rounded-2xl border-b bg-yellow-100 py-4 px-6 font-bold  text-gray-700">
+                        {totalOutcome}$
+                      </td>
+                    </>
+                  )}
+                </tr>
+              </tbody>
+            </table>
+          </>
+        ) : (
+          <div className="font-bold text-1xl">No datas found!</div>
+        )}
+      </div>
+
+      <div className="fixed bottom-10 right-10">
+        <Link
+          href={"/entry/addEditEntry"}
+          className="rounded bg-yellow-950 hover:bg-yellow-800 text-white font-bold py-4 px-6 rounded-2xl "
+        >
+          Add New Entry
+        </Link>
       </div>
     </Home>
   );

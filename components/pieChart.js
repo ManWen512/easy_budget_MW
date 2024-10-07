@@ -9,28 +9,29 @@ import {
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const PieChart = () => {
-  const data = {
-    labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+const PieChart = ({ data }) => {
+  // Ensure that the data is correctly formatted before passing it to the chart
+  const chartData = {
+    labels: data ? data.map((item) => item.name) : [],
     datasets: [
       {
-        label: 'Color Distribution',
-        data: [12, 19, 3, 5, 2, 3],
+        
+        data: data ? data.map((item) => item.percentage) : [],
         backgroundColor: [
-          'rgba(255, 99, 132, 0.6)',  // Color for Red
-          'rgba(54, 162, 235, 0.6)',  // Color for Blue
-          'rgba(255, 206, 86, 0.6)',  // Color for Yellow
-          'rgba(75, 192, 192, 0.6)',  // Color for Green
-          'rgba(153, 102, 255, 0.6)', // Color for Purple
-          'rgba(255, 159, 64, 0.6)',  // Color for Orange
+          'rgba(255, 99, 132, 0.6)',  // Red
+          'rgba(54, 162, 235, 0.6)',  // Blue
+          'rgba(255, 206, 86, 0.6)',  // Yellow
+          'rgba(75, 192, 192, 0.6)',  // Green
+          'rgba(153, 102, 255, 0.6)', // Purple
+          'rgba(255, 159, 64, 0.6)',  // Orange
         ],
         borderColor: [
-          'rgba(255, 99, 132, 1)',  // Border for Red
-          'rgba(54, 162, 235, 1)',  // Border for Blue
-          'rgba(255, 206, 86, 1)',  // Border for Yellow
-          'rgba(75, 192, 192, 1)',  // Border for Green
-          'rgba(153, 102, 255, 1)', // Border for Purple
-          'rgba(255, 159, 64, 1)',  // Border for Orange
+          'rgba(255, 99, 132, 1)',  // Red border
+          'rgba(54, 162, 235, 1)',  // Blue border
+          'rgba(255, 206, 86, 1)',  // Yellow border
+          'rgba(75, 192, 192, 1)',  // Green border
+          'rgba(153, 102, 255, 1)', // Purple border
+          'rgba(255, 159, 64, 1)',  // Orange border
         ],
         borderWidth: 2,
       },
@@ -51,7 +52,7 @@ const PieChart = () => {
       },
       title: {
         display: true,
-        text: 'Pie Chart Example',
+        text: '',
         font: {
           size: 24,
         },
@@ -60,7 +61,7 @@ const PieChart = () => {
     },
   };
 
-  return <Pie data={data} options={options} />;
+  return <Pie data={chartData} options={options} />;
 };
 
 export default PieChart;

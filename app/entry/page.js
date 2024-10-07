@@ -54,6 +54,7 @@ export default function EntryPage() {
                     itemId: item.id,
                     type: item.type,
                     category: JSON.stringify(item.category),
+                    balance: JSON.stringify(item.account),
                     cost: item.cost,
                     dateTime: item.dateTime,
                     description: item.description,

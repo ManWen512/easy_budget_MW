@@ -8,11 +8,14 @@ import { useEffect, useState } from "react";
 export default function AddEditEntryPage({ searchParams }) {
   const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}`;
   const router = useRouter();
-  const { itemId, type, category, cost, dateTime, description } = searchParams;
+  const { itemId, type, category, account, cost, dateTime, description } =
+    searchParams;
   // Without parsing, category.id or category.name cannot be called
   const parsedCategory = category ? JSON.parse(category) : null;
+  const parsedAccount = account ? JSON.parse(account) : null;
 
   const [categories, setCategories] = useState([]);
+  const [accounts, setAccounts ] = useState([]);
   // if you don't use formData and declare one useState for each field,
   // you would have to write handleChange function for each field,
   // that would not be flexible for adding/removing fields
@@ -22,7 +25,11 @@ export default function AddEditEntryPage({ searchParams }) {
       id: parsedCategory?.id || 0,
       name: parsedCategory?.name || "",
     },
-    cost: cost || 1,
+    account: {
+      id: parsedAccount?.id || 0,
+      name: parsedAccount?.name || "",
+    },
+    cost: cost || 1 ,
     dateTime: dateTime || new Date().toISOString().slice(0, 16),
     description: description || "",
   });
@@ -33,6 +40,18 @@ export default function AddEditEntryPage({ searchParams }) {
     setFormData((prevData) => ({
       ...prevData,
       category: {
+        id: data[0].id,
+        name: data[0].name,
+      },
+    }));
+  };
+
+  const setDefaultAccount = (data) => {
+    // I had to use "data", because even calling this function after fetch's .then,
+    // categories array is still not updated somehow
+    setFormData((prevData) => ({
+      ...prevData,
+      account: {
         id: data[0].id,
         name: data[0].name,
       },
@@ -53,146 +72,224 @@ export default function AddEditEntryPage({ searchParams }) {
       });
   };
 
+  const fetchAccounts = async () => {
+    // same as these but .then can call functions after fetching
+    // const response = await fetch(`${mainUrl}/category/all`);
+    // const data = await response.json();
+    fetch(`${mainUrl}/account/all`)
+      .then((response) => response.json())
+      .then((data) => {
+        setAccounts(data);
+        if (parsedAccount === null) {
+          setDefaultAccount(data);
+        }
+      });
+  };
+
   // For first render
   useEffect(() => {
     fetchCategories();
+    fetchAccounts();
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (itemId === undefined) {
-      const response = await fetch(`${mainUrl}/entry`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-      alert("New item successfully added!");
-    } else {
-      const response = await fetch(`${mainUrl}/entry/${itemId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-      alert("An item successfully updated!");
+    console.log(formData);
+    try {
+      if (itemId === undefined) {
+        const response = await fetch(`${mainUrl}/entry`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+        alert("New item successfully added!");
+      } else {
+        const response = await fetch(`${mainUrl}/entry/${itemId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+        alert("An item successfully updated!");
+      }
+    } catch {
+      console.log(error);
     }
 
     router.push("/entry");
   };
 
   const handleChange = (e) => {
-    const { name, id, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]:
-        name === "category"
-          ? { id: value, name: e.target.selectedOptions[0].text }
-          : value,
-    }));
+    const { name, value } = e.target;
+    if (name === "category") {
+      const selectedCategory = categories.find(
+        (cat) => cat.id === parseInt(value)
+      );
+      setFormData((prevData) => ({
+        ...prevData,
+        category: {
+          id: selectedCategory?.id || 0,
+          name: selectedCategory?.name || "",
+        },
+      }));
+    } else if (name === "account") {
+      const selectedAccount = accounts.find(
+        (acc) => acc.id === parseInt(value)
+      );
+      setFormData((prevData) => ({
+        ...prevData,
+        account: {
+          id: selectedAccount?.id || 0,
+          name: selectedAccount?.name || "",
+        },
+      }));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
 
   return (
     <Home>
       <div>
-        <h1 className="text-3xl mb-5">Creating New Entry</h1>
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="flex items-center">
-            <div className="text-xl mr-5">Finance Type: </div>
-            <div>
-              <label htmlFor="outcome" className="mr-2">
-                Outcome
-              </label>
-              <input
-                type="radio"
-                id="outcome"
-                name="type"
-                value="OUTCOME"
-                className="mr-7"
-                onChange={handleChange}
-                checked={formData.type === "OUTCOME"}
-              />
-              <label htmlFor="income" className="mr-2">
-                Income
-              </label>
-              <input
-                type="radio"
-                id="income"
-                name="type"
-                value="INCOME"
-                className="mr-7"
-                onChange={handleChange}
-                checked={formData.type === "INCOME"}
-              />
+        <h1 className="text-3xl mb-5 flex font-bold justify-center content-center ">
+          Creating New Entry
+        </h1>
+        <div className="flex  justify-center">
+          <form onSubmit={handleSubmit} className="space-y-5 w-96">
+            <div className=" items-center">
+              <div className=" mr-5 mb-2 font-bold ">Finance Type: </div>
+              <div className="flex">
+                <label
+                  className={`w-full relative font-bold  cursor-pointer p-3 border rounded-lg transition-all ${
+                    formData.type === "OUTCOME"
+                      ? "border-black bg-yellow-800 text-white"
+                      : "border-black"
+                  }`}
+                >
+                  Outcome
+                  <input
+                    type="radio"
+                    id="outcome"
+                    name="type"
+                    value="OUTCOME"
+                    className="sr-only peer"
+                    onChange={handleChange}
+                    checked={formData.type === "OUTCOME"}
+                  />
+                </label>
+                <label
+                  className={`ml-3 w-full font-bold  relative cursor-pointer p-3 border rounded-lg transition-all ${
+                    formData.type === "INCOME"
+                      ? "border-black bg-yellow-800 text-white"
+                      : "border-black"
+                  }`}
+                >
+                  Income
+                  <input
+                    type="radio"
+                    id="income"
+                    name="type"
+                    value="INCOME"
+                    className="sr-only peer"
+                    onChange={handleChange}
+                    checked={formData.type === "INCOME"}
+                  />
+                </label>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center">
-            <div className="text-xl mr-5">Category: </div>
-            <div>
-              <select
-                name="category"
-                onChange={handleChange}
-                value={formData.category.id}
-              >
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+            <div className=" items-center">
+              <div className=" mr-5 mb-2 font-bold ">Category: </div>
+              <div>
+                <select
+                  className="w-full p-3 border rounded bg-gray-100"
+                  name="category"
+                  onChange={handleChange}
+                  value={formData.category.id}
+                >
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center">
-            <div className="text-xl mr-5">Cost Amount: </div>
-            <div>
-              <input
-                type="number"
-                id="cost"
-                name="cost"
-                min="0.01"
-                max="1000000000"
-                step="0.01"
-                required
-                onChange={handleChange}
-                value={formData.cost}
-              />
+            <div className=" items-center">
+              <div className="mr-5 mb-2 font-bold ">Account: </div>
+              <div>
+                <select
+                  className="w-full p-3 border rounded bg-gray-100"
+                  name="account"
+                  onChange={handleChange}
+                  value={formData.account.id}
+                >
+                  {accounts.map((account) => (
+                    <option key={account.id} value={account.id}>
+                      {account.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center">
-            <div className="text-xl mr-5">Date Time: </div>
-            <div>
-              <input
-                type="datetime-local"
-                id="dateTime"
-                name="dateTime"
-                value={formData.dateTime}
-                required
-                onChange={handleChange}
-              />
+            <div className=" items-center">
+              <div className=" mr-5 mb-2 font-bold ">Cost Amount: </div>
+              <div>
+                <input
+                  className="w-full p-3 border rounded bg-gray-100"
+                  type="number"
+                  id="cost"
+                  name="cost"
+                  min="0.01"
+                  max="1000000000"
+                  step="0.01"
+                  onScroll={()=> {}}
+                  required
+                  onChange={handleChange}
+                  value={formData.cost}
+                />
+              </div>
             </div>
-          </div>
-          <div className="flex items-center">
-            <div className="text-xl mr-5">Description: </div>
-            <div>
-              <textarea
-                id="description"
-                name="description"
-                required
-                onChange={handleChange}
-                value={formData.description}
-              />
+            <div className=" items-center">
+              <div className=" mr-5 mb-2 font-bold ">Date Time: </div>
+              <div>
+                <input
+                  className="w-full p-3 border rounded bg-gray-100"
+                  type="datetime-local"
+                  id="dateTime"
+                  name="dateTime"
+                  value={formData.dateTime}
+                  required
+                  onChange={handleChange}
+                />
+              </div>
             </div>
-          </div>
-          <button
-            type="submit"
-            className=" rounded-full p-2 bg-green-600 hover:bg-green-700"
-          >
-            Save
-          </button>
-        </form>
+            <div className=" items-center">
+              <div className=" mr-5 mb-2 font-bold ">Description: </div>
+              <div>
+                <textarea
+                  className="w-full p-2 border rounded bg-gray-100"
+                  id="description"
+                  name="description"
+                  required
+                  onChange={handleChange}
+                  value={formData.description}
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="font-bold  rounded px-4 py-2 bg-green-500 text-white hover:bg-green-700"
+            >
+              Save
+            </button>
+          </form>
+        </div>
       </div>
     </Home>
   );
