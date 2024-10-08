@@ -3,7 +3,8 @@
 import Home from "../page";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import Snackbar from "@/components/snackBar";
 
 export default function MonthEntryPage() {
   const [monthEntries, setMonthEntries] = useState([]);
@@ -14,8 +15,11 @@ export default function MonthEntryPage() {
   const [year, setYear] = useState(date.getFullYear());
   const [month, setMonth] = useState(date.getMonth()+1); // 1 for January
   const [isLoading, setIsLoading] = useState(true); // Loading state
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // Snackbar message
+  const [showSnackbar, setShowSnackbar] = useState(false); // Snackbar visibility
   const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entry`;
   const router = useRouter();
+  const searchParams = useSearchParams(); // Use this to access query parameters
 
   const fetchEntries = async (year, month) => {
     setIsLoading(true); // Set loading state before fetching
@@ -40,6 +44,21 @@ export default function MonthEntryPage() {
   useEffect(() => {
     fetchEntries(year, month);
   }, [year, month]);
+
+  // Check for Snackbar trigger on page load
+  useEffect(() => {
+    const triggerSnackbar = searchParams.get("triggerSnackbar");
+    if (triggerSnackbar) {
+      setSnackbarMessage(triggerSnackbar);
+      setShowSnackbar(true);
+    }
+  }, [searchParams]);
+
+    // Handle Snackbar close
+    const handleSnackbarClose = () => {
+      setShowSnackbar(false);
+      setSnackbarMessage("");
+    };
 
   // Helper function to handle month navigation
   const handleMonthChange = (direction) => {
@@ -75,10 +94,12 @@ export default function MonthEntryPage() {
     "December",
   ];
 
-   // Handle row click to navigate to the detail page
-   const handleRowClick = (id) => {
-    router.push(`/monthEntry/${id}`);
-  };
+    // Handle row click to navigate to the detail page
+    const handleRowClick = (id) => {
+      router.push(`/monthEntry/${id}`);
+    };
+
+
 
   return (
     <Home>
@@ -213,11 +234,15 @@ export default function MonthEntryPage() {
           <div className="font-bold text-1xl">No datas found!</div>
         )}
       </div>
-
+      <Snackbar
+        message={snackbarMessage}
+        show={showSnackbar}
+        onClose={handleSnackbarClose}
+      />
       <div className="fixed bottom-10 right-10">
         <Link
           href={"/entry/addEditEntry"}
-          className="rounded bg-yellow-950 hover:bg-yellow-800 text-white font-bold py-4 px-6 rounded-2xl "
+          className="rounded bg-yellow-950 hover:bg-yellow-800 text-white font-bold py-4 px-6  "
         >
           Add New Entry
         </Link>

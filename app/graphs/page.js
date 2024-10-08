@@ -6,9 +6,7 @@ import BarChart from "@/components/barChart";
 import { useState, useEffect } from "react";
 
 export default function graphsPage() {
-  const [isMonthChecked, setIsMonthChecked] = useState(false);
-  const [isYearChecked, setIsYearChecked] = useState(false);
-  const [isYearRangeChecked, setIsYearRangeChecked] = useState(false);
+  const [selectedOption, setSelectedOption] = useState("");
 
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [selectedYear, setSelectedYear] = useState(null);
@@ -39,21 +37,12 @@ export default function graphsPage() {
   ];
   const years = Array.from({ length: 30 }, (_, i) => 2024 - i); // Generates a list of years from 2024 to 1995
 
-  // Handle checkbox change with mutual exclusion
-  const handleCheckboxChange = (checkboxType) => {
-    if (checkboxType === "month") {
-      setIsMonthChecked(true);
-      setIsYearChecked(false);
-      setIsYearRangeChecked(false);
-    } else if (checkboxType === "year") {
-      setIsMonthChecked(false);
-      setIsYearChecked(true);
-      setIsYearRangeChecked(false);
-    } else if (checkboxType === "yearRange") {
-      setIsMonthChecked(false);
-      setIsYearChecked(false);
-      setIsYearRangeChecked(true);
-    }
+  const handleOptionChange = (option) => {
+    setSelectedOption(option);
+    // Reset selected data when the option changes
+    setSelectedMonth(null);
+    setSelectedYear(null);
+    setYearRange({ startYear: null, endYear: null });
   };
 
   // Fetch data when month and year are selected
@@ -80,8 +69,8 @@ export default function graphsPage() {
       // Set the data for income and outcome category lists
       setIncomeCategoryList(transformData(data.incomeCategoryList || {}));
       setOutcomeCategoryList(transformData(data.outcomeCategoryList || {}));
-      setIncomeList(transformDayData(data.incomeList || {}));
-      setOutcomeList(transformDayData(data.outcomeList || {}));
+      setIncomeList(transformDayData(data.incomeList || {}, year, month));
+      setOutcomeList(transformDayData(data.outcomeList || {}, year, month));
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -98,8 +87,8 @@ export default function graphsPage() {
       // Set the data for income and outcome category lists
       setIncomeCategoryList(transformData(data.incomeCategoryList || {}));
       setOutcomeCategoryList(transformData(data.outcomeCategoryList || {}));
-      setIncomeList(transformDayData(data.incomeList || {}));
-      setOutcomeList(transformDayData(data.outcomeList || {}));
+      setIncomeList(transformMonthData(data.incomeList || {}));
+      setOutcomeList(transformMonthData(data.outcomeList || {}));
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -118,8 +107,12 @@ export default function graphsPage() {
       // Set the data for income and outcome category lists
       setIncomeCategoryList(transformData(data.incomeCategoryList || {}));
       setOutcomeCategoryList(transformData(data.outcomeCategoryList || {}));
-      setIncomeList(transformDayData(data.incomeList || {}));
-      setOutcomeList(transformDayData(data.outcomeList || {}));
+      setIncomeList(
+        transformYearData(data.incomeList || {}, year.startYear, year.endYear)
+      );
+      setOutcomeList(
+        transformYearData(data.outcomeList || {}, year.startYear, year.endYear)
+      );
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -133,41 +126,98 @@ export default function graphsPage() {
     }));
   };
 
-  // Utility function to transform day data from object to array
-  const transformDayData = (dataObject) => {
-    return Object.entries(dataObject).map(([day, total]) => ({
-      day,
-      total,
-    }));
+  const transformDayData = (dataObject, year, month) => {
+    const daysInMonth = new Date(year, month, 0).getDate(); // Get the number of days in the specified month
+
+    // Create an array with all days of the month, defaulting to 0 if no data exists for that day
+    const daysArray = Array.from({ length: daysInMonth }, (_, i) => {
+      const day = i + 1; // Day number (1-based)
+      const total = dataObject[day] || 0; // Use the total from the data object or default to 0
+
+      return { day, total };
+    });
+
+    return daysArray;
+  };
+
+  // Utility function to transform month data from object to array
+  const transformMonthData = (dataObject) => {
+    // Define month names using Date to get dynamic month names
+    const monthNames = Array.from({ length: 12 }, (_, i) => {
+      const date = new Date(0, i); // Month index is 0-based (January is 0)
+      return date.toLocaleString("default", { month: "long" }).toUpperCase(); // Convert to uppercase
+    });
+
+    return monthNames.map((month, index) => {
+      const total = dataObject[month] || 0; // Get total for month or default to 0
+      return { day: month, total };
+    });
+  };
+
+  // Utility function to transform year data from object to array
+  const transformYearData = (dataObject, startYear, endYear) => {
+    const yearsArray = [];
+
+    // Iterate through the range of years from startYear to endYear
+    for (let year = startYear; year <= endYear; year++) {
+      const total = dataObject[year] || 0; // Get total for year or default to 0
+      yearsArray.push({ day: year, total }); // Push into the array
+    }
+
+    return yearsArray;
   };
 
   return (
     <Home>
       <div className="flex space-x-4 mb-4">
         {/* Checkboxes for selecting Month, Year, or Year Range */}
-        <label className="flex items-center space-x-2">
+        <label
+          className={`ml-3 w-full font-bold  relative cursor-pointer p-3 border rounded-lg transition-all ${
+            selectedOption === "month"
+              ? "border-black bg-yellow-800 text-white"
+              : "border-black"
+          }`}
+        >
           <input
-            type="checkbox"
-            checked={isMonthChecked}
-            onChange={() => handleCheckboxChange("month")}
+            type="radio"
+            name="dataOption"
+            checked={selectedOption === "month"}
+            className="sr-only peer"
+            onChange={() => handleOptionChange("month")}
           />
           <span>Select Month</span>
         </label>
 
-        <label className="flex items-center space-x-2">
+        <label
+          className={`ml-3 w-full font-bold  relative cursor-pointer p-3 border rounded-lg transition-all ${
+            selectedOption === "year"
+              ? "border-black bg-yellow-800 text-white"
+              : "border-black"
+          }`}
+        >
           <input
-            type="checkbox"
-            checked={isYearChecked}
-            onChange={() => handleCheckboxChange("year")}
+            type="radio"
+            name="dataOption"
+            checked={selectedOption === "year"}
+            className="sr-only peer"
+            onChange={() => handleOptionChange("year")}
           />
           <span>Select Year</span>
         </label>
 
-        <label className="flex items-center space-x-2">
+        <label
+          className={`ml-3 w-full font-bold  relative cursor-pointer p-3 border rounded-lg transition-all ${
+            selectedOption === "yearRange"
+              ? "border-black bg-yellow-800 text-white"
+              : "border-black"
+          }`}
+        >
           <input
-            type="checkbox"
-            checked={isYearRangeChecked}
-            onChange={() => handleCheckboxChange("yearRange")}
+            type="radio"
+            name="dataOption"
+            checked={selectedOption === "yearRange"}
+            className="sr-only peer"
+            onChange={() => handleOptionChange("yearRange")}
           />
           <span>Select Year Range</span>
         </label>
@@ -175,7 +225,7 @@ export default function graphsPage() {
 
       <div className="flex space-x-4 mb-8">
         {/* Dropdowns for Month and Year Selection */}
-        {isMonthChecked && (
+        {selectedOption === "month" && (
           <>
             <div>
               <label htmlFor="month" className="mr-2">
@@ -222,7 +272,7 @@ export default function graphsPage() {
         )}
 
         {/* Dropdown for Year Selection */}
-        {isYearChecked && (
+        {selectedOption === "year" && (
           <div>
             <label htmlFor="year" className="mr-2">
               Year:
@@ -246,7 +296,7 @@ export default function graphsPage() {
         )}
 
         {/* Dropdowns for Year Range Selection */}
-        {isYearRangeChecked && (
+        {selectedOption === "yearRange" && (
           <div className="flex space-x-2">
             <div>
               <label htmlFor="startYear" className="mr-2">
@@ -297,21 +347,28 @@ export default function graphsPage() {
         )}
       </div>
 
-      {isMonthChecked && (
-        <div className="grid grid-cols-2 gap-4">
-          <div className="mt-20">
+      {((selectedOption === "month" && selectedMonth && selectedYear) ||
+        (selectedOption === "year" && selectedYear) ||
+        (selectedOption === "yearRange" &&
+          yearRange.startYear &&
+          yearRange.endYear)) && (
+        <div className="grid grid-cols-4 gap-4">
+          <div className="col-span-3 mt-20 ">
             <div>Income</div>
             <BarChart
               data={incomeList}
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
+              startYear={yearRange.startYear}
+              endYear={yearRange.endYear}
               title={["Income"]}
             />
           </div>
-          <div>
+          <div className=" mt-20">
             <PieChart data={incomeCategoryList} />
           </div>
-          <div className="mt-20">
+          <div className="col-span-3 mt-20">
+            <div>Outcome</div>
             <BarChart
               data={outcomeList}
               selectedMonth={selectedMonth}
@@ -319,42 +376,7 @@ export default function graphsPage() {
               title={["Outcome"]}
             />
           </div>
-          <div>
-            <PieChart data={outcomeCategoryList} />
-          </div>
-        </div>
-      )}
-      {isYearChecked && (
-        <div className="grid grid-cols-2 gap-4">
           <div className="mt-20">
-            <div>Income</div>
-            <BarChart data={incomeList} title={["Income"]} />
-          </div>
-          <div>
-            <PieChart data={incomeCategoryList} />
-          </div>
-          <div className="mt-20">
-            <BarChart data={outcomeList} title={["Outcome"]} />
-          </div>
-          <div>
-            <PieChart data={outcomeCategoryList} />
-          </div>
-        </div>
-      )}
-
-      {isYearRangeChecked && (
-        <div className="grid grid-cols-2 gap-4">
-          <div className="mt-20">
-            <div>Income</div>
-            <BarChart data={incomeList} title={["Income"]} />
-          </div>
-          <div>
-            <PieChart data={incomeCategoryList} />
-          </div>
-          <div className="mt-20">
-            <BarChart data={outcomeList} title={["Outcome"]} />
-          </div>
-          <div>
             <PieChart data={outcomeCategoryList} />
           </div>
         </div>

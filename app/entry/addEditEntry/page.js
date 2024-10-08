@@ -5,7 +5,7 @@ import Home from "../../page";
 import { useEffect, useState } from "react";
 
 // only "searchParams" works, name cannot be changed
-export default function AddEditEntryPage({ searchParams }) {
+export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
   const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}`;
   const router = useRouter();
   const { itemId, type, category, account, cost, dateTime, description } =
@@ -94,7 +94,7 @@ export default function AddEditEntryPage({ searchParams }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
+    console.log(itemId);
     try {
       if (itemId === undefined) {
         const response = await fetch(`${mainUrl}/entry`, {
@@ -104,22 +104,24 @@ export default function AddEditEntryPage({ searchParams }) {
           },
           body: JSON.stringify(formData),
         });
-        alert("New item successfully added!");
+        
+        router.push(`/monthEntry?triggerSnackbar=${encodeURIComponent('Entry Added successfully!')}`);
       } else {
-        const response = await fetch(`${mainUrl}/entry/${itemId}`, {
+        const response = await fetch(`${mainUrl}/entry?id=${itemId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(formData),
         });
-        alert("An item successfully updated!");
+       
+        router.push(`/monthEntry?triggerSnackbar=${encodeURIComponent('Entry Updated successfully!')}`);
       }
     } catch {
       console.log(error);
     }
 
-    router.push("/entry");
+   
   };
 
   const handleChange = (e) => {

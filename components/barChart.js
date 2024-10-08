@@ -11,12 +11,18 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-const BarChart = ({ data, selectedMonth = null, selectedYear = null, title }) => {
+const BarChart = ({ data = [], selectedMonth = null, selectedYear = null, title , startYear = null, endYear = null}) => {
+  const colors = [
+    "rgba(75, 192, 192, 0.6)", // Color for first bar
+    "rgba(153, 102, 255, 0.6)", // Color for second bar
+    "rgba(255, 159, 64, 0.6)", // Color for third bar
+    "rgba(255, 99, 132, 0.6)", // Color for fourth bar
+    // Add more colors as needed
+  ];
+  
+  
   // Helper function to format day as 'day/month/year'
   const formatDate = (day) => {
-    if (selectedMonth !== null && selectedYear !== null) {
-      return `${day}/${selectedMonth}/${selectedYear}`;
-    }
     return `${day}`; // Fallback in case month or year is not set
   };
 
@@ -26,8 +32,8 @@ const BarChart = ({ data, selectedMonth = null, selectedYear = null, title }) =>
       {
         label: title,
         data: data.map((item) => item.total), // Extract totals for the bar chart data
-        backgroundColor: "rgba(75, 192, 192, 0.6)", // Color for the bars
-        borderColor: "rgba(75, 192, 192, 1)", // Border color for the bars
+        backgroundColor: data.map((_, index) => colors[index % colors.length]), // Assign colors cyclically
+        borderColor: data.map((_, index) => colors[index % colors.length].replace('0.6', '1')), // Border color
         borderWidth: 2,
       },
     ],

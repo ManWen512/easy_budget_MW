@@ -6,12 +6,16 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Home({ children }) {
+ 
+  const [incomeList, setIncomeList] = useState([]);
+  const [outcomeList, setOutcomeList] = useState([]);
   const [totalBalance, setTotalBalance] = useState(0);
   const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}`;
   const pathname = usePathname();
 
   useEffect(() => {
     fetchTotalBalance();
+    fetchYearData();
   }, []);
 
   const fetchTotalBalance = async () => {
@@ -20,12 +24,38 @@ export default function Home({ children }) {
     setTotalBalance(data);
   };
 
+  const fetchYearData = async () => {
+    const currentYear = new Date().getFullYear();
+    try {
+      const response = await fetch(`${mainUrl}/entry/graphs/year?year=${currentYear}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const data = await response.json();
+
+      // Set the data for income and outcome category lists
+      setIncomeList(transformDayData(data.incomeList || {}));
+      setOutcomeList(transformDayData(data.outcomeList || {}));
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+    // Utility function to transform day data from object to array
+    const transformDayData = (dataObject) => {
+      return Object.entries(dataObject).map(([day, total]) => ({
+        day,
+        total,
+      }));
+    };
+
   return (
     <div className="flex min-h-screen">
-      <div className=" flex flex-col bg-amber-900 border-r-2 border-black w-1/4 min-h-screen">
+      <div className=" flex flex-col bg-amber-900 border-r-2 border-black w-1/5 min-h-screen">
+      <div className='fixed'>
         <div className="flex items-center p-3">
           <div className="bg-black w-14 h-14 rounded-full mr-5"></div>
-          <div className="text-3xl text-white font-bold">Easy Budget</div>
+          <div className="text-3xl text-white font-bold">Easy <br></br>Budget</div>
         </div>
         <div className="flex flex-col items-center space-y-5 text-xl p-5">
           <div>
@@ -117,6 +147,7 @@ export default function Home({ children }) {
             </Link>
           </div>
         </div>
+        </div>
       </div>
       <div className=" p-5 bg-yellow-300 	h-auto w-screen ">
         {children ? (
@@ -124,7 +155,7 @@ export default function Home({ children }) {
         ) : (
           <div className="container content-center">
             <div className="grid grid-cols-2 gap-4 ">
-              <div className="h-48 rounded-2xl text-center content-center block max-w p-6 bg-yellow-950 border border-gray-200 rounded-lg shadow hover:bg-yellow-900 dark:bg-yellow-900 dark:border-yellow-800 dark:hover:bg-yellow-800">
+              <div className="h-48 rounded-2xl text-center content-center block max-w p-6 bg-yellow-950 border border-gray-200  shadow hover:bg-yellow-900 dark:bg-yellow-900 dark:border-yellow-800 dark:hover:bg-yellow-800">
                 <div className="mb-2 text-2xl font-bold text-white">
                   Total Balance
                 </div>
@@ -138,7 +169,10 @@ export default function Home({ children }) {
             <div>
               <div className="m-2 font-bold">Overview </div>
               <div className="bd-white">
-                <BarChart />
+                <BarChart data={incomeList} title={['Income']}/>
+              </div>
+              <div className="bd-white">
+                <BarChart data={outcomeList} title={['Outcome']}/>
               </div>
             </div>
           </div>
