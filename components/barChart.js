@@ -11,7 +11,7 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-const BarChart = ({ data = [], selectedMonth = null, selectedYear = null, title , startYear = null, endYear = null}) => {
+const BarChart = ({ data = [], title }) => {
   const colors = [
     "rgba(75, 192, 192, 0.6)", // Color for first bar
     "rgba(153, 102, 255, 0.6)", // Color for second bar

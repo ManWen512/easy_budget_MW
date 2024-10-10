@@ -95,7 +95,7 @@ const EntryDetailPage = ({ params, triggerSnackbar }) => {
         <div className="grid grid-cols-2 mb-4">
           <div className="text-gray-500 mr-3 flex justify-between">Status<div>:</div></div>{" "}
           <div
-            className={`px-3 py-1 w-1/4 text-center rounded-full text-xs ${
+            className={`px-3 py-1 w-full text-center rounded-full text-xs ${
               entry.type === "INCOME"
                 ? "bg-green-200 text-green-700"
                 : "bg-red-200 text-red-700"

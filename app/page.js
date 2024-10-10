@@ -1,6 +1,7 @@
 "use client";
 
 import BarChart from "@/components/barChart";
+import PieChart from "@/components/pieChart";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -9,6 +10,10 @@ export default function Home({ children }) {
   const [incomeList, setIncomeList] = useState([]);
   const [outcomeList, setOutcomeList] = useState([]);
   const [totalBalance, setTotalBalance] = useState(0);
+  const [incomeCategoryList, setIncomeCategoryList] = useState([]);
+  const [outcomeCategoryList, setOutcomeCategoryList] = useState([]);
+  const [incomeCategoryCostList, setIncomeCategoryCostList] = useState([]);
+  const [outcomeCategoryCostList, setOutcomeCategoryCostList] = useState([]);
   const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}`;
   const pathname = usePathname();
 
@@ -17,7 +22,7 @@ export default function Home({ children }) {
 
   useEffect(() => {
     fetchTotalBalance();
-    fetchYearData();
+    fetchMonthData();
   }, []);
 
   const fetchTotalBalance = async () => {
@@ -26,7 +31,7 @@ export default function Home({ children }) {
     setTotalBalance(data);
   };
 
-  const fetchYearData = async () => {
+  const fetchMonthData = async () => {
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
     try {
@@ -45,9 +50,37 @@ export default function Home({ children }) {
       setOutcomeList(
         transformDayData(data.outcomeList || {}, currentYear, currentMonth)
       );
+      setIncomeCategoryList(
+        transformData(data.incomeCategoryPercentageList || {})
+      );
+      setOutcomeCategoryList(
+        transformData(data.outcomeCategoryPercentageList || {})
+      );
+      setIncomeCategoryCostList(
+        transformCostData(data.incomeCategoryCostList || {})
+      );
+      setOutcomeCategoryCostList(
+        transformCostData(data.outcomeCategoryCostList || {})
+      );
     } catch (error) {
       console.error("Error fetching data:", error);
     }
+  };
+
+  // Utility function to transform data from object to array
+  const transformCostData = (dataObject) => {
+    return Object.entries(dataObject).map(([name, total]) => ({
+      name,
+      total,
+    }));
+  };
+
+  // Utility function to transform data from object to array
+  const transformData = (dataObject) => {
+    return Object.entries(dataObject).map(([name, percentage]) => ({
+      name,
+      percentage,
+    }));
   };
 
   const transformDayData = (dataObject, year, month) => {
@@ -190,13 +223,29 @@ export default function Home({ children }) {
               </Link>
             </div>
 
-            <div>
-              <div className="m-2 font-bold">Overview ({currentMonthName})</div>
-              <div className="bd-white">
-                <BarChart data={incomeList} title={["Income"]} />
+            <div className="">
+              <div className="m-2 font-bold ">
+                Overview ({currentMonthName})
               </div>
-              <div className="bd-white">
-                <BarChart data={outcomeList} title={["Outcome"]} />
+              <div className='grid grid-cols-4'>
+                <div className="col-span-3 bd-white">
+                  <BarChart data={incomeList} title={["Income"]} />
+                </div>
+                <div className=" mt-20">
+                  <PieChart
+                    data={incomeCategoryList}
+                    cost={incomeCategoryCostList}
+                  />
+                </div>
+                <div className="col-span-3 bd-white">
+                  <BarChart data={outcomeList} title={["Outcome"]} />
+                </div>
+                <div className=" mt-20">
+                  <PieChart
+                    data={outcomeCategoryList}
+                    cost={outcomeCategoryCostList}
+                  />
+                </div>
               </div>
             </div>
           </div>
