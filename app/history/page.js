@@ -127,10 +127,9 @@ export default function HistoryPage() {
                     onChange={(e) => setType(e.target.value)}
                     className="w-full border border-gray-300 rounded-md p-2"
                   >
-                    <option>Type</option>
+                    <option value="ALL">Type</option>
                     <option value="INCOME">Income</option>
                     <option value="OUTCOME">Outcome</option>
-                    <option value="ALL">All</option>
                   </select>
                 </div>
 
