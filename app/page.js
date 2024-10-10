@@ -184,18 +184,6 @@ export default function Home({ children }) {
                 History
               </Link>
             </div>
-            <div>
-              <Link
-                href={"/setting"}
-                // This is so cool react+tailwind combo
-                className={
-                  "hover:bg-amber-400 rounded-xl px-7 py-2 text-white hover:text-black " +
-                  (pathname === "/setting" ? "bg-amber-600 font-bold" : "")
-                }
-              >
-                Setting
-              </Link>
-            </div>
           </div>
         </div>
       </div>
