@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 export default function HistoryPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isLoading, setIsLoading] = useState(false);
 
   const [type, setType] = useState(searchParams.get("type") || "");
   const [account, setAccount] = useState(searchParams.get("account") || "");
@@ -44,6 +45,7 @@ export default function HistoryPage() {
   }, [type, account, category, startDate, endDate, sortField, sortOrder]);
 
   const updateQueryParams = () => {
+    
     const params = new URLSearchParams();
 
     if (type) params.set("type", type);
@@ -68,6 +70,7 @@ export default function HistoryPage() {
   };
 
   const fetchEntryData = async () => {
+    setIsLoading(true);
     const params = new URLSearchParams();
     if (type && type !== "ALL") {
       params.append("type", type);
@@ -87,6 +90,8 @@ export default function HistoryPage() {
       setEntryData(data);
     } catch (error) {
       console.error("Error fetching entry data:", error);
+    }finally{
+      setIsLoading(false);
     }
   };
 
@@ -221,7 +226,13 @@ export default function HistoryPage() {
           </div>
         </div>
         <div className="mt-4">
-          {entryData.length > 0 ? (
+          {isLoading ? (
+          <div className="flex space-x-2 justify-center items-center h-screen">
+            <div className="animate-bounce bg-yellow-900 rounded-full h-8 w-4"></div>
+            <div className="animate-bounce bg-yellow-900 rounded-full h-6 w-4"></div>
+            <div className="animate-bounce bg-yellow-900 rounded-full h-8 w-4"></div>
+          </div>
+        ) : entryData.length > 0 ? (
             <table className="min-w-full border-separate border-spacing-2 ">
               <thead className=" bg-yellow-950 text-left text-xs font-semibold text-white uppercase tracking-wider border-b">
                 <tr className="">

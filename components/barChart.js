@@ -42,6 +42,14 @@ const BarChart = ({ data = [], title }) => {
   const options = {
     responsive: true,
     plugins: {
+      tooltip:{
+        callbacks: {
+          label: (tooltipItem) => {
+            const value = tooltipItem.raw; // Access the data value
+            return `$${value}`; // Format the value with a dollar sign
+          },
+        },
+      },
       legend: {
         position: "top",
       },
@@ -60,7 +68,7 @@ const BarChart = ({ data = [], title }) => {
       y: {
         title: {
           display: true,
-          text: "Balances",
+          text: "Balances ($)",
         },
         beginAtZero: true, // Start the y-axis at zero
       },

@@ -83,7 +83,7 @@ const EntryDetailPage = ({ params, triggerSnackbar }) => {
         </div>
         <div className="grid grid-cols-2 mb-4">
           <div className="text-gray-500 mr-3 flex justify-between">Cost<div>:</div></div>
-          <div> ${entry.cost}</div>
+          <div> $ {entry.cost}</div>{/* dollar Sign */}
         </div>
         <div className="grid grid-cols-2 mb-4">
           <div className="text-gray-500 mr-3 flex justify-between">Card<div>:</div></div>

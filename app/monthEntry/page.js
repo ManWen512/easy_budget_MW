@@ -196,7 +196,8 @@ export default function MonthEntryPage() {
                           {item.category.name}
                         </td>
                         <td className="rounded-2xl py-4 px-6 text-sm text-gray-700">
-                          {item.cost}
+                          {/* dollar Sign */}
+                          $ {item.cost}
                         </td>
                         <td className="rounded-2xl py-4 px-6 text-sm text-gray-700">
                           {item.account.name.charAt(0).toUpperCase() +
@@ -214,7 +215,8 @@ export default function MonthEntryPage() {
                         Total Income
                       </td>
                       <td className="rounded-2xl border-b bg-yellow-100 py-4 px-6 font-bold  text-gray-700">
-                        {totalIncome}$
+                        $ {totalIncome}
+                        {/* dollar Sign */}
                       </td>
                     </>
                   )}
@@ -228,7 +230,8 @@ export default function MonthEntryPage() {
                         Total Outcome
                       </td>
                       <td className="rounded-2xl border-b bg-yellow-100 py-4 px-6 font-bold  text-gray-700">
-                        {totalOutcome}$
+                        $ {totalOutcome}
+                        {/* dollar Sign */}
                       </td>
                     </>
                   )}

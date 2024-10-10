@@ -16,7 +16,7 @@ const PieChart = ({ data , cost}) => {
     labels: data
     ? data.map((item) => {
         const matchingCost = cost.find((cos) => cos.name === item.name); // Find matching cost by name
-        return matchingCost ? `${item.name} = ${matchingCost.total}` : item.name; // Format label if match found
+        return matchingCost ? `${item.name} = $${matchingCost.total}` : item.name; // Format label if match found
       })
     : [],
     datasets: [
