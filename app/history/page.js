@@ -1,29 +1,62 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Home from "../page";
+import { FaSortDown } from "react-icons/fa";
+import { FaArrowDownWideShort, FaArrowUpShortWide } from "react-icons/fa6";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function HistoryPage() {
-  const [type, setType] = useState("");
-  const [account, setAccount] = useState("");
-  const [category, setCategory] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [sortOption, setSortOption] = useState("dateTime"); // Single state for sort option
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [type, setType] = useState(searchParams.get("type") || "");
+  const [account, setAccount] = useState(searchParams.get("account") || "");
+  const [category, setCategory] = useState(searchParams.get("category") || "");
+  const [startDate, setStartDate] = useState(searchParams.get("startDate") || "");
+  const [endDate, setEndDate] = useState(searchParams.get("endDate") || "");
+  const [sortOrder, setSortOrder] = useState(searchParams.get("sortOrder") || "DESC");
+  const [sortField, setSortField] = useState(searchParams.get("sortField") || "dateTime");
   const [accountsData, setAccountsData] = useState([]);
   const [categoriesData, setCategoriesData] = useState([]);
-  const [entryData, setEntryData] = useState([]); // State to hold entry data
+  const [entryData, setEntryData] = useState([]);
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}`;
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     fetchAccountsandCategories();
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowFilterDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   useEffect(() => {
-    if (account) {
-      fetchEntryData();
-    }
-  }, [type, account, category, startDate, endDate, sortOption]);
+    fetchEntryData();
+    updateQueryParams();
+  }, [type, account, category, startDate, endDate, sortField, sortOrder]);
+
+  const updateQueryParams = () => {
+    const params = new URLSearchParams();
+
+    if (type) params.set("type", type);
+    if (account) params.set("account", account);
+    if (category) params.set("category", category);
+    if (startDate) params.set("startDate", startDate);
+    if (endDate) params.set("endDate", endDate);
+    if (sortField) params.set("sortField", sortField);
+    if (sortOrder) params.set("sortOrder", sortOrder);
+
+    const queryString = params.toString();
+    router.replace(`/history?${queryString}`);
+  };
 
   const fetchAccountsandCategories = async () => {
     const response = await fetch(`${mainUrl}/account/all`);
@@ -35,153 +68,222 @@ export default function HistoryPage() {
   };
 
   const fetchEntryData = async () => {
-    // Build the query parameters based on selected filters
     const params = new URLSearchParams();
-    if (type) params.append("type", type.toUpperCase());
+    if (type && type !== "ALL") {
+      params.append("type", type);
+    }
     if (account) params.append("accountId", account);
     if (category) params.append("categoryId", category);
-    if (startDate) params.append("startDate", new Date(startDate).toISOString());
-    if (endDate) params.append("endDate", new Date(endDate).toISOString());
-    params.append("sortField", sortOption);
-    params.append("sortOrder", sortOption === "ascending" ? "ASC" : "DESC");
-    console.log([params])
+    if (startDate) params.append("startDate", formatDate(startDate));
+    if (endDate) params.append("endDate", formatDate(endDate));
+    if (sortField) params.append("sortField", sortField);
+    if (sortOrder) params.append("sortOrder", sortOrder === "ascending" ? "ASC" : "DESC");
+
+    const url = params.toString() ? `${mainUrl}/entry/history?${params}` : `${mainUrl}/entry/history`;
+
     try {
-      const response = await fetch(`${mainUrl}/entry/history?${params}`);
+      const response = await fetch(url);
       const data = await response.json();
-      setEntryData(data); // Store fetched entry data
-      
+      setEntryData(data);
     } catch (error) {
       console.error("Error fetching entry data:", error);
     }
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hours}:${minutes}:00`;
+  };
 
-
+  const handleRowClick = (id) => {
+    router.push(`/monthEntry/${id}`);
+  };
   return (
     <Home>
-      <table className="min-w-full">
-        <thead>
-          <tr>
-            <th className="p-2">
-              <select
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-                className="appearance-none border-none p-2 bg-transparent"
-              >
-                <option>Type</option>
-                <option value="INCOME">Income</option>
-                <option value="OUTCOME">Outcome</option>
-              </select>
-            </th>
+      <div>
+        <div className="flex items-center space-x-4 mb-4">
+          {/* Filter Button */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+              className="flex bg-blue-500 text-white px-4 py-2 rounded-md"
+            >
+              Filter
+              <FaSortDown className="ml-1" />
+            </button>
 
-            <th className="p-2">
-              <select
-                value={account}
-                onChange={(e) => setAccount(e.target.value)}
-                className="appearance-none border-none p-2 bg-transparent"
-              >
-                <option value="">Account</option>
-                {accountsData.map((acc) => (
-                  <option key={acc.id} value={acc.id}>
-                    {acc.name}
-                  </option>
-                ))}
-              </select>
-            </th>
+            {/* Filter Dropdown */}
+            {showFilterDropdown && (
+              <div className="absolute mt-2 w-64 bg-yellow-950 border border-gray-900 rounded-md shadow-lg p-4">
+                <div className="mb-4">
+                  <label className="block text-white mb-2">Type</label>
+                  <select
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md p-2"
+                  >
+                    <option>Type</option>
+                    <option value="INCOME">Income</option>
+                    <option value="OUTCOME">Outcome</option>
+                    <option value="ALL">All</option>
+                  </select>
+                </div>
 
-            <th className="p-2">
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="appearance-none border-none p-2 bg-transparent"
-              >
-                <option value="">Category</option>
-                {categoriesData.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            </th>
+                <div className="mb-4">
+                  <label className="block text-white mb-2">Account</label>
+                  <select
+                    value={account}
+                    onChange={(e) => setAccount(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md p-2"
+                  >
+                    <option value="">Account</option>
+                    {accountsData.map((acc) => (
+                      <option key={acc.id} value={acc.id}>
+                        {acc.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            <th className="p-2">
-              <label className="inline-flex items-center">
-                <input
-                  type="radio"
-                  value="ascending"
-                  checked={sortOption === "ascending"}
-                  onChange={() => setSortOption("ascending")}
-                  className="form-radio"
-                />
-                <span className="ml-2">Ascending</span>
-              </label>
-            </th>
-            <th>
-              <label className="inline-flex items-center">
-                <input
-                  type="radio"
-                  value="descending"
-                  checked={sortOption === "descending"}
-                  onChange={() => setSortOption("descending")}
-                  className="form-radio"
-                />
-                <span className="ml-2">Descending</span>
-              </label>
-            </th>
-            <th>
-              <label className="inline-flex items-center">
-                <input
-                  type="radio"
-                  value="dateTime"
-                  checked={sortOption === "dateTime"}
-                  onChange={() => setSortOption("dateTime")}
-                  className="form-radio"
-                />
-                <span className="ml-2">DateTime</span>
-              </label>
-            </th>
-          </tr>
-        </thead>
-      </table>
+                <div className="mb-4">
+                  <label className="block text-white mb-2">Category</label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md p-2"
+                  >
+                    <option value="">Category</option>
+                    {categoriesData.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-      {/* Date Range Pickers - Conditionally Rendered */}
-      {sortOption === "dateTime" && (
-        <div className="flex justify-end space-x-2 mt-4">
-          <div className="mb-4">
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="border border-gray-300 rounded-md p-2 w-full"
-            />
+                <div className="mb-4">
+                  <label className="block text-white mb-2">Sort Field</label>
+                  <select
+                    value={sortField}
+                    onChange={(e) => setSortField(e.target.value)}
+                    className="w-full border border-gray-300 rounded-md p-2"
+                  >
+                    <option value="dateTime">DateTime</option>
+                    <option value="cost">Cost</option>
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="mt-3">To</div>
-          <div className="mb-4">
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="border border-gray-300 rounded-md p-2 w-full"
-            />
+
+          {/* Sort Button with Ascending and Descending Arrows */}
+          <div className="flex items-center ">
+            <button
+              onClick={() =>
+                setSortOrder(
+                  sortOrder === "ascending" ? "descending" : "ascending"
+                )
+              }
+              className="bg-green-500 text-white px-4 py-2 rounded-md flex items-center space-x-1"
+            >
+              <span>Sort</span>
+              {sortOrder === "ascending" ? (
+                <FaArrowUpShortWide className="ml-1" />
+              ) : (
+                <FaArrowDownWideShort className="ml-1" />
+              )}
+            </button>
+          </div>
+
+          {/* Date Range Pickers */}
+          <div className="flex  items-center space-x-2 mt-4 ">
+            <div className="mb-4">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="border border-gray-300 rounded-md p-2"
+              />
+            </div>
+            <div className="mb-3">To</div>
+            <div className="mb-4">
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="border border-gray-300 rounded-md p-2"
+              />
+            </div>
           </div>
         </div>
-      )}
-
-      {/* Display Entry Data */}
-      <div className="mt-4">
-        {entryData.length > 0 ? (
-          <ul>
-            {entryData.map((entry) => (
-              <li key={entry.id} className="border-b py-2">
-                {/* Customize how you want to display entry details */}
-                <div>{entry.tyoe}{entry.account.name}{entry.category.name}</div>
-                <span>{entry.description}</span> - <span>{entry.amount}</span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No entries found for the selected filters.</p>
-        )}
+        <div className="mt-4">
+          {entryData.length > 0 ? (
+            <table className="min-w-full border-separate border-spacing-2 ">
+              <thead className=" bg-yellow-950 text-left text-xs font-semibold text-white uppercase tracking-wider border-b">
+                <tr className="">
+                  <th className="rounded-2xl py-3 px-10 ">Date</th>
+                  <th className="rounded-2xl py-3 px-10 ">Category</th>
+                  <th className="rounded-2xl py-3 px-10 ">Cost</th>
+                  <th className="rounded-2xl py-3 px-10 ">Card</th>
+                  <th className="rounded-2xl py-3 px-10 ">Type</th>
+                  <th className="rounded-2xl py-3 px-10 ">Card Balance</th>
+                  <th className="rounded-2xl py-3 px-10 ">Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                {entryData.map((entry) => (
+                  <tr
+                    key={entry.id}
+                    className=" border-b cursor-pointer hover:bg-yellow-500"
+                    onClick={() => handleRowClick(entry.id)}
+                  >
+                    <td className="rounded-2xl py-4 px-6 text-sm ">
+                      {new Date(entry.dateTime).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })}
+                      {/* Format the date as needed */}
+                    </td>
+                    <td className="rounded-2xl py-4 px-6 text-sm ">
+                      {entry.category.name}
+                    </td>
+                    <td className="rounded-2xl py-4 px-6 text-sm ">
+                      $ {entry.cost}
+                    </td>
+                    <td className="rounded-2xl py-4 px-6 text-sm ">
+                      {entry.account.name}
+                    </td>
+                    <td className="rounded-2xl py-4 px-6 text-sm  items-center">
+                      <span
+                        className={`inline-block px-3 py-2 text-xs text-white rounded-full ${
+                          entry.type === "INCOME"
+                            ? "bg-green-400"
+                            : "bg-red-400"
+                        }`}
+                      >
+                        {entry.type}
+                      </span>
+                    </td>
+                    <td className="rounded-2xl py-4 px-6 text-sm ">
+                      $ {entry.account.balance}
+                    </td>
+                    <td className="rounded-2xl py-4 px-6 text-sm ">
+                      {entry.description}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>No entries found for the selected filters.</p>
+          )}
+        </div>
       </div>
     </Home>
   );

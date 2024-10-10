@@ -10,16 +10,21 @@ export default function MonthEntryPage() {
   const [monthEntries, setMonthEntries] = useState([]);
   const [totalIncome, setTotalIncome] = useState(0);
   const [totalOutcome, setTotalOutcome] = useState(0);
-  const [totalBalance, setTotalBalance] = useState(0)
+  const [totalBalance, setTotalBalance] = useState(0);
+  const searchParams = useSearchParams(); // Use this to access query parameters
   const date = new Date();
-  const [year, setYear] = useState(date.getFullYear());
-  const [month, setMonth] = useState(date.getMonth()+1); // 1 for January
+  const [year, setYear] = useState(
+    searchParams.get("year") || date.getFullYear()
+  );
+  const [month, setMonth] = useState(
+    searchParams.get("month") || date.getMonth() + 1
+  ); // Default to current month if not present in query params
   const [isLoading, setIsLoading] = useState(true); // Loading state
   const [snackbarMessage, setSnackbarMessage] = useState(""); // Snackbar message
   const [showSnackbar, setShowSnackbar] = useState(false); // Snackbar visibility
   const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entry`;
   const router = useRouter();
-  const searchParams = useSearchParams(); // Use this to access query parameters
+  
 
   const fetchEntries = async (year, month) => {
     setIsLoading(true); // Set loading state before fetching
@@ -44,6 +49,7 @@ export default function MonthEntryPage() {
   useEffect(() => {
     fetchEntries(year, month);
   }, [year, month]);
+  
 
   // Check for Snackbar trigger on page load
   useEffect(() => {
@@ -96,7 +102,7 @@ export default function MonthEntryPage() {
 
     // Handle row click to navigate to the detail page
     const handleRowClick = (id) => {
-      router.push(`/monthEntry/${id}`);
+      router.push(`/monthEntry/${id}?month=${month}&year=${year}`);
     };
 
 
@@ -204,7 +210,7 @@ export default function MonthEntryPage() {
                   <td></td>
                   {totalIncome !== 0 && (
                     <>
-                      <td className="rounded-2xl border-b bg-yellow-100 rounded-2xl py-4 px-6 font-bold text-gray-700">
+                      <td className="rounded-2xl border-b bg-yellow-100 py-4 px-6 font-bold text-gray-700">
                         Total Income
                       </td>
                       <td className="rounded-2xl border-b bg-yellow-100 py-4 px-6 font-bold  text-gray-700">
@@ -218,7 +224,7 @@ export default function MonthEntryPage() {
 
                   {totalOutcome !== 0 && (
                     <>
-                      <td className="rounded-2xl border-b bg-yellow-100 rounded-2xl py-4 px-6 font-bold text-gray-700">
+                      <td className="rounded-2xl border-b bg-yellow-100  py-4 px-6 font-bold text-gray-700">
                         Total Outcome
                       </td>
                       <td className="rounded-2xl border-b bg-yellow-100 py-4 px-6 font-bold  text-gray-700">

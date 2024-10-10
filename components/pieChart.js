@@ -9,10 +9,16 @@ import {
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const PieChart = ({ data }) => {
+const PieChart = ({ data , cost}) => {
+
   // Ensure that the data is correctly formatted before passing it to the chart
   const chartData = {
-    labels: data ? data.map((item) => item.name) : [],
+    labels: data
+    ? data.map((item) => {
+        const matchingCost = cost.find((cos) => cos.name === item.name); // Find matching cost by name
+        return matchingCost ? `${item.name} = ${matchingCost.total}` : item.name; // Format label if match found
+      })
+    : [],
     datasets: [
       {
         

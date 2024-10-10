@@ -65,6 +65,7 @@ export default function BalancePage() {
   const closeConfirmDialog = () => {
     setConfirmDialog(false);
     setAccountToDelete(null);
+    setIsChecked(false);
   };
 
   const handleShowSnackbar = (message) => {
@@ -80,7 +81,7 @@ export default function BalancePage() {
     <Home>
       <div className="balance-page relative ">
         <div className="grid grid-cols-2 gap-4 ">
-          <div className="h-48 rounded-2xl text-center content-center block max-w p-6 bg-yellow-950 border border-gray-200 rounded-lg shadow hover:bg-yellow-900 dark:bg-yellow-900 dark:border-yellow-800 dark:hover:bg-yellow-800">
+          <div className="h-48 rounded-2xl text-center content-center block max-w p-6 bg-yellow-950 border border-gray-200  shadow hover:bg-yellow-900 dark:bg-yellow-900 dark:border-yellow-800 dark:hover:bg-yellow-800">
             <div className="mb-2 text-2xl font-bold text-white">
               Total Balance
             </div>
@@ -94,7 +95,7 @@ export default function BalancePage() {
           {accounts.map((account) => (
             <li key={account.id} className="account-item">
               <div className="grid grid-cols-2 gap-4 ">
-                <div className="flex justify-between rounded-2xl text-center content-center block max-w p-6 bg-yellow-950 border border-gray-200 rounded-lg ">
+                <div className="flex justify-between rounded-2xl text-center content-center  max-w p-6 bg-yellow-950 border border-gray-200  ">
                   <div className=" font-bold text-white">{account.name}</div>
                   <div className=" font-bold text-white">
                     ${account.balance}
@@ -160,6 +161,7 @@ export default function BalancePage() {
                   checked={isChecked}
                   onChange={toggleCheckbox}
                   className="mr-5"
+                  autocomplete='off'
                 />
                 <label htmlFor="confirmDelete" className=" text-white">
                   I understand the consequences of deleting this card.
