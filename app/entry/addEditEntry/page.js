@@ -241,9 +241,10 @@ export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
             </div>
             <div className=" items-center">
               <div className=" mr-5 mb-2 font-bold ">Cost Amount: </div>
-              <div>
+              <div className='relative'>
+                <span className='absolute top-3 left-4'>$</span>
                 <input
-                  className="w-full p-3 border rounded bg-gray-100"
+                  className="w-full p-3 border rounded bg-gray-100 pl-7"
                   type="number"
                   id="cost"
                   name="cost"

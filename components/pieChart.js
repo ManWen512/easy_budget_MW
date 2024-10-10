@@ -47,6 +47,14 @@ const PieChart = ({ data , cost}) => {
   const options = {
     responsive: true,
     plugins: {
+      tooltip:{
+        callbacks: {
+          label: (tooltipItem) => {
+            const value = tooltipItem.raw; // Access the data value
+            return `${value}%`; // Format the value with a dollar sign
+          },
+        },
+      },
       legend: {
         position: 'top',
         labels: {
