@@ -5,7 +5,7 @@ import { FaPenSquare, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 import BalanceDialogPage from "./balancedialog/page"; // Import the dialog component
 import Home from "../page";
 import Snackbar from "@/components/snackBar";
-import { useCurrency } from "../context";
+import { currencySymbol } from "../currency";
 
 
 
@@ -20,7 +20,7 @@ export default function BalancePage() {
   const [accountToDelete, setAccountToDelete] = useState(null);
   const [currentAccount, setCurrentAccount] = useState(null); // Hold the current account for editing
   const accUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}`;
-  const { currency } = useCurrency();
+
  
  
 
@@ -93,7 +93,8 @@ export default function BalancePage() {
             </div>
             <br></br>
             <div className="mb-2 text-3xl font-bold ">
-              {currency}{totalBalance}
+              {currencySymbol}
+              {totalBalance}
             </div>
           </div>
         </div>
@@ -104,7 +105,7 @@ export default function BalancePage() {
                 <div className="flex justify-between rounded-2xl shadow-lg text-center content-center mt-3 max-w p-6 bg-teal-100 border border-gray-200  ">
                   <div className=" font-bold ">{account.name}</div>
                   <div className=" font-bold ">
-                    {currency}{account.balance}
+                    {currencySymbol} {account.balance}
                   </div>
                 </div>
                 <div className="flex content-center ">

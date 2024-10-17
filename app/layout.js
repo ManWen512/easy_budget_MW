@@ -1,6 +1,6 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { CurrencyProvider } from "./context";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -11,7 +11,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <CurrencyProvider>
+    
       <html lang="en">
         <head>
           <link
@@ -21,6 +21,6 @@ export default function RootLayout({ children }) {
         </head>
         <body className={inter.className}>{children}</body>
       </html>
-    </CurrencyProvider>
+  
   );
 }

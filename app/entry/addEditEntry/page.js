@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import Home from "../../page";
 import { useEffect, useState } from "react";
-import { useCurrency } from "@/app/context";
+import { currencySymbol } from "@/app/currency";
 
 // only "searchParams" works, name cannot be changed
 export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
@@ -34,7 +34,7 @@ export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
     dateTime: dateTime || new Date().toISOString().slice(0, 16),
     description: description || "",
   });
-  const { currency } = useCurrency();
+  // const { currency } = useCurrency();
 
   const setDefaultCategory = (data) => {
     // I had to use "data", because even calling this function after fetch's .then,
@@ -244,7 +244,7 @@ export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
             <div className=" items-center">
               <div className=" mr-5 mb-2 font-bold ">Cost Amount: </div>
               <div className='relative'>
-                <span className='absolute top-3 left-4'>{currency}</span>
+                <span className='absolute top-3 left-4'>{currencySymbol}</span>
                 <input
                   className="w-full p-3 rounded-md  bg-teal-100 pl-7"
                   type="number"

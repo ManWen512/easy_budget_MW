@@ -5,7 +5,7 @@ import Home from "../page";
 import { FaSortDown } from "react-icons/fa";
 import { FaArrowDownWideShort, FaArrowUpShortWide } from "react-icons/fa6";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCurrency } from "../context";
+import { currencySymbol } from "../currency";
 
 export default function HistoryPage() {
   const date = new Date();
@@ -26,7 +26,7 @@ export default function HistoryPage() {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}`;
   const dropdownRef = useRef(null);
-  const { currency } = useCurrency();
+  // const { currency } = useCurrency();
   
   useEffect(() => {
     fetchAccountsandCategories();
@@ -267,7 +267,7 @@ export default function HistoryPage() {
                       {entry.category.name}
                     </td>
                     <td className="rounded-2xl py-4 px-6 text-sm ">
-                      {currency} {entry.cost}
+                      {currencySymbol} {entry.cost}
                     </td>
                     <td className="rounded-2xl py-4 px-6 text-sm ">
                       {entry.account.name}
@@ -284,7 +284,7 @@ export default function HistoryPage() {
                       </span>
                     </td>
                     <td className="rounded-2xl py-4 px-6 text-sm ">
-                      {currency} {entry.account.balance}
+                     {currencySymbol} {entry.account.balance}
                     </td>
                     <td className="rounded-2xl py-4 px-6 text-sm ">
                       {entry.description}

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Snackbar from "@/components/snackBar";
-import { useCurrency } from "../context";
+import { currencySymbol } from "../currency";
 
 export default function MonthEntryPage() {
   const [monthEntries, setMonthEntries] = useState([]);
@@ -25,7 +25,7 @@ export default function MonthEntryPage() {
   const [showSnackbar, setShowSnackbar] = useState(false); // Snackbar visibility
   const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entry`;
   const router = useRouter();
-  const { currency } = useCurrency();
+  
 
 
   const fetchEntries = async (year, month) => {
@@ -199,7 +199,7 @@ export default function MonthEntryPage() {
                         </td>
                         <td className="rounded-2xl shadow-lg py-4 px-6 text-sm text-gray-700">
                           {/* dollar Sign */}
-                          {currency} {item.cost}
+                          {currencySymbol} {item.cost}
                         </td>
                         <td className="rounded-2xl shadow-lg py-4 px-6 text-sm text-gray-700">
                           {item.account.name.charAt(0).toUpperCase() +
@@ -217,7 +217,7 @@ export default function MonthEntryPage() {
                         Total Income
                       </td>
                       <td className="rounded-2xl shadow-lg border-b bg-orange-300 py-4 px-6 font-bold  text-gray-700">
-                        {currency} {totalIncome}
+                       {currencySymbol} {totalIncome}
                         {/* dollar Sign */}
                       </td>
                     </>
@@ -232,7 +232,7 @@ export default function MonthEntryPage() {
                         Total Outcome
                       </td>
                       <td className="rounded-2xl shadow-lg border-b bg-orange-300 py-4 px-6 font-bold  text-gray-700">
-                        {currency} {totalOutcome}
+                        {currencySymbol} {totalOutcome}
                         {/* dollar Sign */}
                       </td>
                     </>

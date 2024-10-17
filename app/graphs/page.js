@@ -4,7 +4,7 @@ import PieChart from "@/components/pieChart";
 import Home from "../page";
 import BarChart from "@/components/barChart";
 import { useState, useEffect } from "react";
-import { useCurrency } from "../context";
+import { currencySymbol } from "../currency";
 
 export default function graphsPage() {
   const [selectedOption, setSelectedOption] = useState("");
@@ -23,7 +23,7 @@ export default function graphsPage() {
   const [incomeCategoryCostList, setIncomeCategoryCostList] = useState([]);
   const [outcomeCategoryCostList, setOutcomeCategoryCostList] = useState([]);
   const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entry/graphs`;
-  const { currency } = useCurrency();
+
 
   const months = [
     "January",
@@ -71,18 +71,24 @@ export default function graphsPage() {
       const data = await response.json();
 
       // Set the data for income and outcome category lists
-      setIncomeCategoryList(transformData(data.incomeCategoryPercentageList || {}));
-      setOutcomeCategoryList(transformData(data.outcomeCategoryPercentageList || {}));
+      setIncomeCategoryList(
+        transformData(data.incomeCategoryPercentageList || {})
+      );
+      setOutcomeCategoryList(
+        transformData(data.outcomeCategoryPercentageList || {})
+      );
       setIncomeList(transformDayData(data.incomeList || {}, year, month));
       setOutcomeList(transformDayData(data.outcomeList || {}, year, month));
-      setIncomeCategoryCostList(transformCostData(data.incomeCategoryCostList || {}));
-      setOutcomeCategoryCostList(transformCostData(data.outcomeCategoryCostList || {}));
+      setIncomeCategoryCostList(
+        transformCostData(data.incomeCategoryCostList || {})
+      );
+      setOutcomeCategoryCostList(
+        transformCostData(data.outcomeCategoryCostList || {})
+      );
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
-
-
 
   const fetchYearData = async (year) => {
     try {
@@ -93,12 +99,20 @@ export default function graphsPage() {
       const data = await response.json();
 
       // Set the data for income and outcome category lists
-      setIncomeCategoryList(transformData(data.incomeCategoryPercentageList || {}));
-      setOutcomeCategoryList(transformData(data.outcomeCategoryPercentageList || {}));
+      setIncomeCategoryList(
+        transformData(data.incomeCategoryPercentageList || {})
+      );
+      setOutcomeCategoryList(
+        transformData(data.outcomeCategoryPercentageList || {})
+      );
       setIncomeList(transformMonthData(data.incomeList || {}));
       setOutcomeList(transformMonthData(data.outcomeList || {}));
-      setIncomeCategoryCostList(transformCostData(data.incomeCategoryCostList || {}));
-      setOutcomeCategoryCostList(transformCostData(data.outcomeCategoryCostList || {}));
+      setIncomeCategoryCostList(
+        transformCostData(data.incomeCategoryCostList || {})
+      );
+      setOutcomeCategoryCostList(
+        transformCostData(data.outcomeCategoryCostList || {})
+      );
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -115,23 +129,31 @@ export default function graphsPage() {
       const data = await response.json();
 
       // Set the data for income and outcome category lists
-      setIncomeCategoryList(transformData(data.incomeCategoryPercentageList || {}));
-      setOutcomeCategoryList(transformData(data.outcomeCategoryPercentageList || {}));
+      setIncomeCategoryList(
+        transformData(data.incomeCategoryPercentageList || {})
+      );
+      setOutcomeCategoryList(
+        transformData(data.outcomeCategoryPercentageList || {})
+      );
       setIncomeList(
         transformYearData(data.incomeList || {}, year.startYear, year.endYear)
       );
       setOutcomeList(
         transformYearData(data.outcomeList || {}, year.startYear, year.endYear)
       );
-      setIncomeCategoryCostList(transformCostData(data.incomeCategoryCostList || {}));
-      setOutcomeCategoryCostList(transformCostData(data.outcomeCategoryCostList || {}));
+      setIncomeCategoryCostList(
+        transformCostData(data.incomeCategoryCostList || {})
+      );
+      setOutcomeCategoryCostList(
+        transformCostData(data.outcomeCategoryCostList || {})
+      );
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
-   // Utility function to transform data from object to array
-   const transformCostData = (dataObject) => {
+  // Utility function to transform data from object to array
+  const transformCostData = (dataObject) => {
     return Object.entries(dataObject).map(([name, total]) => ({
       name,
       total,
@@ -382,24 +404,32 @@ export default function graphsPage() {
               startYear={yearRange.startYear}
               endYear={yearRange.endYear}
               title={["Income"]}
-              currency={currency}
+              currency={currencySymbol}
             />
           </div>
           <div className=" mt-20">
-            <PieChart data={incomeCategoryList} cost={incomeCategoryCostList} currency={currency}/>
+            <PieChart
+              data={incomeCategoryList}
+              cost={incomeCategoryCostList}
+              currency={currencySymbol}
+            />
           </div>
           <div className="col-span-3 mt-20">
             <div>Outcome</div>
             <BarChart
               data={outcomeList}
-              currency={currency}
+              currency={currencySymbol}
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
               title={["Outcome"]}
             />
           </div>
           <div className="mt-20">
-            <PieChart data={outcomeCategoryList}  cost={outcomeCategoryCostList} currency={currency}/>
+            <PieChart
+              data={outcomeCategoryList}
+              cost={outcomeCategoryCostList}
+              currency={currencySymbol}
+            />
           </div>
         </div>
       )}

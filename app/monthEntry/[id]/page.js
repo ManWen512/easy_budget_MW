@@ -5,12 +5,12 @@ import Home from "../../page"; // Adjust the path as necessary
 import { FaPenSquare, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCurrency } from "@/app/context";
+import { currencySymbol } from "@/app/currency";
 
 const EntryDetailPage = ({ params, triggerSnackbar }) => {
   const [isChecked, setIsChecked] = useState(false);
   const { id  } = params; // Get the entry ID from the URL
-  const { currency } = useCurrency();
+ 
   const router = useRouter();
   const [entry, setEntry] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState(false);
@@ -86,7 +86,7 @@ const EntryDetailPage = ({ params, triggerSnackbar }) => {
         </div>
         <div className="grid grid-cols-2 mb-4">
           <div className="text-gray-500 mr-3 flex justify-between">Cost<div>:</div></div>
-          <div> {currency} {entry.cost}</div>{/* dollar Sign */}
+          <div> {currencySymbol}{entry.cost}</div>{/* dollar Sign */}
         </div>
         <div className="grid grid-cols-2 mb-4">
           <div className="text-gray-500 mr-3 flex justify-between">Card<div>:</div></div>
