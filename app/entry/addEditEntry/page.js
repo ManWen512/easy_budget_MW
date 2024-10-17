@@ -14,6 +14,10 @@ export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
   // Without parsing, category.id or category.name cannot be called
   const parsedCategory = category ? JSON.parse(category) : null;
   const parsedAccount = account ? JSON.parse(account) : null;
+  const localDate = new Date();
+    const localDateTime = new Date(localDate.getTime() - (localDate.getTimezoneOffset() * 60000))
+      .toISOString()
+      .slice(0, 16);
 
   const [categories, setCategories] = useState([]);
   const [accounts, setAccounts ] = useState([]);
@@ -31,10 +35,11 @@ export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
       name: parsedAccount?.name || "",
     },
     cost: cost || 1 ,
-    dateTime: dateTime || new Date().toISOString().slice(0, 16),
+    dateTime: dateTime || localDateTime,
     description: description || "",
   });
-  // const { currency } = useCurrency();
+  
+ 
 
   const setDefaultCategory = (data) => {
     // I had to use "data", because even calling this function after fetch's .then,
@@ -243,10 +248,10 @@ export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
             </div>
             <div className=" items-center">
               <div className=" mr-5 mb-2 font-bold ">Cost Amount: </div>
-              <div className='relative'>
-                <span className='absolute top-3 left-4'>{currencySymbol}</span>
+              <div className='flex items-center overflow-hidden'>
+                <span className='bg-teal-100 py-3 pl-4 rounded-l-md'>{currencySymbol}</span>
                 <input
-                  className="w-full p-3 rounded-md  bg-teal-100 pl-7"
+                  className="w-full  p-3 rounded-r-md  bg-teal-100  focus:outline-none"
                   type="number"
                   id="cost"
                   name="cost"
@@ -264,7 +269,7 @@ export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
               <div className=" mr-5 mb-2 font-bold ">Date Time: </div>
               <div>
                 <input
-                  className="w-full p-3 border rounded-md  bg-teal-100"
+                  className="w-full p-3 border rounded-md  bg-teal-100 focus:outline-none"
                   type="datetime-local"
                   id="dateTime"
                   name="dateTime"
@@ -278,7 +283,7 @@ export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
               <div className=" mr-5 mb-2 font-bold ">Description: </div>
               <div>
                 <textarea
-                  className="w-full p-2 border rounded-md  bg-teal-100"
+                  className="w-full p-2 border rounded-md  bg-teal-100 focus:outline-none"
                   id="description"
                   name="description"
                   required
