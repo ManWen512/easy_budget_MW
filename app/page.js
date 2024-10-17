@@ -221,7 +221,7 @@ export default function Home({ children }) {
         ) : (
           <div className="container content-center">
             <div className="grid grid-cols-2 gap-4 ">
-              <div className="h-48 mb-2 text-2xl font-bold cursor-pointer shadow-lg rounded-2xl text-center content-center block max-w p-6 bg-teal-100 border border-gray-200   hover:bg-teal-200 dark:bg-yellow-900 dark:border-yellow-800 dark:hover:bg-yellow-800">
+              <div className="h-48 mb-2 text-2xl font-bold cursor-pointer shadow-lg rounded-2xl text-center content-center block max-w p-6 bg-teal-100 border border-gray-200   hover:bg-teal-200 ">
                 Total Balance
                 <br></br>
                 <div>
@@ -229,7 +229,7 @@ export default function Home({ children }) {
                 </div>
               </div>
               <Link href={"/entry/addEditEntry"}>
-                <div className="h-48 rounded-2xl text-center content-center block max-w p-6 bg-teal-100  shadow-lg hover:bg-teal-200 dark:bg-yellow-900 dark:border-yellow-800 dark:hover:bg-yellow-800">
+                <div className="h-48 rounded-2xl text-center content-center block max-w p-6 bg-teal-100  shadow-lg hover:bg-teal-200">
                   <div className="mb-2 text-2xl font-bold ">Add New</div>
                 </div>
               </Link>
