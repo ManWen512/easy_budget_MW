@@ -77,8 +77,8 @@ export default function CategoryPage() {
           {categories.map((cat) => (
             <li key={cat.id} className="account-item">
               <div className="grid grid-cols-2 gap-4 ">
-                <div className="flex justify-center rounded-2xl text-center content-center max-w p-6 bg-yellow-950 border border-gray-200  ">
-                  <div className=" font-bold text-white">{cat.name}</div>
+                <div className="flex justify-center shadow-lg rounded-2xl text-center content-center mt-3 max-w p-6 bg-teal-100  border border-gray-200  ">
+                  <div className=" font-bold ">{cat.name}</div>
                 </div>
                 <div className="flex content-center ">
                   <button onClick={() => openDialog(cat)} className="ml-5 ">
@@ -89,7 +89,7 @@ export default function CategoryPage() {
                     onClick={() => openConfirmDialog(cat.id)}
                     className="ml-5"
                   >
-                    <FaTrash size={30} color="red" />
+                    <FaTrash size={30} className="text-orange-400" />
                   </button>
                   {/* Delete Button */}
                 </div>
@@ -99,7 +99,7 @@ export default function CategoryPage() {
         </ul>
         <button
           onClick={() => openDialog()}
-          className="fixed right-10 bottom-10 bg-yellow-950 hover:bg-yellow-800 text-white font-bold py-4 px-6 rounded-2xl "
+          className="fixed right-10 bottom-10 bg-teal-100 hover:bg-teal-200 font-bold py-4 px-6 rounded-2xl "
         >
           Add New
         </button>{" "}
@@ -114,8 +114,8 @@ export default function CategoryPage() {
         )}
         {confirmDialog && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-yellow-950 p-6 rounded-lg shadow-lg w-1/3">
-              <h2 className="text-2xl mb-4 font-bold text-white">
+            <div className="bg-teal-100 p-6 rounded-lg shadow-lg w-1/3">
+              <h2 className="text-2xl mb-4 font-bold ">
                 Delete Card
               </h2>
               <div className="flex justify-evenly">
@@ -124,10 +124,10 @@ export default function CategoryPage() {
                   size={40}
                 />
                 <div>
-                  <div className="text-white mb-2">
+                  <div className=" mb-2">
                     Are you sure you want to delete this Category?
                   </div>
-                  <div className="text-white font-bold mb-2">
+                  <div className=" font-bold mb-2">
                     If you deleted, all the related entries will be deleted!
                   </div>
                 </div>
@@ -141,13 +141,13 @@ export default function CategoryPage() {
                   className="mr-5"
                   autocomplete="off"
                 />
-                <label htmlFor="confirmDelete" className=" text-white">
+                <label htmlFor="confirmDelete" className=" ">
                   I understand the consequences of deleting this Category.
                 </label>
               </div>
               <div className="flex justify-end">
                 <button
-                  className="bg-red-500 text-white px-4 py-2 rounded-md mr-3"
+                  className="border-2 border-teal-400 px-4 py-2 rounded-md mr-3"
                   onClick={() => closeConfirmDialog()}
                   type="button"
                 >
@@ -156,7 +156,7 @@ export default function CategoryPage() {
                 <button
                   className={`px-4 py-2 rounded-md ${
                     isChecked
-                      ? "bg-yellow-700"
+                      ? "bg-teal-400"
                       : "bg-gray-400 cursor-not-allowed"
                   }`}
                   onClick={() => {

@@ -46,13 +46,13 @@ export default function CategoryDialog({ catId, name, balance, onClose, onSucces
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-yellow-950 p-6 rounded-lg shadow-lg w-1/3">
-        <h2 className="text-xl text-white font-semibold mb-4">
+      <div className="bg-teal-100 p-6 rounded-lg shadow-lg w-1/3">
+        <h2 className="text-xl font-semibold mb-4">
           {catId ? "Edit Category" : "Add New Category"} {/* Conditional title */}
         </h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block mb-2 text-white">Category Name</label>
+            <label className="block mb-2 ">Category Name</label>
             <input
               type="text"
               name="name"
@@ -68,13 +68,13 @@ export default function CategoryDialog({ catId, name, balance, onClose, onSucces
             <button
               type="button"
               onClick={onClose}
-              className="bg-red-500 text-white px-4 py-2 rounded-md mr-3"
+              className="border-2 border-teal-400  px-4 py-2 rounded-md mr-3"
             >
               Close
             </button>
             <button
               type="submit"
-              className="bg-green-500 text-white px-4 py-2 rounded-md"
+              className="bg-teal-400  px-5 py-2 rounded-md"
             >
               Save
             </button>

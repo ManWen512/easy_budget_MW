@@ -5,8 +5,14 @@ import PieChart from "@/components/pieChart";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useCurrency } from "./context";
+import { MdDashboard, MdAccountBalanceWallet, MdCategory   } from "react-icons/md";
+import { VscGraphScatter } from "react-icons/vsc";
+import { IoCalendar } from "react-icons/io5";
+import { LuHistory } from "react-icons/lu";
 
 export default function Home({ children }) {
+  const { currency } = useCurrency();
   const [incomeList, setIncomeList] = useState([]);
   const [outcomeList, setOutcomeList] = useState([]);
   const [totalBalance, setTotalBalance] = useState(0);
@@ -19,6 +25,8 @@ export default function Home({ children }) {
 
   const date = new Date();
   const currentMonthName = date.toLocaleString("default", { month: "long" });
+ 
+
 
   useEffect(() => {
     fetchTotalBalance();
@@ -99,41 +107,40 @@ export default function Home({ children }) {
 
   return (
     <div className="flex min-h-screen">
-      <div className=" flex flex-col bg-amber-900 border-r-2 border-black w-1/5 min-h-screen">
+      <div className=" flex flex-col   shadow-2xl w-1/5 min-h-screen">
         <div className="fixed">
-          <div className="flex items-center p-3">
+          <div className="flex items-center p-3   mb-3">
             <div className="bg-black w-14 h-14 rounded-full mr-5"></div>
-            <div className="text-3xl text-white font-bold">
-              Easy <br></br>Budget
+            <div className="text-2xl font-bold">
+              EASY <br></br>BUDGET
             </div>
           </div>
-          <div className="flex flex-col items-center space-y-5 text-xl p-5">
+          <div className="flex flex-col  space-y-5 text-xl p-2">
             <div>
               <Link
                 href={"/"}
                 // This is so cool react+tailwind combo
                 className={
-                  "hover:bg-amber-400 rounded-xl px-7 py-2  text-white hover:text-black " +
-                  (pathname === "/" ? "bg-amber-600 font-bold" : "")
+                  "hover:bg-teal-100 rounded-xl px-2 py-3 flex text-gray-600 " +
+                  (pathname === "/" ? "bg-teal-100  border-l-4 border-teal-500" : "")
                 }
               >
-                Dashboard
+               <MdDashboard size={25} className="mt-1 mr-3"/> Dashboard
               </Link>
             </div>
             <div>
               <Link
                 href={{
-                  pathname: "/balance",
+                  pathname: "/balance", 
+                  
                 }}
-                // query: {
-                //   totalBalance: totalBalance,
-                // }
+               
                 className={
-                  "hover:bg-amber-400 rounded-xl px-7 py-2  text-white hover:text-black " +
-                  (pathname === "/balance" ? "bg-amber-600 font-bold" : "")
+                  "flex hover:bg-teal-100 rounded-xl px-2 py-3  text-gray-600 " +
+                  (pathname === "/balance" ? "bg-teal-100 border-l-4 border-teal-500" : "")
                 }
               >
-                Balance
+                <MdAccountBalanceWallet size={25} className="mt-1 mr-3"/>Balance
               </Link>
             </div>
             <div>
@@ -141,70 +148,78 @@ export default function Home({ children }) {
                 href={"/category"}
                 // This is so cool react+tailwind combo
                 className={
-                  "hover:bg-amber-400 rounded-xl px-7 py-2  text-white hover:text-black " +
-                  (pathname === "/category" ? "bg-amber-600 font-bold" : "")
+                  "flex hover:bg-teal-100 rounded-xl px-2 py-3  text-gray-600  " +
+                  (pathname === "/category" ? "bg-teal-100 border-l-4 border-teal-500" : "")
                 }
               >
-                Categories
+                <MdCategory size={25} className="mt-1 mr-3"/> Categories
               </Link>
             </div>
             <div>
               <Link
-                href={"/graphs"}
+                href={{
+                  pathname: "/graphs", 
+                  
+                }}
                 // This is so cool react+tailwind combo
                 className={
-                  "hover:bg-amber-400 rounded-xl px-7 py-2  text-white hover:text-black " +
-                  (pathname === "/graphs" ? "bg-amber-600 font-bold" : "")
+                  "flex hover:bg-teal-100 rounded-xl px-2 py-3 text-gray-600  " +
+                  (pathname === "/graphs" ? "bg-teal-100 border-l-4 border-teal-500" : "")
                 }
               >
-                Graphs
+                <VscGraphScatter size={25} className="mt-1 mr-3"/>Graphs
               </Link>
             </div>
             <div>
               <Link
-                href={"/monthEntry"}
+                href={{
+                  pathname: "/monthEntry", 
+                 
+                }}
                 // This is so cool react+tailwind combo
                 className={
-                  "hover:bg-amber-400 rounded-xl px-5 py-2  text-white hover:text-black " +
-                  (pathname === "/monthEntry" ? "bg-amber-600 font-bold" : "")
+                  "flex hover:bg-teal-100 rounded-xl px-2 py-3 text-gray-600  " +
+                  (pathname === "/monthEntry" ? "bg-teal-100 border-l-4 border-teal-500" : "")
                 }
               >
-                Month Entry
+                <IoCalendar size={25} className="mt-1 mr-3"/> Month Entry
               </Link>
             </div>
             <div>
               <Link
-                href={"/history"}
+                 href={{
+                  pathname: "/history", 
+                }}
                 // This is so cool react+tailwind combo
                 className={
-                  "hover:bg-amber-400 rounded-xl px-7 py-2  text-white hover:text-black " +
-                  (pathname === "/history" ? "bg-amber-600 font-bold" : "")
+                  "flex hover:bg-teal-100 rounded-xl px-2 py-3 text-gray-600 " +
+                  (pathname === "/history" ? "bg-teal-100 border-l-4 border-teal-500" : "")
                 }
               >
-                History
+              <LuHistory  size={25} className="mt-1 mr-3"/>History
               </Link>
             </div>
           </div>
         </div>
       </div>
-      <div className=" p-5 bg-yellow-300 	h-auto w-screen ">
+      <div className=" p-5 	h-auto w-screen ">
         {children ? (
           children
         ) : (
           <div className="container content-center">
             <div className="grid grid-cols-2 gap-4 ">
-              <div className="h-48 rounded-2xl text-center content-center block max-w p-6 bg-yellow-950 border border-gray-200  shadow hover:bg-yellow-900 dark:bg-yellow-900 dark:border-yellow-800 dark:hover:bg-yellow-800">
-                <div className="mb-2 text-2xl font-bold text-white">
+              <div className="h-48 cursor-pointer shadow-lg rounded-2xl text-center content-center block max-w p-6 bg-teal-100 border border-gray-200   hover:bg-teal-200 dark:bg-yellow-900 dark:border-yellow-800 dark:hover:bg-yellow-800">
+                <div className="mb-2 text-2xl font-bold ">
                   Total Balance
                 </div>
                 <br></br>
-                <div className="mb-2 text-3xl font-bold text-white">
-                  $ {totalBalance}
+                <div className="mb-2 text-3xl font-bold ">
+                  {currency} {totalBalance}
                 </div>
               </div>
               <Link href={"/entry/addEditEntry"}>
-                <div className="h-48 rounded-2xl text-center content-center block max-w p-6 bg-yellow-950 border border-gray-200  shadow hover:bg-yellow-900 dark:bg-yellow-900 dark:border-yellow-800 dark:hover:bg-yellow-800">
-                  <div className="mb-2 text-2xl font-bold text-white">
+                <div className="h-48 rounded-2xl text-center content-center block max-w p-6 bg-teal-100  shadow-lg hover:bg-teal-200 dark:bg-yellow-900 dark:border-yellow-800 dark:hover:bg-yellow-800">
+                  <div className="mb-2 text-2xl font-bold ">
                     Add New
                   </div>
                 </div>
@@ -217,21 +232,23 @@ export default function Home({ children }) {
               </div>
               <div className='grid grid-cols-4'>
                 <div className="col-span-3 bd-white">
-                  <BarChart data={incomeList} title={["Income"]} />
+                  <BarChart data={incomeList} title={["Income"]} currency={currency}/>
                 </div>
                 <div className=" mt-20">
                   <PieChart
                     data={incomeCategoryList}
                     cost={incomeCategoryCostList}
+                    currency={currency}
                   />
                 </div>
                 <div className="col-span-3 bd-white">
-                  <BarChart data={outcomeList} title={["Outcome"]} />
+                  <BarChart data={outcomeList} title={["Outcome"]} currency={currency}/>
                 </div>
                 <div className=" mt-20">
                   <PieChart
                     data={outcomeCategoryList}
                     cost={outcomeCategoryCostList}
+                    currency={currency}
                   />
                 </div>
               </div>

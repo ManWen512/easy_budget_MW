@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import Home from "../../page";
 import { useEffect, useState } from "react";
+import { useCurrency } from "@/app/context";
 
 // only "searchParams" works, name cannot be changed
 export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
@@ -33,6 +34,7 @@ export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
     dateTime: dateTime || new Date().toISOString().slice(0, 16),
     description: description || "",
   });
+  const { currency } = useCurrency();
 
   const setDefaultCategory = (data) => {
     // I had to use "data", because even calling this function after fetch's .then,
@@ -170,8 +172,8 @@ export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
                 <label
                   className={`w-full relative font-bold  cursor-pointer p-3 border rounded-lg transition-all ${
                     formData.type === "OUTCOME"
-                      ? "border-black bg-yellow-800 text-white"
-                      : "border-black"
+                      ? "border-l-4 border-teal-500 bg-teal-100"
+                      : "border-teal-500"
                   }`}
                 >
                   Outcome
@@ -188,8 +190,8 @@ export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
                 <label
                   className={`ml-3 w-full font-bold  relative cursor-pointer p-3 border rounded-lg transition-all ${
                     formData.type === "INCOME"
-                      ? "border-black bg-yellow-800 text-white"
-                      : "border-black"
+                      ? "border-l-4 border-teal-500 bg-teal-100"
+                      : "border-teal-500"
                   }`}
                 >
                   Income
@@ -209,7 +211,7 @@ export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
               <div className=" mr-5 mb-2 font-bold ">Category: </div>
               <div>
                 <select
-                  className="w-full p-3 border rounded bg-gray-100"
+                  className="w-full p-3  rounded-md  bg-teal-100"
                   name="category"
                   onChange={handleChange}
                   value={formData.category.id}
@@ -226,7 +228,7 @@ export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
               <div className="mr-5 mb-2 font-bold ">Account: </div>
               <div>
                 <select
-                  className="w-full p-3 border rounded bg-gray-100"
+                  className="w-full p-3 border rounded-md  bg-teal-100"
                   name="account"
                   onChange={handleChange}
                   value={formData.account.id}
@@ -242,9 +244,9 @@ export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
             <div className=" items-center">
               <div className=" mr-5 mb-2 font-bold ">Cost Amount: </div>
               <div className='relative'>
-                <span className='absolute top-3 left-4'>$</span>
+                <span className='absolute top-3 left-4'>{currency}</span>
                 <input
-                  className="w-full p-3 border rounded bg-gray-100 pl-7"
+                  className="w-full p-3 rounded-md  bg-teal-100 pl-7"
                   type="number"
                   id="cost"
                   name="cost"
@@ -262,7 +264,7 @@ export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
               <div className=" mr-5 mb-2 font-bold ">Date Time: </div>
               <div>
                 <input
-                  className="w-full p-3 border rounded bg-gray-100"
+                  className="w-full p-3 border rounded-md  bg-teal-100"
                   type="datetime-local"
                   id="dateTime"
                   name="dateTime"
@@ -276,7 +278,7 @@ export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
               <div className=" mr-5 mb-2 font-bold ">Description: </div>
               <div>
                 <textarea
-                  className="w-full p-2 border rounded bg-gray-100"
+                  className="w-full p-2 border rounded-md  bg-teal-100"
                   id="description"
                   name="description"
                   required
@@ -287,7 +289,7 @@ export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
             </div>
             <button
               type="submit"
-              className="font-bold  rounded px-4 py-2 bg-green-500 text-white hover:bg-green-700"
+              className="font-bold  rounded px-4 py-2 bg-orange-300  hover:bg-orange-400"
             >
               Save
             </button>

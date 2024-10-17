@@ -4,6 +4,7 @@ import PieChart from "@/components/pieChart";
 import Home from "../page";
 import BarChart from "@/components/barChart";
 import { useState, useEffect } from "react";
+import { useCurrency } from "../context";
 
 export default function graphsPage() {
   const [selectedOption, setSelectedOption] = useState("");
@@ -22,6 +23,7 @@ export default function graphsPage() {
   const [incomeCategoryCostList, setIncomeCategoryCostList] = useState([]);
   const [outcomeCategoryCostList, setOutcomeCategoryCostList] = useState([]);
   const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entry/graphs`;
+  const { currency } = useCurrency();
 
   const months = [
     "January",
@@ -190,27 +192,27 @@ export default function graphsPage() {
       <div className="flex space-x-4 mb-4">
         {/* Checkboxes for selecting Month, Year, or Year Range */}
         <label
-          className={`ml-3 w-full font-bold  relative cursor-pointer p-3 border rounded-lg transition-all ${
+          className={`ml-3 w-full font-bold shadow-lg  relative cursor-pointer p-3 border rounded-lg transition-all ${
             selectedOption === "month"
-              ? "border-black bg-yellow-800 text-white"
-              : "border-black"
+              ? "border-l-4 border-teal-500 bg-teal-100 "
+              : "border-teal-400"
           }`}
         >
           <input
             type="radio"
             name="dataOption"
             checked={selectedOption === "month"}
-            className="sr-only peer"
+            className="sr-only peer "
             onChange={() => handleOptionChange("month")}
           />
           <span>Select Month</span>
         </label>
 
         <label
-          className={`ml-3 w-full font-bold  relative cursor-pointer p-3 border rounded-lg transition-all ${
+          className={`ml-3 w-full font-bold shadow-lg  relative cursor-pointer p-3 border rounded-lg transition-all ${
             selectedOption === "year"
-              ? "border-black bg-yellow-800 text-white"
-              : "border-black"
+              ? "border-l-4 border-teal-500 bg-teal-100"
+              : "border-teal-400"
           }`}
         >
           <input
@@ -224,10 +226,10 @@ export default function graphsPage() {
         </label>
 
         <label
-          className={`ml-3 w-full font-bold  relative cursor-pointer p-3 border rounded-lg transition-all ${
+          className={`ml-3 w-full font-bold shadow-lg  relative cursor-pointer p-3 border rounded-lg transition-all ${
             selectedOption === "yearRange"
-              ? "border-black bg-yellow-800 text-white"
-              : "border-black"
+              ? " bg-teal-100 border-l-4 border-teal-500"
+              : "border-teal-400"
           }`}
         >
           <input
@@ -253,7 +255,7 @@ export default function graphsPage() {
                 id="month"
                 value={selectedMonth || ""}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="border border-gray-300 rounded-md p-2"
+                className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100"
               >
                 <option value="" disabled>
                   Select Month
@@ -274,7 +276,7 @@ export default function graphsPage() {
                 id="year"
                 value={selectedYear || ""}
                 onChange={(e) => setSelectedYear(e.target.value)}
-                className="border border-gray-300 rounded-md p-2"
+                className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100"
               >
                 <option value="" disabled>
                   Select Year
@@ -299,7 +301,7 @@ export default function graphsPage() {
               id="year"
               value={selectedYear || ""}
               onChange={(e) => setSelectedYear(e.target.value)}
-              className="border border-gray-300 rounded-md p-2"
+              className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100"
             >
               <option value="" disabled>
                 Select Year
@@ -326,7 +328,7 @@ export default function graphsPage() {
                 onChange={(e) =>
                   setYearRange({ ...yearRange, startYear: e.target.value })
                 }
-                className="border border-gray-300 rounded-md p-2"
+                className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100"
               >
                 <option value="" disabled>
                   Select Start Year
@@ -349,7 +351,7 @@ export default function graphsPage() {
                 onChange={(e) =>
                   setYearRange({ ...yearRange, endYear: e.target.value })
                 }
-                className="border border-gray-300 rounded-md p-2"
+                className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100"
               >
                 <option value="" disabled>
                   Select End Year
@@ -380,23 +382,24 @@ export default function graphsPage() {
               startYear={yearRange.startYear}
               endYear={yearRange.endYear}
               title={["Income"]}
+              currency={currency}
             />
           </div>
           <div className=" mt-20">
-            <PieChart data={incomeCategoryList} cost={incomeCategoryCostList}/>
+            <PieChart data={incomeCategoryList} cost={incomeCategoryCostList} currency={currency}/>
           </div>
           <div className="col-span-3 mt-20">
             <div>Outcome</div>
             <BarChart
               data={outcomeList}
-             
+              currency={currency}
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
               title={["Outcome"]}
             />
           </div>
           <div className="mt-20">
-            <PieChart data={outcomeCategoryList}  cost={outcomeCategoryCostList}/>
+            <PieChart data={outcomeCategoryList}  cost={outcomeCategoryCostList} currency={currency}/>
           </div>
         </div>
       )}

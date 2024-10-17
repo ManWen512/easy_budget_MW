@@ -5,8 +5,10 @@ import Home from "../page";
 import { FaSortDown } from "react-icons/fa";
 import { FaArrowDownWideShort, FaArrowUpShortWide } from "react-icons/fa6";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useCurrency } from "../context";
 
 export default function HistoryPage() {
+  const date = new Date();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -14,8 +16,8 @@ export default function HistoryPage() {
   const [type, setType] = useState(searchParams.get("type") || "");
   const [account, setAccount] = useState(searchParams.get("account") || "");
   const [category, setCategory] = useState(searchParams.get("category") || "");
-  const [startDate, setStartDate] = useState(searchParams.get("startDate") || "");
-  const [endDate, setEndDate] = useState(searchParams.get("endDate") || "");
+  const [startDate, setStartDate] = useState(searchParams.get("startDate") || new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0));
+  const [endDate, setEndDate] = useState(searchParams.get("endDate") || new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59));
   const [sortOrder, setSortOrder] = useState(searchParams.get("sortOrder") || "DESC");
   const [sortField, setSortField] = useState(searchParams.get("sortField") || "dateTime");
   const [accountsData, setAccountsData] = useState([]);
@@ -24,7 +26,8 @@ export default function HistoryPage() {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}`;
   const dropdownRef = useRef(null);
-
+  const { currency } = useCurrency();
+  
   useEffect(() => {
     fetchAccountsandCategories();
     const handleClickOutside = (event) => {
@@ -116,7 +119,7 @@ export default function HistoryPage() {
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-              className="flex bg-blue-500 text-white px-4 py-2 rounded-md"
+              className="flex bg-orange-300 px-4 py-2 rounded-md"
             >
               Filter
               <FaSortDown className="ml-1" />
@@ -124,9 +127,9 @@ export default function HistoryPage() {
 
             {/* Filter Dropdown */}
             {showFilterDropdown && (
-              <div className="absolute mt-2 w-64 bg-yellow-950 border border-gray-900 rounded-md shadow-lg p-4">
+              <div className="absolute mt-2 w-64 bg-teal-100 border border-gray-900 rounded-md shadow-lg p-4">
                 <div className="mb-4">
-                  <label className="block text-white mb-2">Type</label>
+                  <label className="block  mb-2">Type</label>
                   <select
                     value={type}
                     onChange={(e) => setType(e.target.value)}
@@ -139,7 +142,7 @@ export default function HistoryPage() {
                 </div>
 
                 <div className="mb-4">
-                  <label className="block text-white mb-2">Account</label>
+                  <label className="block mb-2">Account</label>
                   <select
                     value={account}
                     onChange={(e) => setAccount(e.target.value)}
@@ -155,7 +158,7 @@ export default function HistoryPage() {
                 </div>
 
                 <div className="mb-4">
-                  <label className="block text-white mb-2">Category</label>
+                  <label className="block  mb-2">Category</label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
@@ -171,7 +174,7 @@ export default function HistoryPage() {
                 </div>
 
                 <div className="mb-4">
-                  <label className="block text-white mb-2">Sort Field</label>
+                  <label className="block  mb-2">Sort Field</label>
                   <select
                     value={sortField}
                     onChange={(e) => setSortField(e.target.value)}
@@ -193,7 +196,7 @@ export default function HistoryPage() {
                   sortOrder === "ascending" ? "descending" : "ascending"
                 )
               }
-              className="bg-green-500 text-white px-4 py-2 rounded-md flex items-center space-x-1"
+              className="bg-orange-300 px-4 py-2 rounded-md flex items-center space-x-1"
             >
               <span>Sort</span>
               {sortOrder === "ascending" ? (
@@ -211,7 +214,7 @@ export default function HistoryPage() {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="border border-gray-300 rounded-md p-2"
+                className=" rounded-md p-2 bg-orange-300"
               />
             </div>
             <div className="mb-3">To</div>
@@ -220,7 +223,7 @@ export default function HistoryPage() {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="border border-gray-300 rounded-md p-2"
+                className=" rounded-md p-2 bg-orange-300"
               />
             </div>
           </div>
@@ -228,28 +231,28 @@ export default function HistoryPage() {
         <div className="mt-4">
           {isLoading ? (
           <div className="flex space-x-2 justify-center items-center h-screen">
-            <div className="animate-bounce bg-yellow-900 rounded-full h-8 w-4"></div>
-            <div className="animate-bounce bg-yellow-900 rounded-full h-6 w-4"></div>
-            <div className="animate-bounce bg-yellow-900 rounded-full h-8 w-4"></div>
+            <div className="animate-bounce bg-teal-100 rounded-full h-8 w-4"></div>
+            <div className="animate-bounce bg-teal-100 rounded-full h-6 w-4"></div>
+            <div className="animate-bounce bg-teal-100 rounded-full h-8 w-4"></div>
           </div>
         ) : entryData.length > 0 ? (
             <table className="min-w-full border-separate border-spacing-2 ">
-              <thead className=" bg-yellow-950 text-left text-xs font-semibold text-white uppercase tracking-wider border-b">
+              <thead className=" bg-teal-100 text-left text-xs font-semibold  uppercase tracking-wider border-b">
                 <tr className="">
-                  <th className="rounded-2xl py-3 px-10 ">Date</th>
-                  <th className="rounded-2xl py-3 px-10 ">Category</th>
-                  <th className="rounded-2xl py-3 px-10 ">Cost</th>
-                  <th className="rounded-2xl py-3 px-10 ">Card</th>
-                  <th className="rounded-2xl py-3 px-10 ">Type</th>
-                  <th className="rounded-2xl py-3 px-10 ">Card Balance</th>
-                  <th className="rounded-2xl py-3 px-10 ">Description</th>
+                  <th className="border-l-4 border-teal-500 rounded-xl shadow-lg py-3 px-10 ">Date</th>
+                  <th className="border-l-4 border-teal-500 rounded-xl shadow-lg py-3 px-10 ">Category</th>
+                  <th className="border-l-4 border-teal-500 rounded-xl shadow-lg py-3 px-10 ">Cost</th>
+                  <th className="border-l-4 border-teal-500 rounded-xl shadow-lg py-3 px-10 ">Card</th>
+                  <th className="border-l-4 border-teal-500 rounded-xl shadow-lg py-3 px-10 ">Type</th>
+                  <th className="border-l-4 border-teal-500 rounded-xl shadow-lg py-3 px-10 ">Card Balance</th>
+                  <th className="border-l-4 border-teal-500 rounded-xl shadow-lg py-3 px-10 ">Description</th>
                 </tr>
               </thead>
               <tbody>
                 {entryData.map((entry) => (
                   <tr
                     key={entry.id}
-                    className=" border-b cursor-pointer hover:bg-yellow-500"
+                    className=" border-b cursor-pointer hover:bg-teal-100"
                     onClick={() => handleRowClick(entry.id)}
                   >
                     <td className="rounded-2xl py-4 px-6 text-sm ">
@@ -264,7 +267,7 @@ export default function HistoryPage() {
                       {entry.category.name}
                     </td>
                     <td className="rounded-2xl py-4 px-6 text-sm ">
-                      $ {entry.cost}
+                      {currency} {entry.cost}
                     </td>
                     <td className="rounded-2xl py-4 px-6 text-sm ">
                       {entry.account.name}
@@ -281,7 +284,7 @@ export default function HistoryPage() {
                       </span>
                     </td>
                     <td className="rounded-2xl py-4 px-6 text-sm ">
-                      $ {entry.account.balance}
+                      {currency} {entry.account.balance}
                     </td>
                     <td className="rounded-2xl py-4 px-6 text-sm ">
                       {entry.description}

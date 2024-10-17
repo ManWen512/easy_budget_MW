@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Snackbar from "@/components/snackBar";
+import { useCurrency } from "../context";
 
 export default function MonthEntryPage() {
   const [monthEntries, setMonthEntries] = useState([]);
@@ -24,7 +25,8 @@ export default function MonthEntryPage() {
   const [showSnackbar, setShowSnackbar] = useState(false); // Snackbar visibility
   const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entry`;
   const router = useRouter();
-  
+  const { currency } = useCurrency();
+
 
   const fetchEntries = async (year, month) => {
     setIsLoading(true); // Set loading state before fetching
@@ -113,18 +115,18 @@ export default function MonthEntryPage() {
         <div className="flex justify-center content-center items-center mb-5">
           <button
             onClick={() => handleMonthChange("prev")}
-            className="text-3xl mr-3"
+            className="text-3xl mr-3 text-orange-300"
           >
             ◀
           </button>
-          <div className="rounded-2xl w-1/2 text-center block p-3 bg-black border border-gray-200">
-            <div className="text-1xl text-white font-bold">{`${
+          <div className="rounded-2xl shadow-lg w-1/2 text-center block p-3 bg-orange-300 border border-gray-200">
+            <div className="text-1xl  font-bold">{`${
               monthNames[month - 1]
             } ${year}`}</div>
           </div>
           <button
             onClick={() => handleMonthChange("next")}
-            className="text-3xl ml-3"
+            className="text-3xl ml-3 text-orange-300"
           >
             ▶
           </button>
@@ -134,25 +136,25 @@ export default function MonthEntryPage() {
       <div>
         {isLoading ? (
           <div className="flex space-x-2 justify-center items-center h-screen">
-            <div className="animate-bounce bg-yellow-900 rounded-full h-8 w-4"></div>
-            <div className="animate-bounce bg-yellow-900 rounded-full h-6 w-4"></div>
-            <div className="animate-bounce bg-yellow-900 rounded-full h-8 w-4"></div>
+            <div className="animate-bounce bg-teal-100 rounded-full h-8 w-4"></div>
+            <div className="animate-bounce bg-teal-100 rounded-full h-6 w-4"></div>
+            <div className="animate-bounce bg-teal-100 rounded-full h-8 w-4"></div>
           </div>
         ) : monthEntries.length > 0 ? (
           <>
             <table className="min-w-full border-separate border-spacing-2 ">
-              <thead>
-                <tr>
-                  <th className="rounded-2xl py-3 px-6 bg-yellow-950 text-left text-xs font-semibold text-white uppercase tracking-wider border-b">
+              <thead >
+                <tr >
+                  <th className="rounded-xl shadow-lg py-3 px-6 border-l-4 border-teal-500 bg-teal-100 text-left text-sm font-semibold  uppercase tracking-wider ">
                     Date
                   </th>
-                  <th className="rounded-2xl py-3 px-6 bg-yellow-950 text-left text-xs font-semibold text-white uppercase tracking-wider border-b">
+                  <th className="rounded-xl shadow-lg py-3 px-6 border-l-4 border-teal-500 bg-teal-100 text-left text-sm font-semibold  uppercase tracking-wider ">
                     Categories
                   </th>
-                  <th className="rounded-2xl py-3 px-6 bg-yellow-950 text-left text-xs font-semibold text-white uppercase tracking-wider border-b">
+                  <th className="rounded-xl shadow-lg py-3 px-6 border-l-4 border-teal-500 bg-teal-100 text-left text-sm font-semibold  uppercase tracking-wider ">
                     Cost
                   </th>
-                  <th className="rounded-2xl py-3 px-6 bg-yellow-950 text-left text-xs font-semibold text-white uppercase tracking-wider border-b">
+                  <th className="rounded-xl shadow-lg py-3 px-6 border-l-4 border-teal-500 bg-teal-100 text-left text-sm font-semibold  uppercase tracking-wider ">
                     Card
                   </th>
                 </tr>
@@ -189,17 +191,17 @@ export default function MonthEntryPage() {
                         }`}
                         onClick={() => handleRowClick(item.id)} // Navigate on row click
                       >
-                        <td className={`${currentDate !== previousDate ? "rounded-2xl py-4 px-6 text-sm text-gray-700" :'bg-yellow-300 cursor-default'} `}>
+                        <td className={`${currentDate !== previousDate ? "rounded-2xl shadow-lg py-4 px-6 text-sm text-gray-700" :'bg-white cursor-default'} `}>
                           {currentDate !== previousDate && currentDate}
                         </td>
-                        <td className="rounded-2xl py-4 px-6 text-sm text-gray-700">
+                        <td className="rounded-2xl shadow-lg py-4 px-6 text-sm text-gray-700">
                           {item.category.name}
                         </td>
-                        <td className="rounded-2xl py-4 px-6 text-sm text-gray-700">
+                        <td className="rounded-2xl shadow-lg py-4 px-6 text-sm text-gray-700">
                           {/* dollar Sign */}
-                          $ {item.cost}
+                          {currency} {item.cost}
                         </td>
-                        <td className="rounded-2xl py-4 px-6 text-sm text-gray-700">
+                        <td className="rounded-2xl shadow-lg py-4 px-6 text-sm text-gray-700">
                           {item.account.name.charAt(0).toUpperCase() +
                             item.account.name.slice(1)}
                         </td>
@@ -211,11 +213,11 @@ export default function MonthEntryPage() {
                   <td></td>
                   {totalIncome !== 0 && (
                     <>
-                      <td className="rounded-2xl border-b bg-yellow-100 py-4 px-6 font-bold text-gray-700">
+                      <td className="rounded-2xl shadow-lg border-b bg-orange-300 py-4 px-6 font-bold text-gray-700">
                         Total Income
                       </td>
-                      <td className="rounded-2xl border-b bg-yellow-100 py-4 px-6 font-bold  text-gray-700">
-                        $ {totalIncome}
+                      <td className="rounded-2xl shadow-lg border-b bg-orange-300 py-4 px-6 font-bold  text-gray-700">
+                        {currency} {totalIncome}
                         {/* dollar Sign */}
                       </td>
                     </>
@@ -226,11 +228,11 @@ export default function MonthEntryPage() {
 
                   {totalOutcome !== 0 && (
                     <>
-                      <td className="rounded-2xl border-b bg-yellow-100  py-4 px-6 font-bold text-gray-700">
+                      <td className="rounded-2xl shadow-lg border-b bg-orange-300  py-4 px-6 font-bold text-gray-700">
                         Total Outcome
                       </td>
-                      <td className="rounded-2xl border-b bg-yellow-100 py-4 px-6 font-bold  text-gray-700">
-                        $ {totalOutcome}
+                      <td className="rounded-2xl shadow-lg border-b bg-orange-300 py-4 px-6 font-bold  text-gray-700">
+                        {currency} {totalOutcome}
                         {/* dollar Sign */}
                       </td>
                     </>
@@ -251,7 +253,7 @@ export default function MonthEntryPage() {
       <div className="fixed bottom-10 right-10">
         <Link
           href={"/entry/addEditEntry"}
-          className="rounded bg-yellow-950 hover:bg-yellow-800 text-white font-bold py-4 px-6  "
+          className="rounded-xl shadow-lg bg-teal-100 hover:bg-teal-400  font-bold py-4 px-6  "
         >
           Add New Entry
         </Link>

@@ -11,7 +11,7 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-const BarChart = ({ data = [], title }) => {
+const BarChart = ({ data = [], title , currency}) => {
   const colors = [
     "rgba(75, 192, 192, 0.6)", // Color for first bar
     "rgba(153, 102, 255, 0.6)", // Color for second bar
@@ -46,7 +46,7 @@ const BarChart = ({ data = [], title }) => {
         callbacks: {
           label: (tooltipItem) => {
             const value = tooltipItem.raw; // Access the data value
-            return `$${value}`; // Format the value with a dollar sign
+            return `${currency}${value}`; // Format the value with a dollar sign
           },
         },
       },
@@ -68,7 +68,7 @@ const BarChart = ({ data = [], title }) => {
       y: {
         title: {
           display: true,
-          text: "Balances ($)",
+          text: `Balances (${currency})`,
         },
         beginAtZero: true, // Start the y-axis at zero
       },
