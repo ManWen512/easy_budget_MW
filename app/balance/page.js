@@ -126,7 +126,7 @@ export default function BalancePage() {
         </ul>
         <button
           onClick={() => openDialog()}
-          className="fixed right-10 bottom-10 bg-teal-100  hover:bg-teal-200  font-bold py-4 px-6 rounded-2xl "
+          className="fixed shadow-lg right-10 bottom-10 bg-teal-100  hover:bg-teal-200  font-bold py-4 px-6 rounded-2xl "
         >
           Add New
         </button>{" "}
