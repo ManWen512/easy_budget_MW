@@ -87,14 +87,13 @@ export default function BalancePage() {
     <Home>
       <div className="balance-page relative ">
         <div className="grid grid-cols-2 gap-4 ">
-          <div className="h-48 rounded-2xl text-center content-center block max-w p-6 bg-teal-100 border border-gray-200  shadow-lg hover:bg-teal-200 dark:bg-yellow-900 dark:border-yellow-800 dark:hover:bg-yellow-800">
+          <div className="h-48 rounded-2xl text-center content-center block max-w p-6 bg-teal-100 border border-gray-200  shadow-lg hover:bg-teal-200 ">
             <div className="mb-2 text-2xl font-bold ">
               Total Balance
             </div>
             <br></br>
             <div className="mb-2 text-3xl font-bold ">
-              {currencySymbol}
-              {totalBalance}
+              {currencySymbol} {totalBalance}
             </div>
           </div>
         </div>

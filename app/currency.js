@@ -1,1 +1,1 @@
-export const currencySymbol = 'MMK';
+export const currencySymbol = '$';

@@ -14,6 +14,8 @@ import {
 import { VscGraphScatter } from "react-icons/vsc";
 import { IoCalendar } from "react-icons/io5";
 import { LuHistory } from "react-icons/lu";
+import Image from "next/image";
+
 
 export default function Home({ children }) {
   // const { currency } = useCurrency();
@@ -112,8 +114,11 @@ export default function Home({ children }) {
       <div className=" flex flex-col   shadow-2xl w-1/5 min-h-screen">
         <div className="fixed">
           <div className="flex items-center p-3   mb-3">
-            <div className="bg-black w-14 h-14 rounded-full mr-5"></div>
             <div className="">
+              <Image src="/Pixel.png" width={50} height={50}/>
+              
+            </div>
+            <div className="ml-2 text-2xl">
               EASY <br></br>BUDGET
             </div>
           </div>
@@ -202,7 +207,7 @@ export default function Home({ children }) {
                 }}
                 // This is so cool react+tailwind combo
                 className={
-                  "flex hover:bg-teal-100 rounded-xl px-2 py-3 text-gray-600 " +
+                  "flex hover:bg-teal-100 rounded-xl px-2 py-3 text-gray-600  " +
                   (pathname === "/history"
                     ? "bg-teal-100 border-l-4 border-teal-500"
                     : "")

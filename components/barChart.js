@@ -46,7 +46,7 @@ const BarChart = ({ data = [], title , currency}) => {
         callbacks: {
           label: (tooltipItem) => {
             const value = tooltipItem.raw; // Access the data value
-            return `${currency}${value}`; // Format the value with a dollar sign
+            return `${currency} ${value}`; // Format the value with a dollar sign
           },
         },
       },

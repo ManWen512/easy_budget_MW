@@ -294,7 +294,7 @@ export default function AddEditEntryPage({ searchParams, triggerSnackbar }) {
             </div>
             <button
               type="submit"
-              className="font-bold  rounded px-4 py-2 bg-orange-300  hover:bg-orange-400"
+              className="font-bold  rounded px-4 py-2 bg-orange-400  hover:bg-orange-400"
             >
               Save
             </button>

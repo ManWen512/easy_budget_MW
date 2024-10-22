@@ -115,18 +115,18 @@ export default function MonthEntryPage() {
         <div className="flex justify-center content-center items-center mb-5">
           <button
             onClick={() => handleMonthChange("prev")}
-            className="text-3xl mr-3 text-orange-300"
+            className="text-3xl mr-3 text-orange-400"
           >
             ◀
           </button>
-          <div className="rounded-2xl shadow-lg w-1/2 text-center block p-3 bg-orange-300 border border-gray-200">
+          <div className="rounded-2xl shadow-lg w-1/2 text-center block p-3 bg-orange-400 border border-gray-200">
             <div className="text-1xl  font-bold">{`${
               monthNames[month - 1]
             } ${year}`}</div>
           </div>
           <button
             onClick={() => handleMonthChange("next")}
-            className="text-3xl ml-3 text-orange-300"
+            className="text-3xl ml-3 text-orange-400"
           >
             ▶
           </button>
@@ -213,10 +213,10 @@ export default function MonthEntryPage() {
                   <td></td>
                   {totalIncome !== 0 && (
                     <>
-                      <td className="rounded-2xl shadow-lg border-b bg-orange-300 py-4 px-6 font-bold text-gray-700">
+                      <td className="rounded-2xl shadow-lg border-b bg-orange-400 py-4 px-6 font-bold text-gray-700">
                         Total Income
                       </td>
-                      <td className="rounded-2xl shadow-lg border-b bg-orange-300 py-4 px-6 font-bold  text-gray-700">
+                      <td className="rounded-2xl shadow-lg border-b bg-orange-400 py-4 px-6 font-bold  text-gray-700">
                        {currencySymbol} {totalIncome}
                         {/* dollar Sign */}
                       </td>
@@ -228,10 +228,10 @@ export default function MonthEntryPage() {
 
                   {totalOutcome !== 0 && (
                     <>
-                      <td className="rounded-2xl shadow-lg border-b bg-orange-300  py-4 px-6 font-bold text-gray-700">
+                      <td className="rounded-2xl shadow-lg border-b bg-orange-400  py-4 px-6 font-bold text-gray-700">
                         Total Outcome
                       </td>
-                      <td className="rounded-2xl shadow-lg border-b bg-orange-300 py-4 px-6 font-bold  text-gray-700">
+                      <td className="rounded-2xl shadow-lg border-b  bg-orange-400 py-4 px-6 font-bold  text-gray-700">
                         {currencySymbol} {totalOutcome}
                         {/* dollar Sign */}
                       </td>

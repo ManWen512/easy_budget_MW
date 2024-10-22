@@ -12,7 +12,7 @@ export default function HistoryPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
-
+  const [ totalCost , setTotalCost ] = useState('');
   const [type, setType] = useState(searchParams.get("type") || "");
   const [account, setAccount] = useState(searchParams.get("account") || "");
   const [category, setCategory] = useState(searchParams.get("category") || "");
@@ -90,7 +90,8 @@ export default function HistoryPage() {
     try {
       const response = await fetch(url);
       const data = await response.json();
-      setEntryData(data);
+      setEntryData(data.entries);
+      setTotalCost(data.totalCost);
     } catch (error) {
       console.error("Error fetching entry data:", error);
     }finally{
@@ -119,7 +120,7 @@ export default function HistoryPage() {
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-              className="flex bg-orange-300 px-4 py-2 rounded-md"
+              className="flex bg-orange-400 px-4 py-2 rounded-md"
             >
               Filter
               <FaSortDown className="ml-1" />
@@ -196,7 +197,7 @@ export default function HistoryPage() {
                   sortOrder === "ascending" ? "descending" : "ascending"
                 )
               }
-              className="bg-orange-300 px-4 py-2 rounded-md flex items-center space-x-1"
+              className="bg-orange-400 px-4 py-2 rounded-md flex items-center space-x-1"
             >
               <span>Sort</span>
               {sortOrder === "ascending" ? (
@@ -214,7 +215,7 @@ export default function HistoryPage() {
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className=" rounded-md p-2 bg-orange-300"
+                className=" rounded-md p-2 bg-orange-400"
               />
             </div>
             <div className="mb-3">To</div>
@@ -223,7 +224,7 @@ export default function HistoryPage() {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className=" rounded-md p-2 bg-orange-300"
+                className=" rounded-md p-2 bg-orange-400"
               />
             </div>
           </div>
@@ -290,7 +291,15 @@ export default function HistoryPage() {
                       {entry.description}
                     </td>
                   </tr>
-                ))}
+
+                  
+                ))} 
+
+                <tr >
+                  <td></td>
+                  <td className="rounded-2xl py-4 px-6 text-sm border-b bg-orange-400 font-bold">Total Cost</td>
+                  <td className="rounded-2xl py-4 px-6 text-sm border-b bg-orange-400 font-bold">{totalCost}</td>
+                </tr>
               </tbody>
             </table>
           ) : (
