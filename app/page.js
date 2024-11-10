@@ -16,7 +16,6 @@ import { IoCalendar } from "react-icons/io5";
 import { LuHistory } from "react-icons/lu";
 import Image from "next/image";
 
-
 export default function Home({ children }) {
   // const { currency } = useCurrency();
   const [incomeList, setIncomeList] = useState([]);
@@ -115,8 +114,7 @@ export default function Home({ children }) {
         <div className="fixed">
           <div className="flex items-center p-3   mb-3">
             <div className="">
-              <Image src="/Pixel.png" width={50} height={50}/>
-              
+              <Image src="/Pixel.png" alt="Logo" width={50} height={50} />
             </div>
             <div className="ml-2 text-2xl">
               EASY <br></br>BUDGET
