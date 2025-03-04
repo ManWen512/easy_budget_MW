@@ -3,20 +3,20 @@
 import { useEffect, useState } from "react";
 import Home from "../../page"; // Adjust the path as necessary
 import { FaPenSquare, FaTrash, FaExclamationTriangle } from "react-icons/fa";
+import { BsArrowLeftCircleFill } from "react-icons/bs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { currencySymbol } from "@/app/currency";
 
 const EntryDetailPage = ({ params, triggerSnackbar }) => {
   const [isChecked, setIsChecked] = useState(false);
-  const { id  } = params; // Get the entry ID from the URL
- 
+  const { id } = params; // Get the entry ID from the URL
+
   const router = useRouter();
   const [entry, setEntry] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState(null);
   const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entry`;
-
 
   // Fetch the entry details based on the ID
   const fetchEntryDetails = async (entryId) => {
@@ -41,7 +41,11 @@ const EntryDetailPage = ({ params, triggerSnackbar }) => {
     // setEntries((prevEntries) =>
     //   prevEntries.filter((category) => category.id !== id)
     // );
-    router.push(`/monthEntry?triggerSnackbar=${encodeURIComponent('Entry deleted successfully!')}`);
+    router.push(
+      `/monthEntry?triggerSnackbar=${encodeURIComponent(
+        "Entry deleted successfully!"
+      )}`
+    );
     fetchEntryDetails();
   };
 
@@ -62,41 +66,62 @@ const EntryDetailPage = ({ params, triggerSnackbar }) => {
   // Loading state
   if (!entry) {
     return (
-      <Home>
-        <div className="flex justify-center items-center h-screen">
+      <>
+        <div className="flex justify-center items-center h-screen w-screen sm:w-[60vw]">
           <div className="animate-bounce bg-yellow-900 rounded-full h-8 w-4"></div>
           <div className="animate-bounce bg-yellow-900 rounded-full h-6 w-4"></div>
           <div className="animate-bounce bg-yellow-900 rounded-full h-8 w-4"></div>
         </div>
-      </Home>
+      </>
     );
   }
 
   return (
-    <Home>
-      <div className="mx-40 p-20 bg-white rounded-lg shadow-lg">
+    <>
+      <div className="sm:mx-40 m-5 mt-20 sm:mt-0 p-10 sm:p-20 bg-white rounded-lg shadow-lg">
+        <button
+          onClick={() => router.back()}
+          className="mb-4"
+        >
+          <BsArrowLeftCircleFill size={30}/>
+        </button>
         <h1 className="text-2xl font-bold mb-4">Details</h1>
         <div className="grid grid-cols-2 mb-4 ">
-          <div className="text-gray-500 mr-3 flex justify-between">Date<div>:</div></div>
+          <div className="text-gray-500 mr-3 flex justify-between">
+            Date<div>:</div>
+          </div>
           <div>{entry.dateTime}</div>
         </div>
         <div className="grid grid-cols-2 mb-4">
-          <div className="text-gray-500 mr-3 flex justify-between">Category<div>:</div></div>{" "}
+          <div className="text-gray-500 mr-3 flex justify-between">
+            Category<div>:</div>
+          </div>{" "}
           <div>{entry.category.name}</div>
         </div>
         <div className="grid grid-cols-2 mb-4">
-          <div className="text-gray-500 mr-3 flex justify-between">Cost<div>:</div></div>
-          <div> {currencySymbol}{entry.cost}</div>{/* dollar Sign */}
+          <div className="text-gray-500 mr-3 flex justify-between">
+            Cost<div>:</div>
+          </div>
+          <div>
+            {" "}
+            {currencySymbol}
+            {entry.cost}
+          </div>
+          {/* dollar Sign */}
         </div>
         <div className="grid grid-cols-2 mb-4">
-          <div className="text-gray-500 mr-3 flex justify-between">Card<div>:</div></div>
+          <div className="text-gray-500 mr-3 flex justify-between">
+            Card<div>:</div>
+          </div>
           <div>
             {entry.account.name.charAt(0).toUpperCase() +
               entry.account.name.slice(1)}
           </div>
         </div>
         <div className="grid grid-cols-2 mb-4">
-          <div className="text-gray-500 mr-3 flex justify-between">Status<div>:</div></div>{" "}
+          <div className="text-gray-500 mr-3 flex justify-between">
+            Status<div>:</div>
+          </div>{" "}
           <div
             className={`px-3 py-1 w-full text-center rounded-full text-xs ${
               entry.type === "INCOME"
@@ -108,7 +133,9 @@ const EntryDetailPage = ({ params, triggerSnackbar }) => {
           </div>
         </div>
         <div className="grid grid-cols-2 mb-4">
-          <div className="text-gray-500 mr-3 flex justify-between">Description<div>:</div></div>{" "}
+          <div className="text-gray-500 mr-3 flex justify-between">
+            Description<div>:</div>
+          </div>{" "}
           <div>{entry.description}</div>
         </div>
         <div className="flex justify-end">
@@ -192,7 +219,7 @@ const EntryDetailPage = ({ params, triggerSnackbar }) => {
           </div>
         </div>
       )}
-    </Home>
+    </>
   );
 };
 

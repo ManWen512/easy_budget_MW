@@ -28,7 +28,7 @@ export default function Snackbar({ message, show, onClose }) {
   return (
     <>
       {show && (
-        <div className="fixed top-4 right-4 bg-teal-100 text-sm px-6 py-3 rounded-md shadow-lg transition-opacity duration-700 ease-in-out">
+        <div className="fixed top-20  sm:top-4 right-4 bg-teal-100 text-sm px-6 py-3 rounded-md shadow-lg transition-opacity duration-700 ease-in-out">
           {message}
           {/* Progress bar */}
           <div className="w-full h-1 bg-gray-300 absolute bottom-0 left-0 rounded-b-md">

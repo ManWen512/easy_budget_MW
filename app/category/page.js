@@ -1,39 +1,33 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Home from "../page";
+
 import CategoryDialog from "./categorydialog/page";
 import { FaPenSquare, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 import Snackbar from "@/components/snackBar";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchCategories,  deleteCategory } from "@/redux/slices/categorySlice";
 
 export default function CategoryPage() {
+  const dispatch = useDispatch();
+  const { categories, loading, error } = useSelector((state) => state.category);
+
   const [showDialog, setShowDialog] = useState();
-  const [categories, setCategories] = useState([]);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [confirmDialog, setConfirmDialog] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState(null);
   const [isChecked, setIsChecked] = useState(false);
-  const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}`;
   const [currentCategory, setCurrentCategory] = useState(null);
 
-  // For first render
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    dispatch(fetchCategories());
+  }, [dispatch]);
 
-  const fetchCategories = async () => {
-    const response = await fetch(`${mainUrl}/category/all`);
-    const data = await response.json();
-    setCategories(data);
-  };
 
-  const handleDelete = async (id) => {
-    await fetch(`${mainUrl}/category?id=${id}`, { method: "DELETE" });
-    // setCategories((prevCategories) =>
-    //   prevCategories.filter((category) => category.id !== id)
-    // );
-    fetchCategories();
+
+  const handleDelete = (id) => {
+    dispatch(deleteCategory(id));
     setSnackbarMessage("Category deleted successfully!");
     setShowSnackbar(true);
   };
@@ -70,18 +64,18 @@ export default function CategoryPage() {
   };
 
   return (
-    <Home>
-      <div className="balance-page relative ">
+    
+      <div className="balance-page  mt-14 p-5 ">
         <div className="text-3xl font-bold mb-5"> Categories </div>
         <ul className="accounts-list">
           {categories.map((cat) => (
             <li key={cat.id} className="account-item">
-              <div className="grid grid-cols-2 gap-4 ">
-                <div className="flex justify-center shadow-lg rounded-2xl text-center content-center mt-3 max-w p-6 bg-teal-100  border border-gray-200  ">
+              <div className="grid grid-cols-4 gap-2 sm:w-96">
+                <div className="flex justify-center col-span-3 shadow-lg rounded-2xl text-center content-center mt-3  p-6 bg-teal-100  border border-gray-200  ">
                   <div className=" font-bold ">{cat.name}</div>
                 </div>
                 <div className="flex content-center ">
-                  <button onClick={() => openDialog(cat)} className="ml-5 ">
+                  <button onClick={() => openDialog(cat)} className="ml-3">
                     <FaPenSquare size={30} />
                   </button>
                   {/* Edit Button */}
@@ -99,7 +93,7 @@ export default function CategoryPage() {
         </ul>
         <button
           onClick={() => openDialog()}
-          className="fixed shadow-lg right-10 bottom-10 bg-teal-100 hover:bg-teal-200 font-bold py-4 px-6 rounded-2xl "
+          className="fixed shadow-lg right-5 bottom-5 sm:right-10 sm:bottom-10 bg-teal-100 hover:bg-teal-200 font-bold py-4 px-6 rounded-2xl "
         >
           Add New
         </button>{" "}
@@ -113,8 +107,8 @@ export default function CategoryPage() {
           />
         )}
         {confirmDialog && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-teal-100 p-6 rounded-lg shadow-lg w-1/3">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-2">
+            <div className="bg-teal-100 p-6 rounded-lg shadow-lg sm:w-1/3">
               <h2 className="text-2xl mb-4 font-bold ">
                 Delete Card
               </h2>
@@ -179,6 +173,6 @@ export default function CategoryPage() {
           onClose={() => setShowSnackbar(false)}
         />
       </div>
-    </Home>
+   
   );
 }

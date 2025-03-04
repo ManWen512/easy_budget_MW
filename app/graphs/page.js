@@ -1,12 +1,14 @@
 "use client";
 
 import PieChart from "@/components/pieChart";
-import Home from "../page";
 import BarChart from "@/components/barChart";
 import { useState, useEffect } from "react";
 import { currencySymbol } from "../currency";
 
+
 export default function graphsPage() {
+
+  
   const [selectedOption, setSelectedOption] = useState("");
 
   const [selectedMonth, setSelectedMonth] = useState(null);
@@ -39,7 +41,8 @@ export default function graphsPage() {
     "November",
     "December",
   ];
-  const years = Array.from({ length: 30 }, (_, i) => 2024 - i); // Generates a list of years from 2024 to 1995
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 30 }, (_, i) => currentYear - i); // Generates a list of years from 2024 to 1995
 
   const handleOptionChange = (option) => {
     setSelectedOption(option);
@@ -210,8 +213,8 @@ export default function graphsPage() {
   };
 
   return (
-    <Home>
-      <div className="flex space-x-4 mb-4">
+    <>
+      <div className="flex space-x-4 mb-4 p-5 mt-14 w-screen sm:w-[60vw]">
         {/* Checkboxes for selecting Month, Year, or Year Range */}
         <label
           className={`ml-3 w-full font-bold shadow-lg  relative cursor-pointer p-3 border rounded-lg transition-all ${
@@ -227,7 +230,7 @@ export default function graphsPage() {
             className="sr-only peer "
             onChange={() => handleOptionChange("month")}
           />
-          <span>Select Month</span>
+          <span className="text-sm sm:text-base">Select Month</span>
         </label>
 
         <label
@@ -244,7 +247,7 @@ export default function graphsPage() {
             className="sr-only peer"
             onChange={() => handleOptionChange("year")}
           />
-          <span>Select Year</span>
+          <span className="text-sm sm:text-base">Select Year</span>
         </label>
 
         <label
@@ -261,11 +264,11 @@ export default function graphsPage() {
             className="sr-only peer"
             onChange={() => handleOptionChange("yearRange")}
           />
-          <span>Select Year Range</span>
+          <span className="text-sm sm:text-base">Select Year Range</span>
         </label>
       </div>
 
-      <div className="flex space-x-4 mb-8">
+      <div className="flex space-x-4 mb-8 px-5">
         {/* Dropdowns for Month and Year Selection */}
         {selectedOption === "month" && (
           <>
@@ -394,7 +397,7 @@ export default function graphsPage() {
         (selectedOption === "yearRange" &&
           yearRange.startYear &&
           yearRange.endYear)) && (
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-5">
           <div className="col-span-3 mt-20 ">
             <div>Income</div>
             <BarChart
@@ -433,6 +436,6 @@ export default function graphsPage() {
           </div>
         </div>
       )}
-    </Home>
+    </>
   );
 }

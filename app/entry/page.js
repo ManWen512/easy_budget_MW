@@ -28,7 +28,7 @@ export default function EntryPage() {
   };
 
   return (
-    <Home>
+    <>
       <div>
         <h1 className="text-3xl mb-5">Entries</h1>
         <ul>
@@ -83,6 +83,6 @@ export default function EntryPage() {
           Add New Entry
         </Link>
       </div>
-    </Home>
+    </>
   );
 }

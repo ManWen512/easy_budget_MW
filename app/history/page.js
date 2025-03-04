@@ -113,9 +113,10 @@ export default function HistoryPage() {
     router.push(`/monthEntry/${id}`);
   };
   return (
-    <Home>
-      <div>
-        <div className="flex items-center space-x-4 mb-4">
+    <>
+      <div className="p-5 mt-14 sm:-ml-36 ">
+        <div className="text-center text-xl font-bold">History</div>
+        <div className="flex pt-4 sm:items-center space-x-4 mb-4 w-[90vw]  sm:w-[60vw] ">
           {/* Filter Button */}
           <div className="relative" ref={dropdownRef}>
             <button
@@ -128,7 +129,7 @@ export default function HistoryPage() {
 
             {/* Filter Dropdown */}
             {showFilterDropdown && (
-              <div className="absolute mt-2 w-64 bg-teal-100 border border-gray-900 rounded-md shadow-lg p-4">
+              <div className="absolute mt-2 w-64 bg-teal-100 border border-gray-900 rounded-md shadow-lg p-4 ">
                 <div className="mb-4">
                   <label className="block  mb-2">Type</label>
                   <select
@@ -190,7 +191,7 @@ export default function HistoryPage() {
           </div>
 
           {/* Sort Button with Ascending and Descending Arrows */}
-          <div className="flex items-center ">
+          <div className="flex sm:items-center h-10">
             <button
               onClick={() =>
                 setSortOrder(
@@ -209,27 +210,28 @@ export default function HistoryPage() {
           </div>
 
           {/* Date Range Pickers */}
-          <div className="flex  items-center space-x-2 mt-4 ">
-            <div className="mb-4">
+          <div className="sm:flex items-center space-x-2   ">
+            <div className="ml-2 ">
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className=" rounded-md p-2 bg-orange-400"
+                className=" rounded-md p-2 w-36 h-10 bg-orange-400"
               />
             </div>
-            <div className="mb-3">To</div>
-            <div className="mb-4">
+            <div className=" text-sm">To</div>
+            <div className="mb-4 sm:mt-4">
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className=" rounded-md p-2 bg-orange-400"
+                className=" rounded-md p-2 h-10 bg-orange-400"
+               
               />
             </div>
           </div>
         </div>
-        <div className="mt-4">
+        <div className="mt-4 w-[90vw] sm:w-[80vw] ">
           {isLoading ? (
           <div className="flex space-x-2 justify-center items-center h-screen">
             <div className="animate-bounce bg-teal-100 rounded-full h-8 w-4"></div>
@@ -237,7 +239,7 @@ export default function HistoryPage() {
             <div className="animate-bounce bg-teal-100 rounded-full h-8 w-4"></div>
           </div>
         ) : entryData.length > 0 ? (
-            <table className="min-w-full border-separate border-spacing-2 ">
+            <table className=" max-w block overflow-x-auto lg:overflow-hidden border-separate border-spacing-2 -z-10">
               <thead className=" bg-teal-100 text-left text-xs font-semibold  uppercase tracking-wider border-b">
                 <tr className="">
                   <th className="border-l-4 border-teal-500 rounded-xl shadow-lg py-3 px-10 ">Date</th>
@@ -307,6 +309,6 @@ export default function HistoryPage() {
           )}
         </div>
       </div>
-    </Home>
+    </>
   );
 }

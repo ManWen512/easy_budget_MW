@@ -2,46 +2,31 @@
 
 import { useState } from "react";
 import Snackbar from "@/components/snackBar";
+import { useDispatch } from "react-redux";
+import { addAccount, editAccount } from "@/redux/slices/balanceSlice";
 
 export default function BalanceDialogPage({ accId, name, balance, onClose, onSuccess }) {
-  const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}`;
+  const dispatch = useDispatch();
   
   const [accData, setAccData] = useState({
     name: name || "",
     balance: balance || "",
   });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      if (accId === undefined) {
-        await fetch(`${mainUrl}/account`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(accData),
-        });
-        onSuccess("Account Added successfully!")
-      } else {
-        await fetch(`${mainUrl}/account?id=${accId}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(accData),
-        });
-        onSuccess("Account Updated successfully!")
-
-      }
-      onClose(); // Close dialog after save
-
-      
-    } catch (error) {
-      console.error("Error:", error);
-     
+    
+    if (accId === undefined) {
+      dispatch(addAccount(accData)); // Dispatch Redux action to add a new account
+      onSuccess("Account Added successfully!");
+    } else {
+      dispatch(editAccount({ id: accId, ...accData })); // Dispatch Redux action to edit existing account
+      onSuccess("Account Updated successfully!");
     }
+
+    onClose(); // Close dialog after save
   };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,7 +38,7 @@ export default function BalanceDialogPage({ accId, name, balance, onClose, onSuc
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-teal-100  p-6 rounded-lg shadow-lg w-1/3">
+      <div className="bg-teal-100  p-6 rounded-lg shadow-lg sm:w-1/3">
         <h2 className="text-xl  font-semibold mb-4">
           {accId ? "Edit Account" : "Add New Account"} {/* Conditional title */}
         </h2>

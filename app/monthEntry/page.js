@@ -1,11 +1,12 @@
 "use client";
 
-import Home from "../page";
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Snackbar from "@/components/snackBar";
 import { currencySymbol } from "../currency";
+import { BiSolidLeftArrow, BiSolidRightArrow } from "react-icons/bi";
 
 export default function MonthEntryPage() {
   const [monthEntries, setMonthEntries] = useState([]);
@@ -110,14 +111,14 @@ export default function MonthEntryPage() {
 
 
   return (
-    <Home>
-      <div className="flex justify-center content-center">
-        <div className="flex justify-center content-center items-center mb-5">
+    <>
+      <div className="flex justify-center content-center p-5 mt-14 mx-auto w-screen sm:w-[60vw] ">
+        <div className="flex justify-center content-center items-center mb-2 ">
           <button
             onClick={() => handleMonthChange("prev")}
             className="text-3xl mr-3 text-orange-400"
           >
-            ◀
+            <BiSolidLeftArrow />
           </button>
           <div className="rounded-2xl shadow-lg w-1/2 text-center block p-3 bg-orange-400 border border-gray-200">
             <div className="text-1xl  font-bold">{`${
@@ -128,12 +129,12 @@ export default function MonthEntryPage() {
             onClick={() => handleMonthChange("next")}
             className="text-3xl ml-3 text-orange-400"
           >
-            ▶
+            <BiSolidRightArrow />
           </button>
         </div>
       </div>
 
-      <div>
+      <div className="w-screen sm:w-[60vw] sm:ml-20">
         {isLoading ? (
           <div className="flex space-x-2 justify-center items-center h-screen">
             <div className="animate-bounce bg-teal-100 rounded-full h-8 w-4"></div>
@@ -142,9 +143,9 @@ export default function MonthEntryPage() {
           </div>
         ) : monthEntries.length > 0 ? (
           <>
-            <table className="min-w-full border-separate border-spacing-2 ">
+            <table className="max-w block overflow-x-auto border-separate border-spacing-2 px-5  ">
               <thead >
-                <tr >
+                <tr className="">
                   <th className="rounded-xl shadow-lg py-3 px-6 border-l-4 border-teal-500 bg-teal-100 text-left text-sm font-semibold  uppercase tracking-wider ">
                     Date
                   </th>
@@ -223,7 +224,7 @@ export default function MonthEntryPage() {
                     </>
                   )}
                 </tr>
-                <tr className="">
+                <tr>
                   <td></td>
 
                   {totalOutcome !== 0 && (
@@ -240,9 +241,10 @@ export default function MonthEntryPage() {
                 </tr>
               </tbody>
             </table>
+            <div className="h-16"></div>
           </>
         ) : (
-          <div className="font-bold text-1xl">No datas found!</div>
+          <div className="font-bold text-1xl px-5">No datas found!</div>
         )}
       </div>
       <Snackbar
@@ -250,7 +252,7 @@ export default function MonthEntryPage() {
         show={showSnackbar}
         onClose={handleSnackbarClose}
       />
-      <div className="fixed bottom-10 right-10">
+      <div className="fixed bottom-6 right-2 sm:bottom-10 sm:right-10">
         <Link
           href={"/entry/addEditEntry"}
           className="rounded-xl shadow-lg bg-teal-100 hover:bg-teal-400  font-bold py-4 px-6  "
@@ -258,6 +260,6 @@ export default function MonthEntryPage() {
           Add New Entry
         </Link>
       </div>
-    </Home>
+    </>
   );
 }
