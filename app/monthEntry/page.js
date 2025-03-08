@@ -26,8 +26,6 @@ export default function MonthEntryPage() {
   const [showSnackbar, setShowSnackbar] = useState(false); // Snackbar visibility
   const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entry`;
   const router = useRouter();
-  
-
 
   const fetchEntries = async (year, month) => {
     setIsLoading(true); // Set loading state before fetching
@@ -52,7 +50,6 @@ export default function MonthEntryPage() {
   useEffect(() => {
     fetchEntries(year, month);
   }, [year, month]);
-  
 
   // Check for Snackbar trigger on page load
   useEffect(() => {
@@ -63,11 +60,11 @@ export default function MonthEntryPage() {
     }
   }, [searchParams]);
 
-    // Handle Snackbar close
-    const handleSnackbarClose = () => {
-      setShowSnackbar(false);
-      setSnackbarMessage("");
-    };
+  // Handle Snackbar close
+  const handleSnackbarClose = () => {
+    setShowSnackbar(false);
+    setSnackbarMessage("");
+  };
 
   // Helper function to handle month navigation
   const handleMonthChange = (direction) => {
@@ -103,12 +100,10 @@ export default function MonthEntryPage() {
     "December",
   ];
 
-    // Handle row click to navigate to the detail page
-    const handleRowClick = (id) => {
-      router.push(`/monthEntry/${id}?month=${month}&year=${year}`);
-    };
-
-
+  // Handle row click to navigate to the detail page
+  const handleRowClick = (id) => {
+    router.push(`/monthEntry/${id}?month=${month}&year=${year}`);
+  };
 
   return (
     <>
@@ -144,8 +139,8 @@ export default function MonthEntryPage() {
         ) : monthEntries.length > 0 ? (
           <>
             <table className="max-w block overflow-x-auto border-separate border-spacing-2 px-5  ">
-              <thead >
-                <tr className="">
+              <thead>
+                <tr>
                   <th className="rounded-xl shadow-lg py-3 px-6 border-l-4 border-teal-500 bg-teal-100 text-left text-sm font-semibold  uppercase tracking-wider ">
                     Date
                   </th>
@@ -183,31 +178,36 @@ export default function MonthEntryPage() {
                         })
                       : null;
                   return (
-                    <>
-                      <tr
-                        className={`border-b cursor-pointer ${
-                          item.type === "INCOME"
-                            ? "bg-green-100 hover:bg-green-200"
-                            : "bg-red-100 hover:bg-red-200"
-                        }`}
-                        onClick={() => handleRowClick(item.id)} // Navigate on row click
+                    <tr
+                      key={item.id}
+                      className={`border-b cursor-pointer ${
+                        item.type === "INCOME"
+                          ? "bg-green-100 hover:bg-green-200"
+                          : "bg-red-100 hover:bg-red-200"
+                      }`}
+                      onClick={() => handleRowClick(item.id)} // Navigate on row click
+                    >
+                      <td
+                        className={`${
+                          currentDate !== previousDate
+                            ? "rounded-2xl shadow-lg py-4 px-6 text-sm text-gray-700"
+                            : "bg-white cursor-default"
+                        } `}
                       >
-                        <td className={`${currentDate !== previousDate ? "rounded-2xl shadow-lg py-4 px-6 text-sm text-gray-700" :'bg-white cursor-default'} `}>
-                          {currentDate !== previousDate && currentDate}
-                        </td>
-                        <td className="rounded-2xl shadow-lg py-4 px-6 text-sm text-gray-700">
-                          {item.category.name}
-                        </td>
-                        <td className="rounded-2xl shadow-lg py-4 px-6 text-sm text-gray-700">
-                          {/* dollar Sign */}
-                          {currencySymbol} {item.cost}
-                        </td>
-                        <td className="rounded-2xl shadow-lg py-4 px-6 text-sm text-gray-700">
-                          {item.account.name.charAt(0).toUpperCase() +
-                            item.account.name.slice(1)}
-                        </td>
-                      </tr>
-                    </>
+                        {currentDate !== previousDate && currentDate}
+                      </td>
+                      <td className="rounded-2xl shadow-lg py-4 px-6 text-sm text-gray-700">
+                        {item.category.name}
+                      </td>
+                      <td className="rounded-2xl shadow-lg py-4 px-6 text-sm text-gray-700">
+                        {/* dollar Sign */}
+                        {currencySymbol} {item.cost}
+                      </td>
+                      <td className="rounded-2xl shadow-lg py-4 px-6 text-sm text-gray-700">
+                        {item.account.name.charAt(0).toUpperCase() +
+                          item.account.name.slice(1)}
+                      </td>
+                    </tr>
                   );
                 })}
                 <tr className="">
@@ -218,7 +218,7 @@ export default function MonthEntryPage() {
                         Total Income
                       </td>
                       <td className="rounded-2xl shadow-lg border-b bg-orange-400 py-4 px-6 font-bold  text-gray-700">
-                       {currencySymbol} {totalIncome}
+                        {currencySymbol} {totalIncome}
                         {/* dollar Sign */}
                       </td>
                     </>

@@ -1,9 +1,8 @@
-import { Inter } from "next/font/google";
+
 import "./globals.css";
 import Wrap from "./wrap";
 import { Providers } from "./providers";
 
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Create Next App",
@@ -11,6 +10,11 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  console.log("Root layout loaded (server)");
+if (typeof window !== "undefined") {
+  console.log("Root layout loaded (client)");
+}
+
   return (
     <html lang="en">
       <head>
@@ -19,7 +23,7 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body className={inter.className}>
+      <body >
         <Providers>
           <Wrap>{children}</Wrap>
         </Providers>

@@ -6,9 +6,7 @@ import { useState, useEffect } from "react";
 import { currencySymbol } from "../currency";
 
 
-export default function graphsPage() {
-
-  
+export default function GraphsPage() {
   const [selectedOption, setSelectedOption] = useState("");
 
   const [selectedMonth, setSelectedMonth] = useState(null);

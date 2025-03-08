@@ -7,6 +7,7 @@ import Navbar from "./Navbar";
 
 export default function Wrap({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  console.log("wrap loaded");
 
   // Load sidebar state from localStorage
   useEffect(() => {
