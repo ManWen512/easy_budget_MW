@@ -76,29 +76,29 @@ export default function Home() {
               <div className="m-2 font-bold ">
                 Overview ({currentMonthName})
               </div>
-              <div className="grid grid-cols-4">
-                <div className="col-span-3 bd-white">
+              <div className="grid grid-cols-1 sm:grid-cols-4">
+                <div className="sm:col-span-3 bd-white mb-10">
                   <BarChart
                     data={incomeList}
                     title={["Income"]}
                     currency={currencySymbol}
                   />
                 </div>
-                <div className=" sm:mt-20">
+                <div className="mb-10 sm:mt-20">
                   <PieChart
                     data={incomeCategoryList}
                     cost={incomeCategoryCostList}
                     currency={currencySymbol}
                   />
                 </div>
-                <div className="col-span-3 bd-white">
+                <div className="sm:col-span-3 bd-white mb-10">
                   <BarChart
                     data={outcomeList}
                     title={["Outcome"]}
                     currency={currencySymbol}
                   />
                 </div>
-                <div className=" sm:mt-20">
+                <div className=" sm:mt-20 mb-10">
                   <PieChart
                     data={outcomeCategoryList}
                     cost={outcomeCategoryCostList}

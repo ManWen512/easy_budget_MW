@@ -52,6 +52,20 @@ export default function AddEditEntryPage({ searchParams }) {
     dispatch(fetchAccounts());
   }, [dispatch]);
 
+  useEffect(() => {
+    dispatch(fetchCategories()).then((result) => {
+      if (result.payload?.length > 0 && formData.category.id === 0) {
+        setDefaultCategory(result.payload);
+      }
+    });
+  
+    dispatch(fetchAccounts()).then((result) => {
+      if (result.payload?.length > 0 && formData.account.id === 0) {
+        setDefaultAccount(result.payload);
+      }
+    });
+  }, [dispatch]);
+
   const setDefaultCategory = (data) => {
     // I had to use "data", because even calling this function after fetch's .then,
     // categories array is still not updated somehow
@@ -124,7 +138,7 @@ export default function AddEditEntryPage({ searchParams }) {
       }));
     }
   };
-
+  
   return (
     <>
       <div>
