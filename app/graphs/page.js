@@ -4,9 +4,15 @@ import PieChart from "@/components/pieChart";
 import BarChart from "@/components/barChart";
 import { useState, useEffect } from "react";
 import { currencySymbol } from "../currency";
-
+import { useSelector, useDispatch } from "react-redux";
+import {
+  fetchMonthData,
+  fetchYearData,
+  fetchYearRangeData,
+} from "@/redux/slices/graphSlice";
 
 export default function GraphsPage() {
+  const dispatch = useDispatch();
   const [selectedOption, setSelectedOption] = useState("");
 
   const [selectedMonth, setSelectedMonth] = useState(null);
@@ -16,14 +22,14 @@ export default function GraphsPage() {
     endYear: null,
   });
 
-  const [incomeCategoryList, setIncomeCategoryList] = useState([]);
-  const [outcomeCategoryList, setOutcomeCategoryList] = useState([]);
-  const [incomeList, setIncomeList] = useState([]);
-  const [outcomeList, setOutcomeList] = useState([]);
-  const [incomeCategoryCostList, setIncomeCategoryCostList] = useState([]);
-  const [outcomeCategoryCostList, setOutcomeCategoryCostList] = useState([]);
-  const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entry/graphs`;
-
+  const {
+    incomeList,
+    outcomeList,
+    incomeCategoryList,
+    outcomeCategoryList,
+    incomeCategoryCostList,
+    outcomeCategoryCostList,
+  } = useSelector((state) => state.graph);
 
   const months = [
     "January",
@@ -53,162 +59,14 @@ export default function GraphsPage() {
   // Fetch data when month and year are selected
   useEffect(() => {
     if (selectedMonth && selectedYear) {
-      fetchMonthData(selectedYear, selectedMonth);
+      dispatch(fetchMonthData({ year: selectedYear, month: selectedMonth }));
     } else if (selectedYear) {
-      fetchYearData(selectedYear);
+      dispatch(fetchYearData(selectedYear));
     } else if (yearRange.startYear && yearRange.endYear) {
-      fetchYearRangeData(yearRange);
+      dispatch(fetchYearRangeData(yearRange));
     }
   }, [selectedMonth, selectedYear, yearRange]);
 
-  const fetchMonthData = async (year, month) => {
-    try {
-      const response = await fetch(
-        `${mainUrl}/month?year=${year}&month=${month}`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch data");
-      }
-      const data = await response.json();
-
-      // Set the data for income and outcome category lists
-      setIncomeCategoryList(
-        transformData(data.incomeCategoryPercentageList || {})
-      );
-      setOutcomeCategoryList(
-        transformData(data.outcomeCategoryPercentageList || {})
-      );
-      setIncomeList(transformDayData(data.incomeList || {}, year, month));
-      setOutcomeList(transformDayData(data.outcomeList || {}, year, month));
-      setIncomeCategoryCostList(
-        transformCostData(data.incomeCategoryCostList || {})
-      );
-      setOutcomeCategoryCostList(
-        transformCostData(data.outcomeCategoryCostList || {})
-      );
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  const fetchYearData = async (year) => {
-    try {
-      const response = await fetch(`${mainUrl}/year?year=${year}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch data");
-      }
-      const data = await response.json();
-
-      // Set the data for income and outcome category lists
-      setIncomeCategoryList(
-        transformData(data.incomeCategoryPercentageList || {})
-      );
-      setOutcomeCategoryList(
-        transformData(data.outcomeCategoryPercentageList || {})
-      );
-      setIncomeList(transformMonthData(data.incomeList || {}));
-      setOutcomeList(transformMonthData(data.outcomeList || {}));
-      setIncomeCategoryCostList(
-        transformCostData(data.incomeCategoryCostList || {})
-      );
-      setOutcomeCategoryCostList(
-        transformCostData(data.outcomeCategoryCostList || {})
-      );
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  const fetchYearRangeData = async (year) => {
-    try {
-      const response = await fetch(
-        `${mainUrl}/years?startYear=${year.startYear}&endYear=${year.endYear}`
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch data");
-      }
-      const data = await response.json();
-
-      // Set the data for income and outcome category lists
-      setIncomeCategoryList(
-        transformData(data.incomeCategoryPercentageList || {})
-      );
-      setOutcomeCategoryList(
-        transformData(data.outcomeCategoryPercentageList || {})
-      );
-      setIncomeList(
-        transformYearData(data.incomeList || {}, year.startYear, year.endYear)
-      );
-      setOutcomeList(
-        transformYearData(data.outcomeList || {}, year.startYear, year.endYear)
-      );
-      setIncomeCategoryCostList(
-        transformCostData(data.incomeCategoryCostList || {})
-      );
-      setOutcomeCategoryCostList(
-        transformCostData(data.outcomeCategoryCostList || {})
-      );
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
-
-  // Utility function to transform data from object to array
-  const transformCostData = (dataObject) => {
-    return Object.entries(dataObject).map(([name, total]) => ({
-      name,
-      total,
-    }));
-  };
-
-  // Utility function to transform data from object to array
-  const transformData = (dataObject) => {
-    return Object.entries(dataObject).map(([name, percentage]) => ({
-      name,
-      percentage,
-    }));
-  };
-
-  const transformDayData = (dataObject, year, month) => {
-    const daysInMonth = new Date(year, month, 0).getDate(); // Get the number of days in the specified month
-
-    // Create an array with all days of the month, defaulting to 0 if no data exists for that day
-    const daysArray = Array.from({ length: daysInMonth }, (_, i) => {
-      const day = i + 1; // Day number (1-based)
-      const total = dataObject[day] || 0; // Use the total from the data object or default to 0
-
-      return { day, total };
-    });
-
-    return daysArray;
-  };
-
-  // Utility function to transform month data from object to array
-  const transformMonthData = (dataObject) => {
-    // Define month names using Date to get dynamic month names
-    const monthNames = Array.from({ length: 12 }, (_, i) => {
-      const date = new Date(0, i); // Month index is 0-based (January is 0)
-      return date.toLocaleString("default", { month: "long" }).toUpperCase(); // Convert to uppercase
-    });
-
-    return monthNames.map((month, index) => {
-      const total = dataObject[month] || 0; // Get total for month or default to 0
-      return { day: month, total };
-    });
-  };
-
-  // Utility function to transform year data from object to array
-  const transformYearData = (dataObject, startYear, endYear) => {
-    const yearsArray = [];
-
-    // Iterate through the range of years from startYear to endYear
-    for (let year = startYear; year <= endYear; year++) {
-      const total = dataObject[year] || 0; // Get total for year or default to 0
-      yearsArray.push({ day: year, total }); // Push into the array
-    }
-
-    return yearsArray;
-  };
 
   return (
     <>

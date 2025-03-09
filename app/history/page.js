@@ -1,127 +1,69 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Home from "../page";
 import { FaSortDown } from "react-icons/fa";
 import { FaArrowDownWideShort, FaArrowUpShortWide } from "react-icons/fa6";
 import { useRouter, useSearchParams } from "next/navigation";
 import { currencySymbol } from "../currency";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAccountsAndCategories, fetchEntryData } from "@/redux/slices/historySlice";
 
 export default function HistoryPage() {
-  const date = new Date();
+  const dispatch = useDispatch();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [isLoading, setIsLoading] = useState(false);
-  const [ totalCost , setTotalCost ] = useState('');
+
+  const { accountsData, categoriesData, entryData, totalCost, loading } = useSelector((state) => state.history);
+
+  // UI State
   const [type, setType] = useState(searchParams.get("type") || "");
   const [account, setAccount] = useState(searchParams.get("account") || "");
   const [category, setCategory] = useState(searchParams.get("category") || "");
-  const [startDate, setStartDate] = useState(searchParams.get("startDate") || new Date(date.getFullYear(), date.getMonth(), 1, 0, 0, 0));
-  const [endDate, setEndDate] = useState(searchParams.get("endDate") || new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59));
+  const [startDate, setStartDate] = useState(searchParams.get("startDate") || new Date().toISOString().split("T")[0]);
+  const [endDate, setEndDate] = useState(searchParams.get("endDate") || new Date().toISOString().split("T")[0]);
   const [sortOrder, setSortOrder] = useState(searchParams.get("sortOrder") || "DESC");
   const [sortField, setSortField] = useState(searchParams.get("sortField") || "dateTime");
-  const [accountsData, setAccountsData] = useState([]);
-  const [categoriesData, setCategoriesData] = useState([]);
-  const [entryData, setEntryData] = useState([]);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
-  const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}`;
   const dropdownRef = useRef(null);
-  // const { currency } = useCurrency();
-  
+
   useEffect(() => {
-    fetchAccountsandCategories();
+    dispatch(fetchAccountsAndCategories());
+  }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(fetchEntryData({ type, account, category, startDate, endDate, sortField, sortOrder }));
+  }, [dispatch, type, account, category, startDate, endDate, sortField, sortOrder]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowFilterDropdown(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    fetchEntryData();
-    updateQueryParams();
-  }, [type, account, category, startDate, endDate, sortField, sortOrder]);
-
-  const updateQueryParams = () => {
-    
-    const params = new URLSearchParams();
-
-    if (type) params.set("type", type);
-    if (account) params.set("account", account);
-    if (category) params.set("category", category);
-    if (startDate) params.set("startDate", startDate);
-    if (endDate) params.set("endDate", endDate);
-    if (sortField) params.set("sortField", sortField);
-    if (sortOrder) params.set("sortOrder", sortOrder);
-
-    const queryString = params.toString();
-    router.replace(`/history?${queryString}`);
-  };
-
-  const fetchAccountsandCategories = async () => {
-    const response = await fetch(`${mainUrl}/account/all`);
-    const data = await response.json();
-    const response1 = await fetch(`${mainUrl}/category/all`);
-    const data1 = await response1.json();
-    setAccountsData(data);
-    setCategoriesData(data1);
-  };
-
-  const fetchEntryData = async () => {
-    setIsLoading(true);
-    const params = new URLSearchParams();
-    if (type && type !== "ALL") {
-      params.append("type", type);
-    }
-    if (account) params.append("accountId", account);
-    if (category) params.append("categoryId", category);
-    if (startDate) params.append("startDate", formatDate(startDate));
-    if (endDate) params.append("endDate", formatDate(endDate));
-    if (sortField) params.append("sortField", sortField);
-    if (sortOrder) params.append("sortOrder", sortOrder === "ascending" ? "ASC" : "DESC");
-
-    const url = params.toString() ? `${mainUrl}/entry/history?${params}` : `${mainUrl}/entry/history`;
-
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
-      setEntryData(data.entries);
-      setTotalCost(data.totalCost);
-    } catch (error) {
-      console.error("Error fetching entry data:", error);
-    }finally{
-      setIsLoading(false);
-    }
-  };
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    return `${year}-${month}-${day}T${hours}:${minutes}:00`;
+  const handleSort = (field) => {
+    setSortField(field);
+    setSortOrder(sortOrder === "DESC" ? "ASC" : "DESC");
   };
 
   const handleRowClick = (id) => {
     router.push(`/monthEntry/${id}`);
   };
+
   return (
     <>
-      <div className="p-5 mt-14 sm:-ml-36 ">
+      <div className="p-5 mt-14  ">
         <div className="text-center text-xl font-bold">History</div>
         <div className="flex pt-4 sm:items-center space-x-4 mb-4 w-[90vw]  sm:w-[60vw] ">
           {/* Filter Button */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-              className="flex bg-orange-400 px-4 py-2 rounded-md"
+              className="flex bg-orange-400 px-4 py-2 rounded-md z-10"
             >
               Filter
               <FaSortDown className="ml-1" />
@@ -231,8 +173,8 @@ export default function HistoryPage() {
             </div>
           </div>
         </div>
-        <div className="mt-4 w-[90vw] sm:w-[80vw] ">
-          {isLoading ? (
+        <div className="mt-4 w-[90vw] sm:w-[80vw] sm:-ml-36">
+          {loading ? (
           <div className="flex space-x-2 justify-center items-center h-screen">
             <div className="animate-bounce bg-teal-100 rounded-full h-8 w-4"></div>
             <div className="animate-bounce bg-teal-100 rounded-full h-6 w-4"></div>

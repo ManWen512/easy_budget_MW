@@ -1,53 +1,40 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Home from "../../page"; // Adjust the path as necessary
 import { FaPenSquare, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 import { BsArrowLeftCircleFill } from "react-icons/bs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { currencySymbol } from "@/app/currency";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchEntryDetail, deleteEntry, clearEntryDetail } from "@/redux/slices/entryDetailSlice";
 
 const EntryDetailPage = ({ params, triggerSnackbar }) => {
   const [isChecked, setIsChecked] = useState(false);
   const { id } = params; // Get the entry ID from the URL
 
   const router = useRouter();
-  const [entry, setEntry] = useState(null);
+  
   const [confirmDialog, setConfirmDialog] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState(null);
-  const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entry`;
-
-  // Fetch the entry details based on the ID
-  const fetchEntryDetails = async (entryId) => {
-    const response = await fetch(`${mainUrl}?id=${entryId}`);
-    if (response.ok) {
-      const data = await response.json();
-      setEntry(data);
-    } else {
-      console.error("Entry not found");
-    }
-  };
+  const dispatch = useDispatch();
+  const { entry, loading } = useSelector((state) => state.entryDetail);
 
   useEffect(() => {
-    if (id) {
-      // Check if id is available
-      fetchEntryDetails(id);
-    }
-  }, [id]);
+    if (id) dispatch(fetchEntryDetail(id));
 
-  const handleDelete = async (id) => {
-    await fetch(`${mainUrl}?id=${id}`, { method: "DELETE" });
-    // setEntries((prevEntries) =>
-    //   prevEntries.filter((category) => category.id !== id)
-    // );
-    router.push(
-      `/monthEntry?triggerSnackbar=${encodeURIComponent(
-        "Entry deleted successfully!"
-      )}`
-    );
-    fetchEntryDetails();
+    return () => {
+      dispatch(clearEntryDetail()); // Cleanup when unmounting
+    };
+  }, [id, dispatch]);
+
+  
+  const handleDelete = async () => {
+    await dispatch(deleteEntry(id));
+    router.push(`/monthEntry?triggerSnackbar=${encodeURIComponent("Entry deleted successfully!")}`);
   };
+
+  
 
   const openConfirmDialog = (accountId) => {
     setAccountToDelete(accountId);

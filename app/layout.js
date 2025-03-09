@@ -10,10 +10,6 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  console.log("Root layout loaded (server)");
-if (typeof window !== "undefined") {
-  console.log("Root layout loaded (client)");
-}
 
   return (
     <html lang="en">

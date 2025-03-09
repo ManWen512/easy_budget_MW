@@ -7,58 +7,44 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Snackbar from "@/components/snackBar";
 import { currencySymbol } from "../currency";
 import { BiSolidLeftArrow, BiSolidRightArrow } from "react-icons/bi";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  fetchMonthEntries,
+  setMonth,
+  setYear,
+  clearSnackbar,
+  setSnackbar,
+} from "@/redux/slices/monthEntrySlice";
 
 export default function MonthEntryPage() {
-  const [monthEntries, setMonthEntries] = useState([]);
-  const [totalIncome, setTotalIncome] = useState(0);
-  const [totalOutcome, setTotalOutcome] = useState(0);
-  const [totalBalance, setTotalBalance] = useState(0);
-  const searchParams = useSearchParams(); // Use this to access query parameters
-  const date = new Date();
-  const [year, setYear] = useState(
-    searchParams.get("year") || date.getFullYear()
-  );
-  const [month, setMonth] = useState(
-    searchParams.get("month") || date.getMonth() + 1
-  ); // Default to current month if not present in query params
-  const [isLoading, setIsLoading] = useState(true); // Loading state
-  const [snackbarMessage, setSnackbarMessage] = useState(""); // Snackbar message
-  const [showSnackbar, setShowSnackbar] = useState(false); // Snackbar visibility
-  const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entry`;
+  const dispatch = useDispatch();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // Snackbar message
+  const [showSnackbar, setShowSnackbar] = useState(false);
 
-  const fetchEntries = async (year, month) => {
-    setIsLoading(true); // Set loading state before fetching
-    try {
-      const response = await fetch(
-        `${mainUrl}/monthEntry?year=${year}&month=${month}`
-      );
-      if (!response.ok) throw new Error("Network response was not ok");
-      const data = await response.json();
-      setMonthEntries(data.entries);
-      setTotalIncome(data.totalIncome);
-      setTotalOutcome(data.totalOutcome);
-      setTotalBalance(data.totalBalance);
-    } catch (error) {
-      console.error("Error fetching entries:", error);
-    } finally {
-      setIsLoading(false); // Set loading state to false after fetching
-    }
-  };
+  const {
+    monthEntries,
+    totalIncome,
+    totalOutcome,
+    totalBalance,
+    year,
+    month,
+    isLoading,
+  
+  } = useSelector((state) => state.monthEntry);
 
-  // Initial data fetch and whenever month/year changes
   useEffect(() => {
-    fetchEntries(year, month);
-  }, [year, month]);
+    dispatch(fetchMonthEntries({ year, month }));
+  }, [dispatch, year, month]);
 
-  // Check for Snackbar trigger on page load
   useEffect(() => {
     const triggerSnackbar = searchParams.get("triggerSnackbar");
     if (triggerSnackbar) {
       setSnackbarMessage(triggerSnackbar);
       setShowSnackbar(true);
     }
-  }, [searchParams]);
+  }, [searchParams, dispatch]);
 
   // Handle Snackbar close
   const handleSnackbarClose = () => {
@@ -70,17 +56,17 @@ export default function MonthEntryPage() {
   const handleMonthChange = (direction) => {
     if (direction === "prev") {
       if (month === 1) {
-        setMonth(12);
-        setYear(year - 1);
+        dispatch(setMonth(12));
+        dispatch(setYear(year - 1));
       } else {
-        setMonth(month - 1);
+        dispatch(setMonth(month - 1));
       }
     } else if (direction === "next") {
       if (month === 12) {
-        setMonth(1);
-        setYear(year + 1);
+        dispatch(setMonth(1));
+        dispatch(setYear(year + 1));
       } else {
-        setMonth(month + 1);
+        dispatch(setMonth(month + 1));
       }
     }
   };
