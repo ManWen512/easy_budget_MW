@@ -74,11 +74,18 @@ const transformMonthData = (dataObject) => {
 };
 
 const transformYearData = (dataObject, startYear, endYear) => {
-  return Array.from({ length: endYear - startYear + 1 }, (_, i) => {
-    const year = startYear + i;
-    return { day: year, total: dataObject[year] || 0 };
-  });
+  const yearsArray = [];
+
+  // Iterate through the range of years from startYear to endYear
+  for (let year = startYear; year <= endYear; year++) {
+    const total = dataObject[year] || 0; // Get total for year or default to 0
+    yearsArray.push({ day: year, total }); // Push into the array
+  }
+
+  return yearsArray;
+  
 };
+
 
 const graphSlice = createSlice({
   name: "graph",

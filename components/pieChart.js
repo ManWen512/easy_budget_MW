@@ -1,73 +1,99 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   ArcElement,
   Tooltip,
   Legend,
+  Chart,
 } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
-const PieChart = ({ data , cost, currency}) => {
+const PieChart = ({ data, cost, currency }) => {
+  const chartRef = useRef(null);
 
-  // Ensure that the data is correctly formatted before passing it to the chart
   const chartData = {
     labels: data
-    ? data.map((item) => {
-        const matchingCost = cost.find((cos) => cos.name === item.name); // Find matching cost by name
-        return matchingCost ? `${item.name} = ${currency} ${matchingCost.total}` : item.name; // Format label if match found
-      })
-    : [],
+      ? data.map((item) => {
+          const matchingCost = cost.find((cos) => cos.name === item.name);
+          return matchingCost ? `${item.name} = ${currency} ${matchingCost.total}` : item.name;
+        })
+      : [],
     datasets: [
       {
-        
         data: data ? data.map((item) => item.percentage) : [],
         backgroundColor: [
-          'rgba(255, 99, 132, 0.6)',  // Red
-          'rgba(54, 162, 235, 0.6)',  // Blue
-          'rgba(255, 206, 86, 0.6)',  // Yellow
-          'rgba(75, 192, 192, 0.6)',  // Green
-          'rgba(153, 102, 255, 0.6)', // Purple
-          'rgba(255, 159, 64, 0.6)',  // Orange
+          '#FF6384',
+          '#36A2EB',
+          '#FFCE56',
+          '#4BC0C0',
+          '#9966FF',
+          '#FF9F40',
         ],
         borderColor: [
-          'rgba(255, 99, 132, 1)',  // Red border
-          'rgba(54, 162, 235, 1)',  // Blue border
-          'rgba(255, 206, 86, 1)',  // Yellow border
-          'rgba(75, 192, 192, 1)',  // Green border
-          'rgba(153, 102, 255, 1)', // Purple border
-          'rgba(255, 159, 64, 1)',  // Orange border
+          '#FF6384',
+          '#36A2EB',
+          '#FFCE56',
+          '#4BC0C0',
+          '#9966FF',
+          '#FF9F40',
         ],
         borderWidth: 2,
+        cutout: '40%',
+        borderRadius: 10,
+        spacing: 5,
       },
     ],
   };
 
+  const centerTextPlugin = {
+    id: 'centerText',
+    afterDraw(chart) {
+      const { width, height, ctx } = chart;
+      const activeElements = chart.getActiveElements();
+      ctx.save();
+
+      if (activeElements.length > 0) {
+        const { index } = activeElements[0];
+        const label = chart.data.labels[index].split('=')[0].trim();
+        const value = chart.data.datasets[0].data[index];
+
+        ctx.font = 'bold 20px outfit';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#000';
+        ctx.fillText(`${label}`, width / 2, height / 2);
+      }
+
+      ctx.restore();
+    },
+  };
+
   const options = {
     responsive: true,
+    maintainAspectRatio: true,
     plugins: {
-      tooltip:{
+      datalabels: {
+        display: false,
+      },
+      tooltip: {
         callbacks: {
           label: (tooltipItem) => {
-            const value = tooltipItem.raw; // Access the data value
-            return `${value}%`; // Format the value with a dollar sign
+            const value = tooltipItem.raw;
+            return `${value}%`;
           },
         },
       },
       legend: {
-        position: 'top',
-        labels: {
-          font: {
-            size: 14,
-          },
-          color: '#333',
-        },
+        display: false,
       },
       title: {
         display: true,
         text: '',
         font: {
+          family: 'outfit',
           size: 24,
         },
         color: '#1E293B',
@@ -75,7 +101,41 @@ const PieChart = ({ data , cost, currency}) => {
     },
   };
 
-  return <Pie data={chartData} options={options} />;
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="w-full h-auto">
+        <Pie
+          ref={chartRef}
+          data={chartData}
+          options={options}
+          plugins={[ChartDataLabels, centerTextPlugin]}
+        />
+      </div>
+      <div className="max-h-[200px] overflow-y-auto">
+        <div className="grid grid-rows-1 gap-2 p-4">
+          {data && data.map((item, index) => {
+            const matchingCost = cost.find((cos) => cos.name === item.name);
+            return (
+              <div key={index} className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg">
+                <div 
+                  className="w-3 h-3 rounded-full flex-shrink-0" 
+                  style={{ backgroundColor: chartData.datasets[0].backgroundColor[index] }}
+                />
+                <div className="flex flex-col min-w-0">
+                  <span className="font-outfit text-sm truncate">
+                    {item.name}
+                  </span>
+                  <span className="font-outfit text-xs text-gray-500 truncate">
+                    {item.percentage}% {matchingCost && `(${currency} ${matchingCost.total})`}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default PieChart;

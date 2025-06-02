@@ -21,5 +21,6 @@ export const store = configureStore({
     monthEntry: monthEntryReducer,
     entryDetail: entryDetailReducer,
     history: historyReducer,
+    
   },
 });

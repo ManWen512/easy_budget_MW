@@ -7,6 +7,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { currencySymbol } from "../currency";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAccountsAndCategories, fetchEntryData } from "@/redux/slices/historySlice";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaPenSquare, FaTrash, FaExclamationTriangle } from "react-icons/fa";
+import Snackbar from "@/components/snackBar";
+import AnimatedButton from "@/components/AnimatedButton";
 
 export default function HistoryPage() {
   const dispatch = useDispatch();
@@ -14,6 +19,7 @@ export default function HistoryPage() {
   const searchParams = useSearchParams();
 
   const { accountsData, categoriesData, entryData, totalCost, loading } = useSelector((state) => state.history);
+  const { entries, error } = useSelector((state) => state.entry);
 
   // UI State
   const [type, setType] = useState(searchParams.get("type") || "");
@@ -25,6 +31,58 @@ export default function HistoryPage() {
   const [sortField, setSortField] = useState(searchParams.get("sortField") || "dateTime");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const dropdownRef = useRef(null);
+  const [showSnackbar, setShowSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [confirmDialog, setConfirmDialog] = useState(false);
+  const [entryToDelete, setEntryToDelete] = useState(null);
+  const [isChecked, setIsChecked] = useState(false);
+
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.5,
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 24
+      }
+    }
+  };
+
+  const filterVariants = {
+    hidden: { opacity: 0, y: -10, scale: 0.95 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 25
+      }
+    },
+    exit: { 
+      opacity: 0, 
+      y: -10, 
+      scale: 0.95,
+      transition: {
+        duration: 0.2
+      }
+    }
+  };
 
   useEffect(() => {
     dispatch(fetchAccountsAndCategories());
@@ -51,46 +109,109 @@ export default function HistoryPage() {
   };
 
   const handleRowClick = (id) => {
+    router.prefetch(`/monthEntry/${id}`);
     router.push(`/monthEntry/${id}`);
   };
 
-  return (
-    <>
-      <div className="p-5 mt-14  ">
-        <div className="text-center text-xl font-bold">History</div>
-        <div className="flex pt-4 sm:items-center space-x-4 mb-4 w-[90vw]  sm:w-[60vw] ">
-          {/* Filter Button */}
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-              className="flex bg-orange-400 px-4 py-2 rounded-md z-10"
-            >
-              Filter
-              <FaSortDown className="ml-1" />
-            </button>
+  const handleDelete = (id) => {
+    dispatch(deleteEntry(id));
+    setSnackbarMessage("Entry deleted successfully!");
+    setShowSnackbar(true);
+  };
 
-            {/* Filter Dropdown */}
+  const handleShowSnackbar = (message) => {
+    setSnackbarMessage(message);
+    setShowSnackbar(true);
+  };
+
+  const openConfirmDialog = (entryId) => {
+    setEntryToDelete(entryId);
+    setConfirmDialog(true);
+  };
+
+  const closeConfirmDialog = () => {
+    setConfirmDialog(false);
+    setEntryToDelete(null);
+    setIsChecked(false);
+  };
+
+  const toggleCheckbox = () => {
+    setIsChecked(!isChecked);
+  };
+
+  return (
+    <motion.div 
+      className="history-page mt-14 p-5"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div 
+        className="text-3xl font-bold mb-5"
+        variants={itemVariants}
+      >
+        History
+      </motion.div>
+
+      <motion.div 
+        className="grid grid-cols-2 sm:flex sm:flex-row gap-4 mb-4"
+        variants={itemVariants}
+      >
+        {/* Filter Button */}
+        <div className="relative" ref={dropdownRef}>
+          <motion.button
+            onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+            className="flex bg-orange-400 px-4 py-2 rounded-md z-20 w-full"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
+            Filter
+            <motion.div
+              animate={{ rotate: showFilterDropdown ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <FaSortDown className="ml-1" />
+            </motion.div>
+          </motion.button>
+
+          {/* Filter Dropdown */}
+          <AnimatePresence>
             {showFilterDropdown && (
-              <div className="absolute mt-2 w-64 bg-teal-100 border border-gray-900 rounded-md shadow-lg p-4 ">
-                <div className="mb-4">
-                  <label className="block  mb-2">Type</label>
-                  <select
+              <motion.div 
+                className="absolute mt-2 w-64 bg-teal-100 border border-gray-900 rounded-md shadow-lg p-4 z-30"
+                variants={filterVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
+                <motion.div 
+                  className="mb-4"
+                  variants={itemVariants}
+                >
+                  <label className="block mb-2">Type</label>
+                  <motion.select
                     value={type}
                     onChange={(e) => setType(e.target.value)}
                     className="w-full border border-gray-300 rounded-md p-2"
+                    whileFocus={{ scale: 1.02 }}
                   >
                     <option value="ALL">Type</option>
                     <option value="INCOME">Income</option>
                     <option value="OUTCOME">Outcome</option>
-                  </select>
-                </div>
+                  </motion.select>
+                </motion.div>
 
-                <div className="mb-4">
+                <motion.div 
+                  className="mb-4"
+                  variants={itemVariants}
+                >
                   <label className="block mb-2">Account</label>
-                  <select
+                  <motion.select
                     value={account}
                     onChange={(e) => setAccount(e.target.value)}
                     className="w-full border border-gray-300 rounded-md p-2"
+                    whileFocus={{ scale: 1.02 }}
                   >
                     <option value="">Account</option>
                     {accountsData.map((acc) => (
@@ -98,15 +219,19 @@ export default function HistoryPage() {
                         {acc.name}
                       </option>
                     ))}
-                  </select>
-                </div>
+                  </motion.select>
+                </motion.div>
 
-                <div className="mb-4">
-                  <label className="block  mb-2">Category</label>
-                  <select
+                <motion.div 
+                  className="mb-4"
+                  variants={itemVariants}
+                >
+                  <label className="block mb-2">Category</label>
+                  <motion.select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     className="w-full border border-gray-300 rounded-md p-2"
+                    whileFocus={{ scale: 1.02 }}
                   >
                     <option value="">Category</option>
                     {categoriesData.map((cat) => (
@@ -114,143 +239,262 @@ export default function HistoryPage() {
                         {cat.name}
                       </option>
                     ))}
-                  </select>
-                </div>
+                  </motion.select>
+                </motion.div>
 
-                <div className="mb-4">
-                  <label className="block  mb-2">Sort Field</label>
-                  <select
+                <motion.div 
+                  className="mb-4"
+                  variants={itemVariants}
+                >
+                  <label className="block mb-2">Sort Field</label>
+                  <motion.select
                     value={sortField}
                     onChange={(e) => setSortField(e.target.value)}
                     className="w-full border border-gray-300 rounded-md p-2"
+                    whileFocus={{ scale: 1.02 }}
                   >
                     <option value="dateTime">DateTime</option>
                     <option value="cost">Cost</option>
-                  </select>
-                </div>
-              </div>
+                  </motion.select>
+                </motion.div>
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
+        </div>
 
-          {/* Sort Button with Ascending and Descending Arrows */}
-          <div className="flex sm:items-center h-10">
-            <button
-              onClick={() =>
-                setSortOrder(
-                  sortOrder === "ascending" ? "descending" : "ascending"
-                )
-              }
-              className="bg-orange-400 px-4 py-2 rounded-md flex items-center space-x-1"
+        {/* Sort Button */}
+        <motion.div 
+          className="flex items-center"
+          variants={itemVariants}
+        >
+          <motion.button
+            onClick={() => setSortOrder(sortOrder === "ascending" ? "descending" : "ascending")}
+            className="bg-orange-400 px-4 py-2 rounded-md flex items-center space-x-1 w-full"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
+            <span>Sort</span>
+            <motion.div
+              animate={{ rotate: sortOrder === "ascending" ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
             >
-              <span>Sort</span>
               {sortOrder === "ascending" ? (
                 <FaArrowUpShortWide className="ml-1" />
               ) : (
                 <FaArrowDownWideShort className="ml-1" />
               )}
-            </button>
-          </div>
+            </motion.div>
+          </motion.button>
+        </motion.div>
 
-          {/* Date Range Pickers */}
-          <div className="sm:flex items-center space-x-2   ">
-            <div className="ml-2 ">
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className=" rounded-md p-2 w-36 h-10 bg-orange-400"
-              />
-            </div>
-            <div className=" text-sm">To</div>
-            <div className="mb-4 sm:mt-4">
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className=" rounded-md p-2 h-10 bg-orange-400"
-               
-              />
-            </div>
-          </div>
-        </div>
-        <div className="mt-4 w-[90vw] sm:w-[80vw] sm:-ml-36">
-          {loading ? (
-          <div className="flex space-x-2 justify-center items-center h-screen">
-            <div className="animate-bounce bg-teal-100 rounded-full h-8 w-4"></div>
-            <div className="animate-bounce bg-teal-100 rounded-full h-6 w-4"></div>
-            <div className="animate-bounce bg-teal-100 rounded-full h-8 w-4"></div>
-          </div>
+        {/* Date Range Pickers */}
+        <motion.div 
+          className="col-span-2 sm:col-span-1 flex items-center gap-2"
+          variants={itemVariants}
+        >
+          <motion.div 
+            className="flex-1"
+            whileHover={{ scale: 1.02 }}
+          >
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="rounded-md p-2 w-full h-10 bg-orange-400"
+            />
+          </motion.div>
+          <div className="text-sm">To</div>
+          <motion.div 
+            className="flex-1"
+            whileHover={{ scale: 1.02 }}
+          >
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="rounded-md p-2 w-full h-10 bg-orange-400"
+            />
+          </motion.div>
+        </motion.div>
+      </motion.div>
+
+      <motion.div 
+        className="mt-4"
+        variants={itemVariants}
+      >
+        {loading ? (
+          <motion.div 
+            className="flex justify-center items-center min-h-[60vh]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <LoadingSpinner size="large" />
+          </motion.div>
         ) : entryData.length > 0 ? (
-            <table className=" max-w block overflow-x-auto lg:overflow-hidden border-separate border-spacing-2 -z-10">
-              <thead className=" bg-teal-100 text-left text-xs font-semibold  uppercase tracking-wider border-b">
-                <tr className="">
-                  <th className="border-l-4 border-teal-500 rounded-xl shadow-lg py-3 px-10 ">Date</th>
-                  <th className="border-l-4 border-teal-500 rounded-xl shadow-lg py-3 px-10 ">Category</th>
-                  <th className="border-l-4 border-teal-500 rounded-xl shadow-lg py-3 px-10 ">Cost</th>
-                  <th className="border-l-4 border-teal-500 rounded-xl shadow-lg py-3 px-10 ">Card</th>
-                  <th className="border-l-4 border-teal-500 rounded-xl shadow-lg py-3 px-10 ">Type</th>
-                  <th className="border-l-4 border-teal-500 rounded-xl shadow-lg py-3 px-10 ">Card Balance</th>
-                  <th className="border-l-4 border-teal-500 rounded-xl shadow-lg py-3 px-10 ">Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                {entryData.map((entry) => (
-                  <tr
-                    key={entry.id}
-                    className=" border-b cursor-pointer hover:bg-teal-100"
-                    onClick={() => handleRowClick(entry.id)}
-                  >
-                    <td className="rounded-2xl py-4 px-6 text-sm ">
-                      {new Date(entry.dateTime).toLocaleDateString("en-GB", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      })}
-                      {/* Format the date as needed */}
-                    </td>
-                    <td className="rounded-2xl py-4 px-6 text-sm ">
-                      {entry.category.name}
-                    </td>
-                    <td className="rounded-2xl py-4 px-6 text-sm ">
-                      {currencySymbol} {entry.cost}
-                    </td>
-                    <td className="rounded-2xl py-4 px-6 text-sm ">
-                      {entry.account.name}
-                    </td>
-                    <td className="rounded-2xl py-4 px-6 text-sm  items-center">
-                      <span
-                        className={`inline-block px-3 py-2 text-xs text-white rounded-full ${
-                          entry.type === "INCOME"
-                            ? "bg-green-400"
-                            : "bg-red-400"
-                        }`}
+          <motion.div 
+            className="w-full"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="overflow-x-auto">
+              <table className="min-w-full">
+                <thead>
+                  <tr>
+                    {["Date", "Type", "Category", "Cost", "Account", "Actions"].map((header, index) => (
+                      <motion.th
+                        key={header}
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
-                        {entry.type}
-                      </span>
-                    </td>
-                    <td className="rounded-2xl py-4 px-6 text-sm ">
-                     {currencySymbol} {entry.account.balance}
-                    </td>
-                    <td className="rounded-2xl py-4 px-6 text-sm ">
-                      {entry.description}
-                    </td>
+                        {header}
+                      </motion.th>
+                    ))}
                   </tr>
+                </thead>
+                <tbody>
+                  <AnimatePresence>
+                    {entryData.map((item, index) => (
+                      <motion.tr
+                        key={item.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        whileHover={{ scale: 1.01, x: 5 }}
+                        className={`border-b cursor-pointer ${
+                          item.type === "INCOME"
+                            ? "bg-green-100 hover:bg-green-200"
+                            : "bg-red-100 hover:bg-red-200"
+                        }`}
+                        onClick={() => handleRowClick(item.id)}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(item.dateTime).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {item.type}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {item.category.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {currencySymbol} {item.cost}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {item.account.name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <motion.div 
+                            className="flex space-x-2"
+                            whileHover={{ scale: 1.1 }}
+                          >
+                            <motion.button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/entry/addEditEntry?id=${item.id}`);
+                              }}
+                              whileHover={{ scale: 1.2 }}
+                              whileTap={{ scale: 0.9 }}
+                            >
+                              <FaPenSquare className="text-blue-500" />
+                            </motion.button>
+                            <motion.button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openConfirmDialog(item.id);
+                              }}
+                              whileHover={{ scale: 1.2 }}
+                              whileTap={{ scale: 0.9 }}
+                            >
+                              <FaTrash className="text-red-500" />
+                            </motion.button>
+                          </motion.div>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </AnimatePresence>
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-10 text-gray-500"
+          >
+            No entries found
+          </motion.div>
+        )}
+      </motion.div>
 
-                  
-                ))} 
+      <AnimatePresence>
+        {confirmDialog && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full"
+            >
+              <div className="flex items-center mb-4">
+                <FaExclamationTriangle className="text-yellow-500 text-2xl mr-2" />
+                <h3 className="text-lg font-semibold">Confirm Delete</h3>
+              </div>
+              <p className="mb-4">Are you sure you want to delete this entry?</p>
+              <div className="flex items-center mb-4">
+                <input
+                  type="checkbox"
+                  checked={isChecked}
+                  onChange={toggleCheckbox}
+                  className="mr-2"
+                />
+                <label>I understand this action cannot be undone</label>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <motion.button
+                  onClick={closeConfirmDialog}
+                  className="px-4 py-2 bg-gray-200 rounded"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Cancel
+                </motion.button>
+                <motion.button
+                  onClick={() => {
+                    if (isChecked) {
+                      handleDelete(entryToDelete);
+                      closeConfirmDialog();
+                    }
+                  }}
+                  className={`px-4 py-2 rounded ${
+                    isChecked ? "bg-red-500 text-white" : "bg-gray-300"
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  disabled={!isChecked}
+                >
+                  Delete
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-                <tr >
-                  <td></td>
-                  <td className="rounded-2xl py-4 px-6 text-sm border-b bg-orange-400 font-bold">Total Cost</td>
-                  <td className="rounded-2xl py-4 px-6 text-sm border-b bg-orange-400 font-bold">{totalCost}</td>
-                </tr>
-              </tbody>
-            </table>
-          ) : (
-            <p>No entries found for the selected filters.</p>
-          )}
-        </div>
-      </div>
-    </>
+      <Snackbar
+        message={snackbarMessage}
+        show={showSnackbar}
+        onClose={() => setShowSnackbar(false)}
+      />
+    </motion.div>
   );
 }

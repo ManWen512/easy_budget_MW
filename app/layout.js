@@ -1,4 +1,3 @@
-
 import "./globals.css";
 import Wrap from "./wrap";
 import { Providers } from "./providers";
@@ -19,7 +18,7 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body >
+      <body className="min-h-screen">
         <Providers>
           <Wrap>{children}</Wrap>
         </Providers>

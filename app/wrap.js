@@ -20,7 +20,7 @@ export default function Wrap({ children }) {
   return (
     <div className="flex min-h-screen">
       <Navbar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
-      <div className={`transition-all duration-300  `}>
+      <div className={`transition-all duration-300 sm:flex-1 sm:flex sm:flex-col sm:items-center px-4 sm:px-6 md:px-8 sm:max-w-4xl sm:mx-auto sm:w-full`}>
         {children}
       </div>
     </div>
