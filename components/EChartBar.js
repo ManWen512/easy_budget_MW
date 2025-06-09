@@ -7,11 +7,6 @@ const EChartBar = ({ data = [], title, currency, height = 400 }) => {
   const chartRef = useRef(null);
   const instanceRef = useRef(null);
 
-  // Don't render if there's no data or if data is invalid
-  if (!data || !Array.isArray(data) || data.length === 0) {
-    return null;
-  }
-
   const colors = [
     "#FF6384",
     "#36A2EB",
@@ -61,7 +56,7 @@ const EChartBar = ({ data = [], title, currency, height = 400 }) => {
   };
 
   useEffect(() => {
-    if (chartRef.current) {
+    if (chartRef.current && data && Array.isArray(data) && data.length > 0) {
       if (!instanceRef.current) {
         instanceRef.current = echarts.init(chartRef.current);
       }
@@ -75,6 +70,11 @@ const EChartBar = ({ data = [], title, currency, height = 400 }) => {
       };
     }
   }, [data, title, currency]);
+
+  // Conditional rendering based on data availability
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return null;
+  }
 
   return <div ref={chartRef} style={{ width: "100%", height }} />;
 };

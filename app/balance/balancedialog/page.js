@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter,useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
-import { addAccount, updateAccount } from "@/redux/slices/balanceSlice";
+import { addAccount, editAccount } from "@/redux/slices/balanceSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import AnimatedButton from "@/components/AnimatedButton";
 
@@ -26,7 +26,7 @@ export default function BalanceDialogPage({ accId, name, balance, onClose, onSuc
   const handleSubmit = (e) => {
     e.preventDefault();
     if (accId) {
-      dispatch(updateAccount({ id: accId, ...accData }));
+      dispatch(editAccount({ id: accId, ...accData }));
       onSuccess("Account updated successfully!");
     } else {
       dispatch(addAccount(accData));

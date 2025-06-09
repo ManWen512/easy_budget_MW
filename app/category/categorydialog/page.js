@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useRouter, useSearchParams } from "next/navigation";
-import { addCategory, updateCategory } from "@/redux/slices/categorySlice";
+import { addCategory, editCategory } from "@/redux/slices/categorySlice";
 import { motion, AnimatePresence } from "framer-motion";
 import AnimatedButton from "@/components/AnimatedButton";
 
@@ -27,7 +27,7 @@ export default function CategoryDialog({ catId, name, onClose, onSuccess }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (catId) {
-      dispatch(updateCategory({ id: catId, ...catData }));
+      dispatch(editCategory({ id: catId, ...catData }));
       onSuccess("Category updated successfully!");
       onClose();
     } else {
