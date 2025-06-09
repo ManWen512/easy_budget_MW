@@ -17,7 +17,7 @@ const EChartBar = ({ data = [], title, currency, height = 400 }) => {
   ];
 
   const formatDate = (day) => {
-    return `${day}`; // Modify to 'DD/MM/YYYY' if needed
+    return `${day}`; // Modify to &apos;DD/MM/YYYY&apos; if needed
   };
 
   const chartOption = {
