@@ -42,33 +42,33 @@ const historySlice = createSlice({
     categoriesData: [],
     entryData: [],
     totalCost: "",
-    loading: false,
+    status: 'idle',
     error: null,
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchAccountsAndCategories.pending, (state) => {
-        state.loading = true;
+        state.status = 'loading';
       })
       .addCase(fetchAccountsAndCategories.fulfilled, (state, action) => {
-        state.loading = false;
+        state.status = 'succeeded';
         state.accountsData = action.payload.accountsData;
         state.categoriesData = action.payload.categoriesData;
       })
       .addCase(fetchAccountsAndCategories.rejected, (state) => {
-        state.loading = false;
+        state.status = 'failed';
         state.error = "Failed to fetch accountsData and categoriesData.";
       })
       .addCase(fetchEntryData.pending, (state) => {
-        state.loading = true;
+        state.status = 'loading';
       })
       .addCase(fetchEntryData.fulfilled, (state, action) => {
-        state.loading = false;
+        state.status = 'succeeded';
         state.entryData = action.payload.entryData;
         state.totalCost = action.payload.totalCost;
       })
       .addCase(fetchEntryData.rejected, (state) => {
-        state.loading = false;
+        state.status = 'failed';
         state.error = "Failed to fetch entries.";
       });
   },

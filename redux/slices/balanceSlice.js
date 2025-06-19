@@ -20,77 +20,81 @@ export const fetchTotalBalance = createAsyncThunk(
 );
 
 export const addAccount = createAsyncThunk(
-    "balance/addAccount",
-    async (newAccount, { dispatch, rejectWithValue }) => {
-      try {
-        const response = await fetch(`${accUrl}/account`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newAccount),
-        });
-  
-        if (!response.ok) {
-          throw new Error("Failed to add account");
-        }
-  
-        dispatch(fetchAccounts());
-        dispatch(fetchTotalBalance());
-  
-        return await response.json(); // Return response if needed
-      } catch (error) {
-        return rejectWithValue(error.message); // Send error message to Redux state
+  "balance/addAccount",
+  async (newAccount, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await fetch(`${accUrl}/account`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newAccount),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add account");
       }
+
+      dispatch(fetchAccounts());
+      dispatch(fetchTotalBalance());
+
+      return await response.json(); // Return response if needed
+    } catch (error) {
+      return rejectWithValue(error.message); // Send error message to Redux state
     }
-  );
-  
-  export const editAccount = createAsyncThunk(
-    "balance/editAccount",
-    async (updatedAccount, { dispatch, rejectWithValue }) => {
-      try {
-        if (!updatedAccount.id) {
-          throw new Error("Account ID is required for editing.");
-        }
-  
-        const response = await fetch(`${accUrl}/account?id=${updatedAccount.id}`, {
+  }
+);
+
+export const editAccount = createAsyncThunk(
+  "balance/editAccount",
+  async (updatedAccount, { dispatch, rejectWithValue }) => {
+    try {
+      if (!updatedAccount.id) {
+        throw new Error("Account ID is required for editing.");
+      }
+
+      const response = await fetch(
+        `${accUrl}/account?id=${updatedAccount.id}`,
+        {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updatedAccount),
-        });
-  
-        if (!response.ok) {
-          throw new Error("Failed to update account");
         }
-  
-        dispatch(fetchAccounts());
-        dispatch(fetchTotalBalance());
-  
-        return await response.json();
-      } catch (error) {
-        return rejectWithValue(error.message);
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update account");
       }
+
+      dispatch(fetchAccounts());
+      dispatch(fetchTotalBalance());
+
+      return await response.json();
+    } catch (error) {
+      return rejectWithValue(error.message);
     }
-  );
-  
-  export const deleteAccount = createAsyncThunk(
-    "balance/deleteAccount",
-    async (accountId, { dispatch, rejectWithValue }) => {
-      try {
-        const response = await fetch(`${accUrl}/account?id=${accountId}`, { method: "DELETE" });
-  
-        if (!response.ok) {
-          throw new Error("Failed to delete account");
-        }
-  
-        dispatch(fetchAccounts());
-        dispatch(fetchTotalBalance());
-  
-        return accountId; // Return deleted account ID if needed
-      } catch (error) {
-        return rejectWithValue(error.message);
+  }
+);
+
+export const deleteAccount = createAsyncThunk(
+  "balance/deleteAccount",
+  async (accountId, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await fetch(`${accUrl}/account?id=${accountId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete account");
       }
+
+      dispatch(fetchAccounts());
+      dispatch(fetchTotalBalance());
+
+      return accountId; // Return deleted account ID if needed
+    } catch (error) {
+      return rejectWithValue(error.message);
     }
-  );
-  
+  }
+);
 
 const balanceSlice = createSlice({
   name: "balance",
@@ -116,6 +120,41 @@ const balanceSlice = createSlice({
       })
       .addCase(fetchTotalBalance.fulfilled, (state, action) => {
         state.totalBalance = action.payload;
+      })
+
+      .addCase(addAccount.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(addAccount.fulfilled, (state) => {
+        state.status = "succeeded";
+      })
+      .addCase(addAccount.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
+      })
+
+      .addCase(editAccount.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(editAccount.fulfilled, (state) => {
+        state.status = "succeeded";
+      })
+      .addCase(editAccount.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
+      })
+
+      .addCase(deleteAccount.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(deleteAccount.fulfilled, (state) => {
+        state.status = "succeeded";
+      })
+      .addCase(deleteAccount.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
       });
   },
 });

@@ -9,10 +9,13 @@ import {
   fetchYearData,
   fetchYearRangeData,
 } from "@/redux/slices/graphSlice";
-import { motion, AnimatePresence } from "framer-motion";
-import dynamic from "next/dynamic";
 
-const EChartBar = dynamic(() => import("@/components/EChartBar"), { ssr: false });
+import dynamic from "next/dynamic";
+import LoadingSpinner from "@/components/LoadingSpinner";
+
+const EChartBar = dynamic(() => import("@/components/EChartBar"), {
+  ssr: false,
+});
 
 export default function GraphsPage() {
   const dispatch = useDispatch();
@@ -32,6 +35,8 @@ export default function GraphsPage() {
     outcomeCategoryList,
     incomeCategoryCostList,
     outcomeCategoryCostList,
+    status,
+    error,
   } = useSelector((state) => state.graph);
 
   const months = [
@@ -70,46 +75,11 @@ export default function GraphsPage() {
     }
   }, [selectedMonth, selectedYear, yearRange]);
 
-  const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 24
-      }
-    }
-  };
-
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-      className="p-5 mt-14"
-    >
-      <motion.div 
-        className="flex space-x-4 mb-4 w-full sm:w-[60vw]"
-        variants={itemVariants}
-      >
+    <div className="p-5 mt-14">
+      <div className="flex space-x-4 mb-4 w-full sm:w-[60vw]">
         {/* Radio Buttons */}
-        <motion.label
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+        <label
           className={`ml-3 font-bold shadow-lg relative cursor-pointer p-3 border rounded-lg transition-all ${
             selectedOption === "month"
               ? "border-l-4 border-teal-500 bg-teal-100"
@@ -124,11 +94,9 @@ export default function GraphsPage() {
             onChange={() => handleOptionChange("month")}
           />
           <span className="text-sm sm:text-base">Select Month</span>
-        </motion.label>
+        </label>
 
-        <motion.label
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+        <label
           className={`ml-3 font-bold shadow-lg relative cursor-pointer p-3 border rounded-lg transition-all ${
             selectedOption === "year"
               ? "border-l-4 border-teal-500 bg-teal-100"
@@ -143,11 +111,9 @@ export default function GraphsPage() {
             onChange={() => handleOptionChange("year")}
           />
           <span className="text-sm sm:text-base">Select Year</span>
-        </motion.label>
+        </label>
 
-        <motion.label
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+        <label
           className={`ml-3 font-bold shadow-lg relative cursor-pointer p-3 border rounded-lg transition-all ${
             selectedOption === "yearRange"
               ? "bg-teal-100 border-l-4 border-teal-500"
@@ -162,187 +128,198 @@ export default function GraphsPage() {
             onChange={() => handleOptionChange("yearRange")}
           />
           <span className="text-sm sm:text-base">Year Range</span>
-        </motion.label>
-      </motion.div>
+        </label>
+      </div>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={selectedOption}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-          className="flex  mb-8 px-5 "
-        >
-          {/* Month and Year Selection */}
-          {selectedOption === "month" && (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex grid-cols-2 sm:flex-row gap-4 w-full"
-            >
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="flex items-center"
+      <div key={selectedOption} className="flex  mb-8 px-5 ">
+        {/* Month and Year Selection */}
+        {selectedOption === "month" && (
+          <div className="flex grid-cols-2 sm:flex-row gap-4 w-full">
+            <div className="flex items-center">
+              <label
+                htmlFor="month"
+                className="hidden sm:block mr-2 whitespace-nowrap"
               >
-                <label htmlFor="month" className="hidden sm:block mr-2 whitespace-nowrap">
-                  Month:
-                </label>
-                <select
-                  id="month"
-                  value={selectedMonth || ""}
-                  onChange={(e) => setSelectedMonth(e.target.value)}
-                  className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100 w-full sm:w-auto"
-                >
-                  <option value="" disabled>Select Month</option>
-                  {months.map((month, index) => (
-                    <option key={index} value={index + 1}>{month}</option>
-                  ))}
-                </select>
-              </motion.div>
-
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="flex items-center"
+                Month:
+              </label>
+              <select
+                id="month"
+                value={selectedMonth || ""}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100 w-full sm:w-auto"
               >
-                <label htmlFor="year" className="hidden sm:block mr-2 whitespace-nowrap">
-                  Year:
-                </label>
-                <select
-                  id="year"
-                  value={selectedYear || ""}
-                  onChange={(e) => setSelectedYear(e.target.value)}
-                  className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100 w-full sm:w-auto"
-                >
-                  <option value="" disabled>Select Year</option>
-                  {years.map((year) => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-              </motion.div>
-            </motion.div>
-          )}
+                <option value="" disabled>
+                  Select Month
+                </option>
+                {months.map((month, index) => (
+                  <option key={index} value={index + 1}>
+                    {month}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          {/* Year Selection */}
-          {selectedOption === "year" && (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              whileHover={{ scale: 1.02 }}
-              className="flex items-center"
-            >
-              <label htmlFor="year" className="mr-2">
+            <div className="flex items-center">
+              <label
+                htmlFor="year"
+                className="hidden sm:block mr-2 whitespace-nowrap"
+              >
                 Year:
               </label>
               <select
                 id="year"
                 value={selectedYear || ""}
                 onChange={(e) => setSelectedYear(e.target.value)}
-                className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100"
+                className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100 w-full sm:w-auto"
               >
-                <option value="" disabled>Select Year</option>
+                <option value="" disabled>
+                  Select Year
+                </option>
                 {years.map((year) => (
-                  <option key={year} value={year}>{year}</option>
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
                 ))}
               </select>
-            </motion.div>
-          )}
+            </div>
+          </div>
+        )}
 
-          {/* Year Range Selection */}
-          {selectedOption === "yearRange" && (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex grid-cols-2 sm:flex-row gap-4 w-full"
+        {/* Year Selection */}
+        {selectedOption === "year" && (
+          <div className="flex items-center">
+            <label htmlFor="year" className="mr-2">
+              Year:
+            </label>
+            <select
+              id="year"
+              value={selectedYear || ""}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100"
             >
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="flex items-center"
-              >
-                <label htmlFor="startYear" className="hidden sm:block mr-2 whitespace-nowrap">
-                  Start Year:
-                </label>
-                <select
-                  id="startYear"
-                  value={yearRange.startYear || ""}
-                  onChange={(e) => setYearRange({ ...yearRange, startYear: e.target.value })}
-                  className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100 w-full sm:w-auto"
-                >
-                  <option value="" disabled>Select Start Year</option>
-                  {years.map((year) => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-              </motion.div>
+              <option value="" disabled>
+                Select Year
+              </option>
+              {years.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                className="flex items-center"
+        {/* Year Range Selection */}
+        {selectedOption === "yearRange" && (
+          <div className="flex grid-cols-2 sm:flex-row gap-4 w-full">
+            <div className="flex items-center">
+              <label
+                htmlFor="startYear"
+                className="hidden sm:block mr-2 whitespace-nowrap"
               >
-                <label htmlFor="endYear" className="hidden sm:block mr-2 whitespace-nowrap">
-                  End Year:
-                </label>
-                <select
-                  id="endYear"
-                  value={yearRange.endYear || ""}
-                  onChange={(e) => setYearRange({ ...yearRange, endYear: e.target.value })}
-                  className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100 w-full "
-                >
-                  <option value="" disabled>Select End Year</option>
-                  {years.map((year) => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-              </motion.div>
-            </motion.div>
-          )}
-        </motion.div>
-      </AnimatePresence>
+                Start Year:
+              </label>
+              <select
+                id="startYear"
+                value={yearRange.startYear || ""}
+                onChange={(e) =>
+                  setYearRange({ ...yearRange, startYear: e.target.value })
+                }
+                className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100 w-full sm:w-auto"
+              >
+                <option value="" disabled>
+                  Select Start Year
+                </option>
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-      {((selectedOption === "month" && selectedMonth && selectedYear) ||
-        (selectedOption === "year" && selectedYear) ||
-        (selectedOption === "yearRange" &&
-          yearRange.startYear &&
-          yearRange.endYear)) && (
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-5">
-          <div className="col-span-3 mt-20 ">
-            <div>Income</div>
-            <EChartBar
-              data={incomeList}
-              selectedMonth={selectedMonth}
-              selectedYear={selectedYear}
-              startYear={yearRange.startYear}
-              endYear={yearRange.endYear}
-              title={["Income"]}
-              currency={currencySymbol}
-            />
+            <div className="flex items-center">
+              <label
+                htmlFor="endYear"
+                className="hidden sm:block mr-2 whitespace-nowrap"
+              >
+                End Year:
+              </label>
+              <select
+                id="endYear"
+                value={yearRange.endYear || ""}
+                onChange={(e) =>
+                  setYearRange({ ...yearRange, endYear: e.target.value })
+                }
+                className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100 w-full "
+              >
+                <option value="" disabled>
+                  Select End Year
+                </option>
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-          <div className=" mt-20">
-            <PieChart
-              data={incomeCategoryList}
-              cost={incomeCategoryCostList}
-              currency={currencySymbol}
-            />
-          </div>
-          <div className="col-span-3 mt-20">
-            <div>Outcome</div>
-            <EChartBar
-              data={outcomeList}
-              currency={currencySymbol}
-              selectedMonth={selectedMonth}
-              selectedYear={selectedYear}
-              title={["Outcome"]}
-            />
-          </div>
-          <div className="mt-20">
-            <PieChart
-              data={outcomeCategoryList}
-              cost={outcomeCategoryCostList}
-              currency={currencySymbol}
-            />
-          </div>
+        )}
+      </div>
+
+      {status === "failed" && <p className="text-red-500">{error}</p>}
+      {status === "loading" ? (
+        <div className="flex justify-center items-center min-h-[60vh]">
+          <LoadingSpinner />
         </div>
+      ) : (
+        <>
+          {((selectedOption === "month" && selectedMonth && selectedYear) ||
+            (selectedOption === "year" && selectedYear) ||
+            (selectedOption === "yearRange" &&
+              yearRange.startYear &&
+              yearRange.endYear)) && (
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-5">
+              <div className="col-span-3 mt-20 ">
+                <div>Income</div>
+                <EChartBar
+                  data={incomeList}
+                  selectedMonth={selectedMonth}
+                  selectedYear={selectedYear}
+                  startYear={yearRange.startYear}
+                  endYear={yearRange.endYear}
+                  title={["Income"]}
+                  currency={currencySymbol}
+                />
+              </div>
+              <div className=" mt-20">
+                <PieChart
+                  data={incomeCategoryList}
+                  cost={incomeCategoryCostList}
+                  currency={currencySymbol}
+                />
+              </div>
+              <div className="col-span-3 mt-20">
+                <div>Outcome</div>
+                <EChartBar
+                  data={outcomeList}
+                  currency={currencySymbol}
+                  selectedMonth={selectedMonth}
+                  selectedYear={selectedYear}
+                  title={["Outcome"]}
+                />
+              </div>
+              <div className="mt-20">
+                <PieChart
+                  data={outcomeCategoryList}
+                  cost={outcomeCategoryCostList}
+                  currency={currencySymbol}
+                />
+              </div>
+            </div>
+          )}
+        </>
       )}
-    </motion.div>
+    </div>
   );
 }

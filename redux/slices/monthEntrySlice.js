@@ -25,7 +25,7 @@ const monthEntrySlice = createSlice({
     totalBalance: 0,
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,
-    isLoading: false,
+    status: 'idle',
     error: null,
     snackbarMessage: "",
     showSnackbar: false,
@@ -66,18 +66,18 @@ const monthEntrySlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchMonthEntries.pending, (state) => {
-        state.isLoading = true;
+        state.status = 'loading';
         state.error = null;
       })
       .addCase(fetchMonthEntries.fulfilled, (state, action) => {
-        state.isLoading = false;
+        state.status = 'succeeded';
         state.monthEntries = action.payload.entries;
         state.totalIncome = action.payload.totalIncome;
         state.totalOutcome = action.payload.totalOutcome;
         state.totalBalance = action.payload.totalBalance;
       })
       .addCase(fetchMonthEntries.rejected, (state, action) => {
-        state.isLoading = false;
+        state.status = 'failed';
         state.error = action.payload;
       });
   },

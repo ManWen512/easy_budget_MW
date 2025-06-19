@@ -1,17 +1,19 @@
-import React from 'react';
+import React from "react";
 
-const LoadingSpinner = ({ size = 'medium' }) => {
-  const sizeClasses = {
-    small: 'h-4 w-4',
-    medium: 'h-8 w-8',
-    large: 'h-12 w-12'
-  };
-
+const LoadingSpinner = () => {
   return (
-    <div className="flex justify-center items-center">
-      <div className={`${sizeClasses[size]} animate-spin rounded-full border-4 border-teal-200 border-t-teal-600`}></div>
+    <div className="breeding-rhombus-spinner ">
+      <div className="rhombus child-1"></div>
+      <div className="rhombus child-2"></div>
+      <div className="rhombus child-3"></div>
+      <div className="rhombus child-4"></div>
+      <div className="rhombus child-5"></div>
+      <div className="rhombus child-6"></div>
+      <div className="rhombus child-7"></div>
+      <div className="rhombus child-8"></div>
+      <div className="rhombus big"></div>
     </div>
   );
 };
 
-export default LoadingSpinner; 
+export default LoadingSpinner;

@@ -13,32 +13,6 @@ import { LuHistory } from "react-icons/lu";
 import { HiMenu, HiX } from "react-icons/hi";
 import Image from "next/image";
 import Pixel from "../public/Pixel.png";
-import { motion, AnimatePresence } from "framer-motion";
-
-// Page transition variants
-const pageVariants = {
-  initial: {
-    opacity: 0,
-    x: -20,
-  },
-  animate: {
-    opacity: 1,
-    x: 0,
-    transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 30,
-      mass: 1,
-    },
-  },
-  exit: {
-    opacity: 0,
-    x: 20,
-    transition: {
-      duration: 0.2,
-    },
-  },
-};
 
 export default function Navbar({ children }) {
   const pathname = usePathname();
@@ -77,75 +51,25 @@ export default function Navbar({ children }) {
     { name: "History", href: "/history", icon: <LuHistory size={30} /> },
   ];
 
-  const menuItemVariants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: (i) => ({
-      opacity: 1,
-      x: 0,
-      transition: {
-        delay: i * 0.1,
-        duration: 0.3,
-      },
-    }),
-  };
-
   return (
     <div className="flex min-h-screen">
       {/* Sidebar for md & lg screens */}
-      <motion.div
-        initial={{ x: -300 }}
-        animate={{ x: 0 }}
-        transition={{ 
-          type: "spring",
-          stiffness: 300,
-          damping: 30,
-          mass: 1
-        }}
-        className="fixed h-full bg-white shadow-lg hidden sm:block z-40"
+      <div
+        className="fixed h-full bg-white shadow-lg hidden sm:block z-40 transition-all duration-300"
         style={{ width: isSidebarOpen ? 256 : 64 }}
       >
         <div className="p-3 flex items-center justify-between">
-          <motion.button
+          <button
             onClick={toggleSidebar}
-            className="ml-auto mr-2"
-            whileHover={{ scale: 1.1, rotate: 5 }}
-            whileTap={{ scale: 0.9, rotate: -5 }}
-            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+            className="ml-auto mr-2 hover:scale-105 active:scale-95 transition-transform"
           >
             {isSidebarOpen ? <HiX size={30} /> : <HiMenu size={30} />}
-          </motion.button>
+          </button>
         </div>
 
-        <motion.div 
-          className="flex flex-col space-y-5 text-xl p-2"
-          initial="hidden"
-          animate="visible"
-          variants={{
-            visible: {
-              transition: {
-                staggerChildren: 0.1
-              }
-            }
-          }}
-        >
+        <div className="flex flex-col space-y-5 text-xl p-2">
           {menuItems.map((item, index) => (
-            <motion.div
-              key={item.name}
-              custom={index}
-              variants={{
-                hidden: { opacity: 0, x: -20 },
-                visible: (i) => ({
-                  opacity: 1,
-                  x: 0,
-                  transition: {
-                    delay: i * 0.1,
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 20
-                  }
-                })
-              }}
-            >
+            <div key={item.name}>
               <Link
                 href={item.href}
                 className={`flex items-center px-2 py-3 rounded-xl text-gray-600 hover:bg-teal-100 transition-all duration-300 ease-in-out ${
@@ -154,193 +78,91 @@ export default function Navbar({ children }) {
                     : ""
                 }`}
               >
-                <motion.div
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  whileTap={{ scale: 0.9, rotate: -5 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                >
+                <div className="hover:scale-105 active:scale-95 transition-transform">
                   {item.icon}
-                </motion.div>
-                <motion.span
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{
-                    opacity: isSidebarOpen ? 1 : 0,
-                    x: isSidebarOpen ? 0 : -10,
-                    width: isSidebarOpen ? "auto" : 0
-                  }}
-                  transition={{ 
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 20
-                  }}
-                  className="ml-3 overflow-hidden"
+                </div>
+                <span
+                  className={`ml-3 overflow-hidden transition-all duration-300 ${
+                    isSidebarOpen ? "opacity-100 w-auto" : "opacity-0 w-0"
+                  }`}
                 >
                   {item.name}
-                </motion.span>
+                </span>
               </Link>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
       {/* Top Navbar for sm screens */}
-      <motion.div
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ 
-          type: "spring",
-          stiffness: 300,
-          damping: 30,
-          mass: 1
-        }}
-        className="sm:hidden fixed top-0 left-0 w-full bg-white shadow-md flex justify-between items-center px-4 py-3 z-50"
-      >
-        <motion.button
+      <div className="sm:hidden fixed top-0 left-0 w-full bg-white shadow-md flex justify-between items-center px-4 py-3 z-50">
+        <button
           onClick={toggleSmallScreenMenu}
-          whileHover={{ scale: 1.1, rotate: 5 }}
-          whileTap={{ scale: 0.9, rotate: -5 }}
-          transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          className="hover:scale-105 active:scale-95 transition-transform"
         >
           {isSmallScreenMenuOpen ? <HiX size={30} /> : <HiMenu size={30} />}
-        </motion.button>
+        </button>
 
-        <motion.span
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ 
-            type: "spring",
-            stiffness: 300,
-            damping: 20
-          }}
-          className="flex text-lg font-bold justify-center items-center space-x-1"
-        >
+        <span className="flex text-lg font-bold justify-center items-center space-x-1">
           <Image src={Pixel} alt="logo" />
           <span>Easy Budget</span>
-        </motion.span>
-      </motion.div>
+        </span>
+      </div>
 
       {/* Full-screen Overlay Sidebar for sm screens */}
-      <AnimatePresence>
-        {isSmallScreenMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black bg-opacity-50 z-40"
+      {isSmallScreenMenuOpen && (
+        <>
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-200"
+            onClick={closeSmallScreenMenu}
+          />
+
+          <div
+            className="fixed top-0 left-0 w-64 h-full bg-white shadow-lg z-50 p-4 sm:hidden transition-transform duration-300"
+          >
+            <button
               onClick={closeSmallScreenMenu}
-            />
-
-            <motion.div
-              initial={{ x: -300 }}
-              animate={{ x: 0 }}
-              exit={{ x: -300 }}
-              transition={{ 
-                type: "spring",
-                stiffness: 300,
-                damping: 30,
-                mass: 1
-              }}
-              className="fixed top-0 left-0 w-64 h-full bg-white shadow-lg z-50 p-4 sm:hidden"
+              className="mb-4 hover:scale-105 active:scale-95 transition-transform"
             >
-              <motion.button
-                onClick={closeSmallScreenMenu}
-                className="mb-4"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                whileTap={{ scale: 0.9, rotate: -5 }}
-                transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              >
-                <HiX size={30} />
-              </motion.button>
-              <motion.div 
-                className="flex flex-col space-y-5 text-xl"
-                initial="hidden"
-                animate="visible"
-                variants={{
-                  visible: {
-                    transition: {
-                      staggerChildren: 0.1
-                    }
-                  }
-                }}
-              >
-                {menuItems.map((item, index) => (
-                  <motion.div
-                    key={item.name}
-                    custom={index}
-                    variants={{
-                      hidden: { opacity: 0, x: -20 },
-                      visible: (i) => ({
-                        opacity: 1,
-                        x: 0,
-                        transition: {
-                          delay: i * 0.1,
-                          type: "spring",
-                          stiffness: 300,
-                          damping: 20
-                        }
-                      })
-                    }}
+              <HiX size={30} />
+            </button>
+            <div className="flex flex-col space-y-5 text-xl">
+              {menuItems.map((item, index) => (
+                <div key={item.name}>
+                  <Link
+                    href={item.href}
+                    onClick={closeSmallScreenMenu}
+                    className={`block px-2 py-3 rounded-xl text-gray-600 hover:bg-teal-100 transition-all duration-300 ${
+                      pathname === item.href
+                        ? "bg-teal-100 border-l-4 border-teal-500"
+                        : ""
+                    }`}
                   >
-                    <Link
-                      href={item.href}
-                      onClick={closeSmallScreenMenu}
-                      className={`block px-2 py-3 rounded-xl text-gray-600 hover:bg-teal-100 transition-all duration-300 ${
-                        pathname === item.href
-                          ? "bg-teal-100 border-l-4 border-teal-500"
-                          : ""
-                      }`}
-                    >
-                      <motion.div
-                        className="flex space-x-2"
-                        whileHover={{ x: 5, scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                      >
-                        <motion.span
-                          whileHover={{ rotate: 5 }}
-                          transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                        >
-                          {item.icon}
-                        </motion.span>
-                        <span>{item.name}</span>
-                      </motion.div>
-                    </Link>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+                    <div className="flex space-x-2 hover:translate-x-1 transition-transform">
+                      <span className="hover:rotate-5 transition-transform">
+                        {item.icon}
+                      </span>
+                      <span>{item.name}</span>
+                    </div>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
-      {/* Main Content with Page Transitions */}
-      <motion.div
-        initial={{ marginLeft: isSidebarOpen ? 256 : 0 }}
-        animate={{ marginLeft: isSidebarOpen ? 256 : 0 }}
-        transition={{ 
-          type: "spring",
-          stiffness: 300,
-          damping: 30,
-          mass: 1
-        }}
-        className="flex-1 sm:block"
+      {/* Main Content */}
+      <div
+        className="flex-1 sm:block transition-all duration-300"
+        style={{ marginLeft: isSidebarOpen ? 256 : 0 }}
       >
         <div className={`w-full ${!isSidebarOpen ? "sm:max-w-4xl sm:mx-auto" : ""}`}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={pathname}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              variants={pageVariants}
-            >
-              {children}
-            </motion.div>
-          </AnimatePresence>
+          <div key={pathname} className="transition-all duration-300">
+            {children}
+          </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

@@ -50,7 +50,7 @@ export default function Home() {
         {/* Show Loading State */}
         {status === "loading" && (
           <div className="flex justify-center items-center min-h-[60vh]">
-            <LoadingSpinner size="large" />
+            <LoadingSpinner  />
           </div>
         )}
 

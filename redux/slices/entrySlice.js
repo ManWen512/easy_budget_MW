@@ -30,13 +30,13 @@ export const submitEntry = createAsyncThunk(
 const entrySlice = createSlice({
   name: "entry",
   initialState: {
-    loading: false,
+    status: 'idle',
     error: null,
     successMessage: null,
   },
   reducers: {
     clearStatus: (state) => {
-      state.loading = false;
+      state.status = 'succeeded';
       state.error = null;
       state.successMessage = null;
     },
@@ -44,16 +44,16 @@ const entrySlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(submitEntry.pending, (state) => {
-        state.loading = true;
+        state.status = 'loading';
         state.error = null;
         state.successMessage = null;
       })
-      .addCase(submitEntry.fulfilled, (state, action) => {
-        state.loading = false;
+      .addCase(submitEntry.fulfilled, (state) => {
+        state.status = 'loading';
         state.successMessage = "Entry submitted successfully!";
       })
       .addCase(submitEntry.rejected, (state, action) => {
-        state.loading = false;
+        state.status = 'failed';
         state.error = action.payload;
       });
   },

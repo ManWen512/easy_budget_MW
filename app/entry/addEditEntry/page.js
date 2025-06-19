@@ -7,16 +7,25 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "@/redux/slices/categorySlice";
 import { fetchAccounts } from "@/redux/slices/balanceSlice";
 import { submitEntry, clearStatus } from "@/redux/slices/entrySlice";
-import { motion } from "framer-motion";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import Select from "@mui/material/Select";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import InputAdornment from "@mui/material/InputAdornment";
+import TextField from "@mui/material/TextField";
+
 
 // only "searchParams" works, name cannot be changed
 export default function AddEditEntryPage({ searchParams }) {
   const dispatch = useDispatch();
   const { categories } = useSelector((state) => state.category);
   const { accounts } = useSelector((state) => state.balance);
-  const { loading, error, successMessage } = useSelector(
-    (state) => state.entry
-  );
+  const { status, error, successMessage } = useSelector((state) => state.entry);
 
   const router = useRouter();
   const { itemId, type, category, balance, cost, dateTime, description } =
@@ -36,43 +45,12 @@ export default function AddEditEntryPage({ searchParams }) {
   // that would not be flexible for adding/removing fields
   const [formData, setFormData] = useState({
     type: type || "OUTCOME",
-    category: {
-      id: parsedCategory?.id || 0,
-      name: parsedCategory?.name || "",
-    },
-    account: {
-      id: parsedAccount?.id || 0,
-      name: parsedAccount?.name || "",
-    },
+    category: parsedCategory || { id: "", name: "" },
+    account: parsedAccount || { id: "", name: "" },
     cost: cost || 1,
-    dateTime: dateTime || localDateTime,
+    dateTime: localDate || localDateTime,
     description: description || "",
   });
-
-  const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 24,
-      },
-    },
-  };
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -131,6 +109,14 @@ export default function AddEditEntryPage({ searchParams }) {
     }
   }, [successMessage, router, dispatch]);
 
+  //new handleDateTimeChange because the MUI datepicker doesnt send in string
+  const handleDateTimeChange = (newDate) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      dateTime: newDate,
+    }));
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "category") {
@@ -164,205 +150,242 @@ export default function AddEditEntryPage({ searchParams }) {
   };
 
   return (
-    <motion.div
-      className="p-5 mt-14"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      <motion.h1
-        className="text-3xl mb-2 flex font-bold justify-center content-center"
-        variants={itemVariants}
-      >
-        {itemId ? "Edit Entry" : "Create New Entry"}
-      </motion.h1>
-      <motion.div className="flex justify-center" variants={itemVariants}>
-        <motion.form
-          onSubmit={handleSubmit}
-          className="space-y-5 w-96 p-5"
-          variants={itemVariants}
-        >
-          <motion.div className="items-center" variants={itemVariants}>
-            <div className="mr-5 mb-2 font-bold">Finance Type: </div>
-            <div className="flex">
-              <motion.label
-                className={`w-full relative font-bold cursor-pointer p-3 border rounded-lg transition-all ${
-                  formData.type === "OUTCOME"
-                    ? "border-l-4 border-teal-500 bg-teal-100"
-                    : "border-teal-500"
-                }`}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+    <div className="p-5 mt-14">
+      {status === "failed" && <p className="text-red-500">{error}</p>}
+      {status === "loading" ? (
+        <div className="flex justify-center items-center min-h-[60vh]">
+          <LoadingSpinner />
+        </div>
+      ) : (
+        <>
+          <h1 className="text-3xl mb-2 flex font-bold justify-center content-center">
+            {itemId ? "Edit Entry" : "Create New Entry"}
+          </h1>
+          <div className="flex justify-center">
+            <form onSubmit={handleSubmit} className="space-y-5 w-96 p-5">
+              <div className="items-center">
+                <div className="mr-5 mb-2 font-bold">Finance Type: </div>
+                <div className="flex">
+                  <label
+                    className={`w-full relative font-bold cursor-pointer p-3 border rounded-lg transition-all ${
+                      formData.type === "OUTCOME"
+                        ? "border-l-4 border-teal-500 bg-teal-100"
+                        : "border-teal-500"
+                    }`}
+                  >
+                    Outcome
+                    <input
+                      type="radio"
+                      id="outcome"
+                      name="type"
+                      value="OUTCOME"
+                      className="sr-only peer"
+                      onChange={handleChange}
+                      checked={formData.type === "OUTCOME"}
+                    />
+                  </label>
+                  <label
+                    className={`ml-3 w-full font-bold  relative cursor-pointer p-3 border rounded-lg transition-all ${
+                      formData.type === "INCOME"
+                        ? "border-l-4 border-teal-500 bg-teal-100"
+                        : "border-teal-500"
+                    }`}
+                  >
+                    Income
+                    <input
+                      type="radio"
+                      id="income"
+                      name="type"
+                      value="INCOME"
+                      className="sr-only peer"
+                      onChange={handleChange}
+                      checked={formData.type === "INCOME"}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div className="items-center">
+                <div className="grid grid-cols-3 gap-4">
+                  <FormControl
+                    className="w-full p-3 rounded-md col-span-2"
+                    fullWidth
+                  >
+                    <InputLabel
+                      id="demo-simple-select-autowidth-label"
+                      className="font-bold"
+                    >
+                      Category
+                    </InputLabel>
+                    <Select
+                      labelId="demo-simple-select-autowidth-label"
+                      id="demo-simple-select-autowidth"
+                      value={formData.category.id}
+                      onChange={handleChange}
+                      autoWidth
+                      label="Category"
+                      name="category"
+                    >
+                      <MenuItem value="">
+                        <em>None</em>
+                      </MenuItem>
+                      {categories.map((category) => (
+                        <MenuItem key={category.id} value={category.id}>
+                          {category.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      router.push(
+                        `/category?showAddNew=true&returnTo=${encodeURIComponent(
+                          "/entry/addEditEntry"
+                        )}`
+                      );
+                    }}
+                    className="w-full p-3 rounded-md bg-orange-400 font-bold text-sm"
+                  >
+                    Add New
+                  </button>
+                </div>
+              </div>
+
+              <div className="items-center">
+                <div className="grid grid-cols-3 gap-4">
+                  {/* <select
+                    className="w-full p-3 border rounded-md bg-teal-100 col-span-2"
+                    name="account"
+                    onChange={handleChange}
+                    value={formData.account.id}
+                  >
+                    {accounts.map((account) => (
+                      <option key={account.id} value={account.id}>
+                        {account.name}
+                      </option>
+                    ))}
+                  </select> */}
+                  <FormControl
+                    className="w-full p-3 rounded-md col-span-2"
+                    fullWidth
+                  >
+                    <InputLabel
+                      id="demo-simple-select-autowidth-label"
+                      className="font-bold"
+                    >
+                      Account
+                    </InputLabel>
+                    <Select
+                      labelId="demo-simple-select-autowidth-label"
+                      id="demo-simple-select-autowidth"
+                      value={formData.account.id}
+                      onChange={handleChange}
+                      autoWidth
+                      label="Account"
+                      name="account"
+                    >
+                      <MenuItem value="">
+                        <em>None</em>
+                      </MenuItem>
+                      {accounts.map((account) => (
+                        <MenuItem key={account.id} value={account.id}>
+                          {account.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      router.push(
+                        `/balance?showAddNew=true&returnTo=${encodeURIComponent(
+                          "/entry/addEditEntry"
+                        )}`
+                      );
+                    }}
+                    className="w-full p-3 rounded-md bg-orange-400 font-bold text-sm"
+                  >
+                    Add New
+                  </button>
+                </div>
+              </div>
+
+              <div className="items-center">
+                <FormControl fullWidth>
+                  <InputLabel htmlFor="outlined-adornment-amount">
+                    Amount
+                  </InputLabel>
+                  <OutlinedInput
+                    id="outlined-adornment-amount"
+                    name="cost"
+                    value={formData.cost}
+                    onChange={handleChange}
+                    className="w-full  rounded-md relative"
+                    min="1"
+                    required
+                    startAdornment={
+                      <InputAdornment position="start">
+                        {currencySymbol}
+                      </InputAdornment>
+                    }
+                    label="Amount"
+                  />
+                </FormControl>
+              </div>
+
+              <div className="items-center">
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DateTimePicker
+                    className="w-full p-3 border rounded-md  focus:outline-none"
+                    type="datetime-local"
+                    id="dateTime"
+                    label=" Date Time "
+                    name="dateTime"
+                    value={formData.dateTime}
+                    required
+                    onChange={handleDateTimeChange}
+                  />
+                </LocalizationProvider>
+              </div>
+
+              <div className="items-center">
+                {/* <div className="mr-5 mb-2 font-bold">Description: </div>
+                <div>
+                  <textarea
+                    className="w-full p-2 border rounded-md bg-teal-100 focus:outline-none"
+                    id="description"
+                    name="description"
+                    required
+                    onChange={handleChange}
+                    value={formData.description}
+                  /> */}
+                  <TextField
+                    id="outlined-multiline-flexible"
+                    label="Description"
+                    multiline
+                    maxRows={4}
+                    name="description"
+                    required
+                    onChange={handleChange}
+                    value={formData.description}
+                    className="w-full p-2 border rounded-md"
+                  />
+
+              </div>
+
+              <button
+                type="submit"
+                className="font-bold rounded px-4 py-2 bg-orange-400 hover:bg-orange-400"
               >
-                Outcome
-                <input
-                  type="radio"
-                  id="outcome"
-                  name="type"
-                  value="OUTCOME"
-                  className="sr-only peer"
-                  onChange={handleChange}
-                  checked={formData.type === "OUTCOME"}
-                />
-              </motion.label>
-              <motion.label
-                className={`ml-3 w-full font-bold relative cursor-pointer p-3 border rounded-lg transition-all ${
-                  formData.type === "INCOME"
-                    ? "border-l-4 border-teal-500 bg-teal-100"
-                    : "border-teal-500"
-                }`}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Income
-                <input
-                  type="radio"
-                  id="income"
-                  name="type"
-                  value="INCOME"
-                  className="sr-only peer"
-                  onChange={handleChange}
-                  checked={formData.type === "INCOME"}
-                />
-              </motion.label>
-            </div>
-          </motion.div>
-
-          <motion.div className="items-center" variants={itemVariants}>
-            <div className="mr-5 mb-2 font-bold">Category: </div>
-            <div className="grid grid-cols-3 gap-4">
-              <motion.select
-                className="w-full p-3 rounded-md bg-teal-100 col-span-2"
-                name="category"
-                onChange={handleChange}
-                value={formData.category.id}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </motion.select>
-
-              <motion.button
-                type="button"
-                onClick={() => {
-                  router.push(
-                    `/category?showAddNew=true&returnTo=${encodeURIComponent(
-                      "/entry/addEditEntry"
-                    )}`
-                  );
-                }}
-                className="w-full p-3 rounded-md bg-orange-400 font-bold text-sm"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Add New
-              </motion.button>
-            </div>
-          </motion.div>
-
-          <motion.div className="items-center" variants={itemVariants}>
-            <div className="mr-5 mb-2 font-bold">Account: </div>
-            <div className="grid grid-cols-3 gap-4">
-              <motion.select
-                className="w-full p-3 border rounded-md bg-teal-100 col-span-2"
-                name="account"
-                onChange={handleChange}
-                value={formData.account.id}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                {accounts.map((account) => (
-                  <option key={account.id} value={account.id}>
-                    {account.name}
-                  </option>
-                ))}
-              </motion.select>
-              <motion.button
-                type="button"
-                onClick={() => {
-                  router.push(
-                    `/balance?showAddNew=true&returnTo=${encodeURIComponent(
-                      "/entry/addEditEntry"
-                    )}`
-                  );
-                }}
-                className="w-full p-3 rounded-md bg-orange-400 font-bold text-sm"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Add New
-              </motion.button>
-            </div>
-          </motion.div>
-
-          <motion.div className="items-center" variants={itemVariants}>
-            <div className="mr-5 mb-2 font-bold">Cost: </div>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 z-10 pointer-events-none">
-                {currencySymbol}
-              </span>
-              <motion.input
-                type="number"
-                name="cost"
-                value={formData.cost}
-                onChange={handleChange}
-                className="w-full p-3 pl-8 rounded-md bg-teal-100 relative"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                min="1"
-                required
-              />
-            </div>
-          </motion.div>
-
-          <motion.div className="items-center" variants={itemVariants}>
-            <div className="mr-5 mb-2 font-bold">Date Time: </div>
-            <div>
-              <motion.input
-                className="w-full p-3 border rounded-md bg-teal-100 focus:outline-none"
-                type="datetime-local"
-                id="dateTime"
-                name="dateTime"
-                value={formData.dateTime}
-                required
-                onChange={handleChange}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              />
-            </div>
-          </motion.div>
-
-          <motion.div className="items-center" variants={itemVariants}>
-            <div className="mr-5 mb-2 font-bold">Description: </div>
-            <div>
-              <motion.textarea
-                className="w-full p-2 border rounded-md bg-teal-100 focus:outline-none"
-                id="description"
-                name="description"
-                required
-                onChange={handleChange}
-                value={formData.description}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              />
-            </div>
-          </motion.div>
-
-          <motion.button
-            type="submit"
-            className="font-bold rounded px-4 py-2 bg-orange-400 hover:bg-orange-400"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {loading ? "Saving..." : "Save"}
-          </motion.button>
-          {error && <p className="text-red-500">{error}</p>}
-        </motion.form>
-      </motion.div>
-    </motion.div>
+                {status === "loading" ? "...saving" : "Save"}
+              </button>
+            </form>
+          </div>
+        </>
+      )}
+    </div>
   );
 }
