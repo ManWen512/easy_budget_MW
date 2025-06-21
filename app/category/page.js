@@ -10,7 +10,7 @@ import {
   FaExclamationTriangle,
   FaPlus,
 } from "react-icons/fa";
-import Snackbar from '@mui/material/Snackbar';
+import Snackbar from "@mui/material/Snackbar";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories, deleteCategory } from "@/redux/slices/categorySlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -77,7 +77,7 @@ export default function CategoryPage() {
   return (
     <div className="balance-page mt-14 p-5">
       <div className="text-3xl font-bold mb-5">Categories</div>
-      {status === "failed" && <p className="text-red-500">{error}</p>}
+
       {status === "loading" ? (
         <div className="flex justify-center items-center min-h-[60vh]">
           <LoadingSpinner />
@@ -173,12 +173,21 @@ export default function CategoryPage() {
           )}
 
           <Snackbar
-           message={snackbarMessage}
-           open={showSnackbar}
-           onClose={() => setShowSnackbar(false)}
-           autoHideDuration={5000}
-           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            message={snackbarMessage}
+            open={showSnackbar}
+            onClose={() => setShowSnackbar(false)}
+            autoHideDuration={5000}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
           />
+          {status === "failed" && (
+            <Snackbar
+              severity="error"
+              message={error}
+              open={true}
+              autoHideDuration={5000}
+              anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            />
+          )}
         </>
       )}
     </div>

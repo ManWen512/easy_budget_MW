@@ -3,42 +3,41 @@
 import { useState, useEffect, useRef } from "react";
 import { FaSortDown } from "react-icons/fa";
 import { FaArrowDownWideShort, FaArrowUpShortWide } from "react-icons/fa6";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { currencySymbol } from "../currency";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAccountsAndCategories,
   fetchEntryData,
+  setFilters,
 } from "@/redux/slices/historySlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { FaPenSquare, FaTrash, FaExclamationTriangle } from "react-icons/fa";
-import Snackbar from "@/components/snackBar";
+import Snackbar from "@mui/material/Snackbar";
+import Select from "@mui/material/Select";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 export default function HistoryPage() {
   const dispatch = useDispatch();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const { accountsData, categoriesData, entryData, totalCost, loading } =
-    useSelector((state) => state.history);
-  const { entries, error } = useSelector((state) => state.entry);
+  const {
+    accountsData,
+    categoriesData,
+    entryData,
+    totalCost,
+    status,
+    filters,
+    error,
+  } = useSelector((state) => state.history);
 
   // UI State
-  const [type, setType] = useState(searchParams.get("type") || "");
-  const [account, setAccount] = useState(searchParams.get("account") || "");
-  const [category, setCategory] = useState(searchParams.get("category") || "");
-  const [startDate, setStartDate] = useState(
-    searchParams.get("startDate") || new Date().toISOString().split("T")[0]
-  );
-  const [endDate, setEndDate] = useState(
-    searchParams.get("endDate") || new Date().toISOString().split("T")[0]
-  );
-  const [sortOrder, setSortOrder] = useState(
-    searchParams.get("sortOrder") || "DESC"
-  );
-  const [sortField, setSortField] = useState(
-    searchParams.get("sortField") || "dateTime"
-  );
+
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const dropdownRef = useRef(null);
   const [showSnackbar, setShowSnackbar] = useState(false);
@@ -52,27 +51,8 @@ export default function HistoryPage() {
   }, [dispatch]);
 
   useEffect(() => {
-    dispatch(
-      fetchEntryData({
-        type,
-        account,
-        category,
-        startDate,
-        endDate,
-        sortField,
-        sortOrder,
-      })
-    );
-  }, [
-    dispatch,
-    type,
-    account,
-    category,
-    startDate,
-    endDate,
-    sortField,
-    sortOrder,
-  ]);
+    dispatch(fetchEntryData(filters));
+  }, [dispatch, filters]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -85,24 +65,28 @@ export default function HistoryPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSort = (field) => {
-    setSortField(field);
-    setSortOrder(sortOrder === "DESC" ? "ASC" : "DESC");
+  const handleSort = () => {
+    const newSortOrder = filters.sortOrder === "DESC" ? "ASC" : "DESC";
+    dispatch(setFilters({ sortOrder: newSortOrder }));
   };
 
-  const handleRowClick = (id) => {
-    router.prefetch(`/monthEntry/${id}`);
-    router.push(`/monthEntry/${id}`);
+  const handleRowClick = (item) => {
+    const { id, type, category, account } = item;
+    const params = new URLSearchParams({
+      itemId: id,
+      type,
+      category: JSON.stringify(category),
+      balance: JSON.stringify(account),
+      cost: item.cost,
+      dateTime: item.dateTime,
+      description: item.description,
+    });
+    router.push(`/entry/addEditEntry?${params.toString()}`);
   };
 
   const handleDelete = (id) => {
     dispatch(deleteEntry(id));
     setSnackbarMessage("Entry deleted successfully!");
-    setShowSnackbar(true);
-  };
-
-  const handleShowSnackbar = (message) => {
-    setSnackbarMessage(message);
     setShowSnackbar(true);
   };
 
@@ -125,7 +109,7 @@ export default function HistoryPage() {
     <div className=" mt-14 p-5">
       <div className="text-3xl font-bold mb-5">History</div>
 
-      <div className="grid grid-cols-2 sm:flex sm:flex-row gap-4 mb-4">
+      <div className="grid grid-cols-2 gap-4 sm:flex sm:items-center sm:space-x-4 mb-4">
         {/* Filter Button */}
         <div className="relative" ref={dropdownRef}>
           <button
@@ -142,62 +126,120 @@ export default function HistoryPage() {
 
           {showFilterDropdown && (
             <div className="absolute mt-2 w-64 bg-teal-100 border border-gray-900 rounded-md shadow-lg p-4 z-30">
-              <div className="mb-4">
-                <label className="block mb-2">Type</label>
-                <select
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md p-2"
+              <FormControl className="w-full p-3 rounded-md mb-4">
+                <InputLabel
+                  id="demo-simple-select-autowidth-label"
+                  className="font-bold"
                 >
-                  <option value="ALL">Type</option>
-                  <option value="INCOME">Income</option>
-                  <option value="OUTCOME">Outcome</option>
-                </select>
-              </div>
+                  Type
+                </InputLabel>
+                <Select
+                  labelId="demo-simple-select-autowidth-label"
+                  id="demo-simple-select-autowidth"
+                  value={filters.type || ""}
+                  onChange={(e) =>
+                    dispatch(setFilters({ ...filters, type: e.target.value }))
+                  }
+                  autoWidth
+                  label="Type"
+                  name="type"
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  <MenuItem value="ALL">All</MenuItem>
+                  <MenuItem value="INCOME">Income</MenuItem>
+                  <MenuItem value="OUTCOME">Outcome</MenuItem>
+                </Select>
+              </FormControl>
 
-              <div className="mb-4">
-                <label className="block mb-2">Account</label>
-                <select
-                  value={account}
-                  onChange={(e) => setAccount(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md p-2"
+              <div className="mb-4"></div>
+              <FormControl className="w-full p-3 rounded-md mb-4">
+                <InputLabel
+                  id="demo-simple-select-autowidth-label"
+                  className="font-bold"
                 >
-                  <option value="">Account</option>
+                  Account
+                </InputLabel>
+                <Select
+                  labelId="demo-simple-select-autowidth-label"
+                  id="demo-simple-select-autowidth"
+                  value={filters.account || ""}
+                  onChange={(e) =>
+                    dispatch(
+                      setFilters({ ...filters, account: e.target.value })
+                    )
+                  }
+                  autoWidth
+                  label="Account"
+                  name="account"
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  <MenuItem value="">All</MenuItem>
                   {accountsData.map((acc) => (
-                    <option key={acc.id} value={acc.id}>
+                    <MenuItem key={acc.id} value={acc.id}>
                       {acc.name}
-                    </option>
+                    </MenuItem>
                   ))}
-                </select>
-              </div>
+                </Select>
+              </FormControl>
+              <div className="mb-4"></div>
 
-              <div className="mb-4">
-                <label className="block mb-2">Category</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md p-2"
+              <FormControl className="w-full p-3 rounded-md mb-4">
+                <InputLabel
+                  id="demo-simple-select-autowidth-label"
+                  className="font-bold"
                 >
-                  <option value="">Category</option>
+                  Category
+                </InputLabel>
+                <Select
+                  labelId="demo-simple-select-autowidth-label"
+                  id="demo-simple-select-autowidth"
+                  value={filters.category || ""}
+                  onChange={(e) =>
+                    dispatch(
+                      setFilters({ ...filters, category: e.target.value })
+                    )
+                  }
+                  autoWidth
+                  label="Category"
+                  name="category"
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  <MenuItem value="">All</MenuItem>
                   {categoriesData.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
+                    <MenuItem key={cat.id} value={cat.id}>
                       {cat.name}
-                    </option>
+                    </MenuItem>
                   ))}
-                </select>
-              </div>
+                </Select>
+              </FormControl>
 
-              <div className="mb-4">
-                <label className="block mb-2">Sort Field</label>
-                <select
-                  value={sortField}
-                  onChange={(e) => setSortField(e.target.value)}
-                  className="w-full border border-gray-300 rounded-md p-2"
+              <div className="mb-4"></div>
+
+              <FormControl className="w-full p-3 rounded-md mb-4">
+                <InputLabel
+                  id="demo-simple-select-autowidth-label"
+                  className="font-bold"
                 >
-                  <option value="dateTime">DateTime</option>
-                  <option value="cost">Cost</option>
-                </select>
-              </div>
+                  Sort Field
+                </InputLabel>
+                <Select
+                  labelId="demo-simple-select-autowidth-label"
+                  id="demo-simple-select-autowidth"
+                  value={filters.sortField || ""}
+                  onChange={(e) =>
+                    dispatch(
+                      setFilters({ ...filters, sortField: e.target.value })
+                    )
+                  }
+                  autoWidth
+                  label="Sort Field"
+                  name="sortField"
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
+                  <MenuItem value="dateTime">DateTime</MenuItem>
+                  <MenuItem value="cost">Cost</MenuItem>
+                </Select>
+              </FormControl>
             </div>
           )}
         </div>
@@ -205,50 +247,71 @@ export default function HistoryPage() {
         {/* Sort Button */}
         <div className="flex items-center">
           <button
-            onClick={() =>
-              setSortOrder(
-                sortOrder === "ascending" ? "descending" : "ascending"
-              )
-            }
+            onClick={handleSort}
             className="bg-orange-400 px-4 py-2 rounded-md flex items-center space-x-1 w-full"
           >
             <span>Sort</span>
             <div>
-              {sortOrder === "ascending" ? (
-                <FaArrowUpShortWide className="ml-1" />
-              ) : (
+              {filters.sortOrder === "DESC" ? (
                 <FaArrowDownWideShort className="ml-1" />
+              ) : (
+                <FaArrowUpShortWide className="ml-1" />
               )}
             </div>
           </button>
         </div>
 
         {/* Date Range Pickers */}
-        <div className="col-span-2 sm:col-span-1 flex items-center gap-2">
-          <div className="flex-1">
-            <input
+        <div className="col-span-2 sm:col-auto sm:flex-1 flex items-center gap-2">
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DatePicker
+              className="w-full  rounded-md  "
               type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="rounded-md p-2 w-full h-10 bg-orange-400"
+              id="startDate"
+              label=" Start Date "
+              name="startDate"
+              value={new Date(filters.startDate)}
+              required
+              onChange={(newDate) =>
+                dispatch(
+                  setFilters({ ...filters, startDate: newDate.toISOString() })
+                )
+              }
             />
-          </div>
+          </LocalizationProvider>
           <div className="text-sm">To</div>
-          <div className="flex-1">
-            <input
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DatePicker
+              className="w-full  rounded-md  "
               type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="rounded-md p-2 w-full h-10 bg-orange-400"
+              id="endDate"
+              label=" End Date "
+              name="endDate"
+              value={new Date(filters.endDate)}
+              required
+              onChange={(newDate) =>
+                dispatch(
+                  setFilters({ ...filters, endDate: newDate.toISOString() })
+                )
+              }
             />
-          </div>
+          </LocalizationProvider>
         </div>
       </div>
 
       <div className="mt-4">
-        {loading ? (
+        {status === "failed" && (
+            <Snackbar
+            severity="error"
+            message={error}
+            open={true}
+            autoHideDuration={5000}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          />
+        )}
+        {status === "loading" ? (
           <div className="flex justify-center items-center min-h-[60vh]">
-            <LoadingSpinner size="large" />
+            <LoadingSpinner />
           </div>
         ) : entryData.length > 0 ? (
           <div className="w-full">
@@ -262,16 +325,24 @@ export default function HistoryPage() {
                       ? "bg-green-100 hover:bg-green-200"
                       : "bg-red-100 hover:bg-red-200"
                   }`}
-                  onClick={() => handleRowClick(item.id)}
+                  onClick={() => handleRowClick(item)}
                 >
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs font-bold text-gray-700">{new Date(item.dateTime).toLocaleDateString()}</span>
-                    
-                    <span className="text-sm font-bold text-gray-800">{currencySymbol} {item.cost}</span>
+                    <span className="text-xs font-bold text-gray-700">
+                      {new Date(item.dateTime).toLocaleDateString()}
+                    </span>
+
+                    <span className="text-sm font-bold text-gray-800">
+                      {currencySymbol} {item.cost}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-bold text-gray-800">{item.category.name}</span>
-                    <span className="text-xs text-gray-500">{item.account.name}</span>
+                    <span className="text-sm font-bold text-gray-800">
+                      {item.category.name}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {item.account.name}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -281,64 +352,74 @@ export default function HistoryPage() {
               <table className="min-w-full">
                 <thead>
                   <tr>
-                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cost</th>
-                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account</th>
-                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Date
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Type
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Category
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Cost
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Account
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                    {entryData.map((item, index) => (
-                      <tr
-                        key={item.id}
-                        className={`border-b cursor-pointer ${
-                          item.type === "INCOME"
-                            ? "bg-green-100 hover:bg-green-200"
-                            : "bg-red-100 hover:bg-red-200"
-                        }`}
-                        onClick={() => handleRowClick(item.id)}
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {new Date(item.dateTime).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {item.type}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {item.category.name}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {currencySymbol} {item.cost}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {item.account.name}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                router.push(
-                                  `/entry/addEditEntry?id=${item.id}`
-                                );
-                              }}
-                            >
-                              <FaPenSquare className="text-blue-500" />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openConfirmDialog(item.id);
-                              }}
-                            >
-                              <FaTrash className="text-red-500" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                  {entryData.map((item, index) => (
+                    <tr
+                      key={item.id}
+                      className={`border-b cursor-pointer ${
+                        item.type === "INCOME"
+                          ? "bg-green-100 hover:bg-green-200"
+                          : "bg-red-100 hover:bg-red-200"
+                      }`}
+                      onClick={() => handleRowClick(item)}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(item.dateTime).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {item.type}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {item.category.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {currencySymbol} {item.cost}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {item.account.name}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRowClick(item);
+                            }}
+                          >
+                            <FaPenSquare className="text-blue-500" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openConfirmDialog(item.id);
+                            }}
+                          >
+                            <FaTrash className="text-red-500" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -394,8 +475,10 @@ export default function HistoryPage() {
 
       <Snackbar
         message={snackbarMessage}
-        show={showSnackbar}
+        open={showSnackbar}
         onClose={() => setShowSnackbar(false)}
+        autoHideDuration={5000}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       />
     </div>
   );

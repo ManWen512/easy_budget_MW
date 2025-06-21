@@ -113,14 +113,6 @@ export default function MonthEntryPage() {
     );
   }
 
-  if (status === "failed") {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-red-500">Error: {error}</div>
-      </div>
-    );
-  }
-
   return (
     <>
       {/* Top bar with month navigation */}
@@ -243,6 +235,15 @@ export default function MonthEntryPage() {
         autoHideDuration={5000}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       />
+      {status === "failed" && (
+          <Snackbar
+            severity="error"
+            message={error} 
+            open={true}
+            autoHideDuration={5000}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          />
+        )}
 
       {/* Add New Entry button: icon only on sm, text on larger screens */}
       <div className="fixed bottom-6 right-2 sm:bottom-10 sm:right-10">

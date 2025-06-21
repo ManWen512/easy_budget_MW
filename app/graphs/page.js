@@ -12,6 +12,8 @@ import {
 
 import dynamic from "next/dynamic";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { MenuItem, FormControl, InputLabel, Select } from "@mui/material";
+import Snackbar from "@mui/material/Snackbar";
 
 const EChartBar = dynamic(() => import("@/components/EChartBar"), {
   ssr: false,
@@ -134,140 +136,151 @@ export default function GraphsPage() {
       <div key={selectedOption} className="flex  mb-8 px-5 ">
         {/* Month and Year Selection */}
         {selectedOption === "month" && (
-          <div className="flex grid-cols-2 sm:flex-row gap-4 w-full">
-            <div className="flex items-center">
-              <label
-                htmlFor="month"
-                className="hidden sm:block mr-2 whitespace-nowrap"
+          <div className="flex flex-col-2 sm:flex-row gap-4 w-full">
+            <FormControl className="w-full sm:w-1/4 p-3 rounded-md ">
+              <InputLabel
+                id="demo-simple-select-autowidth-label"
+                className="font-bold"
               >
-                Month:
-              </label>
-              <select
-                id="month"
+                Month
+              </InputLabel>
+              <Select
+                labelId="demo-simple-select-autowidth-label"
+                id="demo-simple-select-autowidth"
                 value={selectedMonth || ""}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100 w-full sm:w-auto"
+                autoWidth
+                label="Month"
+                name="month"
               >
-                <option value="" disabled>
-                  Select Month
-                </option>
                 {months.map((month, index) => (
-                  <option key={index} value={index + 1}>
+                  <MenuItem key={index} value={index + 1}>
                     {month}
-                  </option>
+                  </MenuItem>
                 ))}
-              </select>
-            </div>
+              </Select>
+            </FormControl>
 
-            <div className="flex items-center">
-              <label
-                htmlFor="year"
-                className="hidden sm:block mr-2 whitespace-nowrap"
+            <FormControl className="w-full sm:w-1/4 p-3 rounded-md ">
+              <InputLabel
+                id="demo-simple-select-autowidth-label"
+                className="font-bold"
               >
-                Year:
-              </label>
-              <select
-                id="year"
+                Year
+              </InputLabel>
+              <Select
+                labelId="demo-simple-select-autowidth-label"
+                id="demo-simple-select-autowidth"
                 value={selectedYear || ""}
                 onChange={(e) => setSelectedYear(e.target.value)}
-                className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100 w-full sm:w-auto"
+                autoWidth
+                label="Year"
+                name="year"
               >
-                <option value="" disabled>
-                  Select Year
-                </option>
                 {years.map((year) => (
-                  <option key={year} value={year}>
+                  <MenuItem key={year} value={year}>
                     {year}
-                  </option>
+                  </MenuItem>
                 ))}
-              </select>
-            </div>
+              </Select>
+            </FormControl>
           </div>
         )}
 
         {/* Year Selection */}
         {selectedOption === "year" && (
-          <div className="flex items-center">
-            <label htmlFor="year" className="mr-2">
-              Year:
-            </label>
-            <select
-              id="year"
+          <FormControl className="w-1/2 sm:w-1/4 p-3 rounded-md ">
+            <InputLabel
+              id="demo-simple-select-autowidth-label"
+              className="font-bold"
+            >
+              Year
+            </InputLabel>
+            <Select
+              labelId="demo-simple-select-autowidth-label"
+              id="demo-simple-select-autowidth"
               value={selectedYear || ""}
               onChange={(e) => setSelectedYear(e.target.value)}
-              className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100"
+              autoWidth
+              label="Year"
+              name="year"
             >
-              <option value="" disabled>
-                Select Year
-              </option>
               {years.map((year) => (
-                <option key={year} value={year}>
+                <MenuItem key={year} value={year}>
                   {year}
-                </option>
+                </MenuItem>
               ))}
-            </select>
-          </div>
+            </Select>
+          </FormControl>
         )}
 
         {/* Year Range Selection */}
         {selectedOption === "yearRange" && (
           <div className="flex grid-cols-2 sm:flex-row gap-4 w-full">
-            <div className="flex items-center">
-              <label
-                htmlFor="startYear"
-                className="hidden sm:block mr-2 whitespace-nowrap"
+            <FormControl className="w-full sm:w-1/4 p-3 rounded-md ">
+              <InputLabel
+                id="demo-simple-select-autowidth-label"
+                className="font-bold"
               >
-                Start Year:
-              </label>
-              <select
-                id="startYear"
+                Start Year
+              </InputLabel>
+              <Select
+                labelId="demo-simple-select-autowidth-label"
+                id="demo-simple-select-autowidth"
                 value={yearRange.startYear || ""}
                 onChange={(e) =>
                   setYearRange({ ...yearRange, startYear: e.target.value })
                 }
-                className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100 w-full sm:w-auto"
+                autoWidth
+                label="Start Year"
+                name="startYear"
               >
-                <option value="" disabled>
-                  Select Start Year
-                </option>
                 {years.map((year) => (
-                  <option key={year} value={year}>
+                  <MenuItem key={year} value={year}>
                     {year}
-                  </option>
+                  </MenuItem>
                 ))}
-              </select>
-            </div>
+              </Select>
+            </FormControl>
 
-            <div className="flex items-center">
-              <label
-                htmlFor="endYear"
-                className="hidden sm:block mr-2 whitespace-nowrap"
+            <FormControl className="w-full sm:w-1/4 p-3 rounded-md ">
+              <InputLabel
+                id="demo-simple-select-autowidth-label"
+                className="font-bold"
               >
-                End Year:
-              </label>
-              <select
-                id="endYear"
+                End Year
+              </InputLabel>
+              <Select
+                labelId="demo-simple-select-autowidth-label"
+                id="demo-simple-select-autowidth"
                 value={yearRange.endYear || ""}
                 onChange={(e) =>
                   setYearRange({ ...yearRange, endYear: e.target.value })
                 }
-                className="border-l-4 border-teal-500 rounded-md shadow-lg p-2 bg-teal-100 w-full "
+                autoWidth
+                label="End Year"
+                name="endYear"
               >
-                <option value="" disabled>
-                  Select End Year
-                </option>
                 {years.map((year) => (
-                  <option key={year} value={year}>
+                  <MenuItem key={year} value={year}>
                     {year}
-                  </option>
+                  </MenuItem>
                 ))}
-              </select>
-            </div>
+              </Select>
+            </FormControl>
           </div>
         )}
       </div>
 
-      {status === "failed" && <p className="text-red-500">{error}</p>}
+      {status === "failed" && (
+        <Snackbar
+          severity="error"
+          message={error}
+          open={true}
+          autoHideDuration={5000}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        />
+      )}
       {status === "loading" ? (
         <div className="flex justify-center items-center min-h-[60vh]">
           <LoadingSpinner />

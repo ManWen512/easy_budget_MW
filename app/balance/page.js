@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { FaPenSquare, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 import BalanceDialogPage from "./balancedialog/page"; // Import the dialog component
 import { useSearchParams } from "next/navigation";
-import Snackbar from '@mui/material/Snackbar';
+import Snackbar from "@mui/material/Snackbar";
 import { currencySymbol } from "../currency";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -16,9 +16,9 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function BalancePage() {
   const dispatch = useDispatch();
-  
+
   const searchParams = useSearchParams();
-  const { accounts, totalBalance,status, error } = useSelector(
+  const { accounts, totalBalance, status, error } = useSelector(
     (state) => state.balance
   );
   const [isChecked, setIsChecked] = useState(false);
@@ -81,7 +81,6 @@ export default function BalancePage() {
 
   return (
     <div className="p-5 mt-14 container content-center">
-      {status === "failed" && <p className="text-red-500">{error}</p>}
       {status === "loading" ? (
         <div className="flex justify-center items-center min-h-[60vh]">
           <LoadingSpinner />
@@ -205,8 +204,17 @@ export default function BalancePage() {
             open={showSnackbar}
             onClose={() => setShowSnackbar(false)}
             autoHideDuration={5000}
-            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
           />
+          {status === "failed" && (
+            <Snackbar
+              severity="error"
+              message={error}
+              open={true}
+              autoHideDuration={5000}
+              anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            />
+          )}
         </>
       )}
     </div>

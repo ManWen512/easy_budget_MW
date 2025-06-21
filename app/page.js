@@ -4,12 +4,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchTotalBalance, fetchMonthData } from "@/redux/slices/homeSlice";
 import PieChart from "@/components/pieChart";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import ErrorMessage from "@/components/ErrorMessage";
 import Link from "next/link";
-
 import { useEffect } from "react";
 import { currencySymbol } from "./currency";
 import EChartBar from "@/components/EChartBar";
+import Snackbar from "@mui/material/Snackbar";
 
 export default function Home() {
   const dispatch = useDispatch();
@@ -32,11 +31,6 @@ export default function Home() {
     }
   }, [dispatch, status]);
 
-  const handleRetry = () => {
-    dispatch(fetchTotalBalance());
-    dispatch(fetchMonthData());
-  };
-
   const date = new Date();
   const currentMonthName = date.toLocaleString("default", { month: "long" });
 
@@ -50,24 +44,25 @@ export default function Home() {
         {/* Show Loading State */}
         {status === "loading" && (
           <div className="flex justify-center items-center min-h-[60vh]">
-            <LoadingSpinner  />
+            <LoadingSpinner />
           </div>
         )}
 
         {/* Show Error Message */}
         {status === "failed" && (
-          <div className="max-w-md mx-auto mt-8">
-            <ErrorMessage
-              message={error || "Something went wrong. Please try again."}
-              onRetry={handleRetry}
-            />
-          </div>
+          <Snackbar
+            severity="error"
+            message={error}
+            open={true}
+            autoHideDuration={5000}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          />
         )}
 
         {/* Show UI only if data is successfully loaded */}
         {status === "succeeded" && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:mr-28">
+            <div className="grid grid-cols-1 sm:grid-cols-2 w-full gap-4">
               <div className="h-48 mb-1 text-2xl font-bold cursor-pointer shadow-lg rounded-2xl text-center content-center block max-w p-6 bg-teal-100 border border-gray-200 hover:bg-teal-200">
                 Total Balance
                 <br />
@@ -83,12 +78,11 @@ export default function Home() {
             </div>
 
             <div className="mt-8">
-              <div className="m-2 font-bold">
-                Overview ({currentMonthName})
-              </div>
+              <div className="m-2 font-bold">Overview ({currentMonthName})</div>
               {!hasAnyData ? (
                 <div className="text-center text-gray-500 mt-8">
-                  No data available for this month. Add some entries to see your overview.
+                  No data available for this month. Add some entries to see your
+                  overview.
                 </div>
               ) : (
                 <>
@@ -112,7 +106,7 @@ export default function Home() {
                       )}
                     </div>
                   )}
-                  
+
                   {hasOutcomeData && outcomeList.length > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-4 mb-10">
                       <div className="sm:col-span-3 bd-white">
@@ -122,15 +116,16 @@ export default function Home() {
                           currency={currencySymbol}
                         />
                       </div>
-                      {outcomeCategoryList && outcomeCategoryList.length > 0 && (
-                        <div className="sm:mt-20">
-                          <PieChart
-                            data={outcomeCategoryList}
-                            cost={outcomeCategoryCostList}
-                            currency={currencySymbol}
-                          />
-                        </div>
-                      )}
+                      {outcomeCategoryList &&
+                        outcomeCategoryList.length > 0 && (
+                          <div className="sm:mt-20">
+                            <PieChart
+                              data={outcomeCategoryList}
+                              cost={outcomeCategoryCostList}
+                              currency={currencySymbol}
+                            />
+                          </div>
+                        )}
                     </div>
                   )}
                 </>

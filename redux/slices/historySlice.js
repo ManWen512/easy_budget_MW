@@ -25,9 +25,10 @@ export const fetchEntryData = createAsyncThunk(
     if (startDate) params.append("startDate", formatDate(startDate));
     if (endDate) params.append("endDate", formatDate(endDate));
     if (sortField) params.append("sortField", sortField);
-    if (sortOrder) params.append("sortOrder", sortOrder === "ascending" ? "ASC" : "DESC");
+    if (sortOrder) params.append("sortOrder", sortOrder);
 
     const url = `${mainUrl}/entry/history?${params}`;
+    console.log(url);
 
     const response = await fetch(url);
     const data = await response.json();
@@ -44,6 +45,29 @@ const historySlice = createSlice({
     totalCost: "",
     status: 'idle',
     error: null,
+    filters: {
+      type: "ALL",
+      account: "",
+      category: "",
+      startDate: new Date().toISOString(),
+      endDate: new Date().toISOString(),
+      sortOrder: "DESC",
+      sortField: "dateTime",
+    },
+  },
+  reducers: {
+    setFilters: (state, action) => {
+      const newFilters = { ...state.filters, ...action.payload };
+      if (action.payload.startDate) {
+        newFilters.startDate = new Date(
+          action.payload.startDate
+        ).toISOString();
+      }
+      if (action.payload.endDate) {
+        newFilters.endDate = new Date(action.payload.endDate).toISOString();
+      }
+      state.filters = newFilters;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -73,6 +97,10 @@ const historySlice = createSlice({
       });
   },
 });
+
+
+
+export const { setFilters } = historySlice.actions;
 
 export default historySlice.reducer;
 

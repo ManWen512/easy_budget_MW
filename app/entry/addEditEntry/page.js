@@ -18,6 +18,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
+import Snackbar from "@mui/material/Snackbar";
 
 
 // only "searchParams" works, name cannot be changed
@@ -151,7 +152,7 @@ export default function AddEditEntryPage({ searchParams }) {
 
   return (
     <div className="p-5 mt-14">
-      {status === "failed" && <p className="text-red-500">{error}</p>}
+      
       {status === "loading" ? (
         <div className="flex justify-center items-center min-h-[60vh]">
           <LoadingSpinner />
@@ -162,7 +163,10 @@ export default function AddEditEntryPage({ searchParams }) {
             {itemId ? "Edit Entry" : "Create New Entry"}
           </h1>
           <div className="flex justify-center">
-            <form onSubmit={handleSubmit} className="space-y-5 w-96 p-5">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-5 w-full max-w-lg p-5"
+            >
               <div className="items-center">
                 <div className="mr-5 mb-2 font-bold">Finance Type: </div>
                 <div className="flex">
@@ -255,18 +259,7 @@ export default function AddEditEntryPage({ searchParams }) {
 
               <div className="items-center">
                 <div className="grid grid-cols-3 gap-4">
-                  {/* <select
-                    className="w-full p-3 border rounded-md bg-teal-100 col-span-2"
-                    name="account"
-                    onChange={handleChange}
-                    value={formData.account.id}
-                  >
-                    {accounts.map((account) => (
-                      <option key={account.id} value={account.id}>
-                        {account.name}
-                      </option>
-                    ))}
-                  </select> */}
+                
                   <FormControl
                     className="w-full p-3 rounded-md col-span-2"
                     fullWidth
@@ -352,16 +345,7 @@ export default function AddEditEntryPage({ searchParams }) {
               </div>
 
               <div className="items-center">
-                {/* <div className="mr-5 mb-2 font-bold">Description: </div>
-                <div>
-                  <textarea
-                    className="w-full p-2 border rounded-md bg-teal-100 focus:outline-none"
-                    id="description"
-                    name="description"
-                    required
-                    onChange={handleChange}
-                    value={formData.description}
-                  /> */}
+               
                   <TextField
                     id="outlined-multiline-flexible"
                     label="Description"
@@ -384,6 +368,15 @@ export default function AddEditEntryPage({ searchParams }) {
               </button>
             </form>
           </div>
+          {status === "failed" && (
+            <Snackbar
+              severity="error"
+              message={error}
+              open={true}
+              autoHideDuration={5000}
+              anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            />
+          )}
         </>
       )}
     </div>
