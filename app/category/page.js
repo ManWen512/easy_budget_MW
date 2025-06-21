@@ -29,7 +29,8 @@ export default function CategoryPage() {
   const [accountToDelete, setAccountToDelete] = useState(null);
   const [isChecked, setIsChecked] = useState(false);
   const [currentCategory, setCurrentCategory] = useState(null);
-
+  const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
+  
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
@@ -183,7 +184,8 @@ export default function CategoryPage() {
             <Snackbar
               severity="error"
               message={error}
-              open={true}
+              open={showErrorSnackbar}
+              onClose={() => setShowErrorSnackbar(false)}
               autoHideDuration={5000}
               anchorOrigin={{ vertical: "top", horizontal: "right" }}
             />

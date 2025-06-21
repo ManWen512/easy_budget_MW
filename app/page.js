@@ -5,7 +5,7 @@ import { fetchTotalBalance, fetchMonthData } from "@/redux/slices/homeSlice";
 import PieChart from "@/components/pieChart";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { currencySymbol } from "./currency";
 import EChartBar from "@/components/EChartBar";
 import Snackbar from "@mui/material/Snackbar";
@@ -23,6 +23,7 @@ export default function Home() {
     status,
     error,
   } = useSelector((state) => state.home);
+  const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
 
   useEffect(() => {
     if (status === "idle") {
@@ -53,7 +54,8 @@ export default function Home() {
           <Snackbar
             severity="error"
             message={error}
-            open={true}
+            open={showErrorSnackbar}
+            onClose={() => setShowErrorSnackbar(false)}
             autoHideDuration={5000}
             anchorOrigin={{ vertical: "top", horizontal: "right" }}
           />
@@ -63,7 +65,7 @@ export default function Home() {
         {status === "succeeded" && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 w-full gap-4">
-              <div className="h-48 mb-1 text-2xl font-bold cursor-pointer shadow-lg rounded-2xl text-center content-center block max-w p-6 bg-teal-100 border border-gray-200 hover:bg-teal-200">
+              <div className="p-8 mb-1 text-2xl font-bold cursor-pointer shadow-lg rounded-2xl text-center content-center block max-w bg-teal-100 border border-gray-200 hover:bg-teal-200">
                 Total Balance
                 <br />
                 <div>
@@ -71,7 +73,7 @@ export default function Home() {
                 </div>
               </div>
               <Link href={"/entry/addEditEntry"}>
-                <div className="h-48 rounded-2xl text-center content-center block max-w p-6 bg-teal-100 shadow-lg hover:bg-teal-200">
+                <div className="p-8 rounded-2xl text-center content-center block max-w bg-teal-100 shadow-lg hover:bg-teal-200">
                   <div className="mb-2 text-2xl font-bold">Add New</div>
                 </div>
               </Link>
@@ -88,7 +90,7 @@ export default function Home() {
                 <>
                   {hasIncomeData && incomeList.length > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-4 mb-10">
-                      <div className="sm:col-span-3 bd-white">
+                      <div className="sm:col-span-3 bd-white w-full overflow-x-auto">
                         <EChartBar
                           data={incomeList}
                           title={["Income"]}
@@ -109,7 +111,7 @@ export default function Home() {
 
                   {hasOutcomeData && outcomeList.length > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-4 mb-10">
-                      <div className="sm:col-span-3 bd-white">
+                      <div className="sm:col-span-3 bd-white w-full overflow-x-auto">
                         <EChartBar
                           data={outcomeList}
                           title={["Outcome"]}

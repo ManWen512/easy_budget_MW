@@ -23,7 +23,7 @@ export default function MonthEntryPage() {
   const searchParams = useSearchParams();
   const [snackbarMessage, setSnackbarMessage] = useState(""); // Snackbar message
   const [showSnackbar, setShowSnackbar] = useState(false);
-
+  const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
   const {
     monthEntries,
     totalIncome,
@@ -116,7 +116,7 @@ export default function MonthEntryPage() {
   return (
     <>
       {/* Top bar with month navigation */}
-      <div className="flex justify-center content-center p-5 mt-14 mx-auto w-screen sm:w-[60vw]">
+      <div className="flex justify-center content-center p-5 mt-14 mx-auto w-[90vw] sm:w-[60vw]">
         <div className="flex justify-center content-center items-center mb-2 w-full">
           <button
             onClick={() => handleMonthChange("prev")}
@@ -239,7 +239,8 @@ export default function MonthEntryPage() {
           <Snackbar
             severity="error"
             message={error} 
-            open={true}
+            open={showErrorSnackbar}
+            onClose={() => setShowErrorSnackbar(false)}
             autoHideDuration={5000}
             anchorOrigin={{ vertical: "top", horizontal: "right" }}
           />

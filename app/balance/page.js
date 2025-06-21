@@ -30,7 +30,8 @@ export default function BalancePage() {
   const [confirmDialog, setConfirmDialog] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState(null);
   const [currentAccount, setCurrentAccount] = useState(null); // Hold the current account for editing
-
+  const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
+  
   useEffect(() => {
     dispatch(fetchAccounts());
     dispatch(fetchTotalBalance());
@@ -210,7 +211,8 @@ export default function BalancePage() {
             <Snackbar
               severity="error"
               message={error}
-              open={true}
+              open={showErrorSnackbar}
+              onClose={() => setShowErrorSnackbar(false)}
               autoHideDuration={5000}
               anchorOrigin={{ vertical: "top", horizontal: "right" }}
             />

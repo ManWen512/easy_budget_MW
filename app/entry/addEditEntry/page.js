@@ -52,6 +52,7 @@ export default function AddEditEntryPage({ searchParams }) {
     dateTime: localDate || localDateTime,
     description: description || "",
   });
+  const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -71,6 +72,12 @@ export default function AddEditEntryPage({ searchParams }) {
       }
     });
   }, [dispatch]);
+
+  useEffect(() => {
+    if (error) {
+      setShowErrorSnackbar(true);
+    }
+  }, [error]);
 
   const setDefaultCategory = (data) => {
     // I had to use "data", because even calling this function after fetch's .then,
@@ -368,13 +375,13 @@ export default function AddEditEntryPage({ searchParams }) {
               </button>
             </form>
           </div>
-          {status === "failed" && (
+          {status === "failed" && error && (
             <Snackbar
-              severity="error"
+              open={showErrorSnackbar}
+              autoHideDuration={6000}
+              onClose={() => setShowErrorSnackbar(false)}
               message={error}
-              open={true}
-              autoHideDuration={5000}
-              anchorOrigin={{ vertical: "top", horizontal: "right" }}
+              anchorOrigin={{ vertical: "top", horizontal: "center" }}
             />
           )}
         </>

@@ -22,7 +22,7 @@ const EChartBar = dynamic(() => import("@/components/EChartBar"), {
 export default function GraphsPage() {
   const dispatch = useDispatch();
   const [selectedOption, setSelectedOption] = useState("");
-
+  const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [selectedYear, setSelectedYear] = useState(null);
   const [yearRange, setYearRange] = useState({
@@ -276,7 +276,8 @@ export default function GraphsPage() {
         <Snackbar
           severity="error"
           message={error}
-          open={true}
+          open={showErrorSnackbar}
+          onClose={() => setShowErrorSnackbar(false)}
           autoHideDuration={5000}
           anchorOrigin={{ vertical: "top", horizontal: "right" }}
         />

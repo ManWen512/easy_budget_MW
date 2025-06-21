@@ -45,7 +45,8 @@ export default function HistoryPage() {
   const [confirmDialog, setConfirmDialog] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState(null);
   const [isChecked, setIsChecked] = useState(false);
-
+  const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
+  
   useEffect(() => {
     dispatch(fetchAccountsAndCategories());
   }, [dispatch]);
@@ -304,7 +305,8 @@ export default function HistoryPage() {
             <Snackbar
             severity="error"
             message={error}
-            open={true}
+            open={showErrorSnackbar}
+            onClose={() => setShowErrorSnackbar(false)}
             autoHideDuration={5000}
             anchorOrigin={{ vertical: "top", horizontal: "right" }}
           />
