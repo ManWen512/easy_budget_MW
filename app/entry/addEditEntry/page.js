@@ -160,11 +160,7 @@ export default function AddEditEntryPage({ searchParams }) {
   return (
     <div className="p-5 mt-14">
       
-      {status === "loading" ? (
-        <div className="flex justify-center items-center min-h-[60vh]">
-          <LoadingSpinner />
-        </div>
-      ) : (
+      {status === "loading" ? <LoadingSpinner /> : (
         <>
           <h1 className="text-3xl mb-2 flex font-bold justify-center content-center">
             {itemId ? "Edit Entry" : "Create New Entry"}

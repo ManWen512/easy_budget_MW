@@ -43,11 +43,7 @@ export default function Home() {
     <div className="p-5 mx-auto mt-14">
       <div>
         {/* Show Loading State */}
-        {status === "loading" && (
-          <div className="flex justify-center items-center min-h-[60vh]">
-            <LoadingSpinner />
-          </div>
-        )}
+        {status === "loading" && <LoadingSpinner />}
 
         {/* Show Error Message */}
         {status === "failed" && (
@@ -65,7 +61,7 @@ export default function Home() {
         {status === "succeeded" && (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 w-full gap-4">
-              <div className="p-8 mb-1 text-2xl font-bold cursor-pointer shadow-lg rounded-2xl text-center content-center block max-w bg-teal-100 border border-gray-200 hover:bg-teal-200">
+              <div className="p-8 mb-1 text-2xl font-bold cursor-pointer shadow-lg rounded-2xl text-center content-center block max-w bg-teal-100 border border-gray-200 hover:bg-teal-200 h-32">
                 Total Balance
                 <br />
                 <div>
@@ -73,7 +69,7 @@ export default function Home() {
                 </div>
               </div>
               <Link href={"/entry/addEditEntry"}>
-                <div className="p-8 rounded-2xl text-center content-center block max-w bg-teal-100 shadow-lg hover:bg-teal-200">
+                <div className="p-8 rounded-2xl text-center content-center block max-w bg-teal-100 shadow-lg hover:bg-teal-200 h-32">
                   <div className="mb-2 text-2xl font-bold">Add New</div>
                 </div>
               </Link>

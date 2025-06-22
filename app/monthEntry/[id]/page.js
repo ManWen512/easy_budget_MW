@@ -56,13 +56,7 @@ const EntryDetailPage = ({ params }) => {
     setIsChecked(!isChecked);
   };
 
-  if (status === "loading") {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <LoadingSpinner size="large" />
-      </div>
-    );
-  }
+  if (status === "loading") return <LoadingSpinner />;
 
   if (error) {
     return (

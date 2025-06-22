@@ -30,7 +30,7 @@ export default function CategoryPage() {
   const [isChecked, setIsChecked] = useState(false);
   const [currentCategory, setCurrentCategory] = useState(null);
   const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
-  
+
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
@@ -79,11 +79,7 @@ export default function CategoryPage() {
     <div className="balance-page mt-14 p-5">
       <div className="text-3xl font-bold mb-5">Categories</div>
 
-      {status === "loading" ? (
-        <div className="flex justify-center items-center min-h-[60vh]">
-          <LoadingSpinner />
-        </div>
-      ) : (
+      {status === "loading" ? <LoadingSpinner /> : (
         <>
           <ul className="accounts-list">
             {categories.map((cat) => (

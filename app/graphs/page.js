@@ -282,11 +282,7 @@ export default function GraphsPage() {
           anchorOrigin={{ vertical: "top", horizontal: "right" }}
         />
       )}
-      {status === "loading" ? (
-        <div className="flex justify-center items-center min-h-[60vh]">
-          <LoadingSpinner />
-        </div>
-      ) : (
+      {status === "loading" ? <LoadingSpinner /> : (
         <>
           {((selectedOption === "month" && selectedMonth && selectedYear) ||
             (selectedOption === "year" && selectedYear) ||

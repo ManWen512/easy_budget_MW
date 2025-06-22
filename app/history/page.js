@@ -46,7 +46,7 @@ export default function HistoryPage() {
   const [entryToDelete, setEntryToDelete] = useState(null);
   const [isChecked, setIsChecked] = useState(false);
   const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
-  
+
   useEffect(() => {
     dispatch(fetchAccountsAndCategories());
   }, [dispatch]);
@@ -311,11 +311,7 @@ export default function HistoryPage() {
             anchorOrigin={{ vertical: "top", horizontal: "right" }}
           />
         )}
-        {status === "loading" ? (
-          <div className="flex justify-center items-center min-h-[60vh]">
-            <LoadingSpinner />
-          </div>
-        ) : entryData.length > 0 ? (
+        {status === "loading" ? <LoadingSpinner /> : entryData.length > 0 ? (
           <div className="w-full">
             {/* Mobile card layout for sm screens */}
             <div className="block sm:hidden">

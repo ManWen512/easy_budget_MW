@@ -82,11 +82,7 @@ export default function BalancePage() {
 
   return (
     <div className="p-5 mt-14 container content-center">
-      {status === "loading" ? (
-        <div className="flex justify-center items-center min-h-[60vh]">
-          <LoadingSpinner />
-        </div>
-      ) : (
+      {status === "loading" ? <LoadingSpinner /> : (
         <>
           <div className="grid grid-cols-1 w-full">
             <div className="h-48 rounded-2xl text-center p-6 bg-teal-100 border border-gray-200 shadow-lg hover:bg-teal-200">
