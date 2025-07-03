@@ -15,7 +15,6 @@ import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 
-
 export default function SignupPage() {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -38,14 +37,15 @@ export default function SignupPage() {
       setPasswordError("Passwords do not match");
       return;
     }
-    dispatch(signupUser(formData));
-  };
 
-  useEffect(() => {
-    if (status === "succeeded") {
-      router.push("/login?signupSnackbar=Account created successfully!");
-    }
-  }, [status, router]);
+    dispatch(signupUser(formData)).then((res) => {
+      if (res.meta.requestStatus === "fulfilled") {
+        dispatch(fetchUser());
+
+        router.push("/dashboard");
+      }
+    });
+  };
 
   useEffect(() => {
     if (status === "failed") {
@@ -61,17 +61,15 @@ export default function SignupPage() {
       signinUser({
         email: process.env.NEXT_PUBLIC_EMAIL,
         password: process.env.NEXT_PUBLIC_PASSWORD,
-      }).then((res) => {
-        if (res.meta.requestStatus === "fulfilled") {
-          dispatch(fetchUser());
-          dispatch(fetchResetData());
-          router.push("/");
-        }
       })
-    );
+    ).then((res) => {
+      if (res.meta.requestStatus === "fulfilled") {
+        dispatch(fetchUser());
+        dispatch(fetchResetData());
+        router.push("/dashboard");
+      }
+    });
   };
-
-  
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -90,7 +88,7 @@ export default function SignupPage() {
           {message}
         </Alert>
       </Snackbar>
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-sm   ">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2">Create an account</h1>

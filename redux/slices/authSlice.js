@@ -25,7 +25,9 @@ export const signupUser = createAsyncThunk(
   async (data, thunkAPI) => {
     try {
       const res = await axios.post(`${accUrl}/auth/signup`, data);
-      return res.data;
+      const token = res.data;
+      localStorage.setItem("token", token);
+      return { ...res.data, token };
     } catch (error) {
       const status = error.response.status;
       let message = error.response.data.message;
@@ -56,6 +58,7 @@ const authSlice = createSlice({
   initialState: {
     token: null,
     user: null,
+    isAuthenticated: false,
     status: "idle",
     error: null,
   },
@@ -63,6 +66,7 @@ const authSlice = createSlice({
     logout: (state) => {
       state.token = null;
       state.user = null;
+      state.isAuthenticated = false;
       state.status = "idle";
       localStorage.removeItem("token");
     },
@@ -78,11 +82,13 @@ const authSlice = createSlice({
       })
       .addCase(signinUser.fulfilled, (state, action) => {
         state.status = "succeeded";
+        state.isAuthenticated = true;
         state.token = action.payload.token;
         state.user = action.payload.user;
       })
       .addCase(signinUser.rejected, (state, action) => {
         state.status = "failed";
+        state.isAuthenticated = false;
         state.error = action.payload?.message || "Request failed";
         state.errorStatus = action.payload?.status || null;
       })
@@ -92,6 +98,8 @@ const authSlice = createSlice({
       .addCase(signupUser.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.user = action.payload.user;
+        state.isAuthenticated = true;
+        state.token = action.payload.token;
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.status = "failed";

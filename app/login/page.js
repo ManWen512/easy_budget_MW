@@ -45,7 +45,7 @@ export default function LoginPage() {
       if (res.meta.requestStatus === "fulfilled") {
         dispatch(fetchUser());
         
-        router.push("/");
+        router.push("/dashboard");
       }
     });
   };
@@ -60,7 +60,7 @@ export default function LoginPage() {
       if (res.meta.requestStatus === "fulfilled") {
         dispatch(fetchUser());
         dispatch(fetchResetData());
-        router.push("/");
+        router.push("/dashboard");
       }
     });
   };
@@ -68,7 +68,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-sm ">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>

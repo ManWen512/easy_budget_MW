@@ -69,14 +69,14 @@ export default function AddEditEntryPage({ searchParams }) {
   const memoAccounts = useMemo(() => accounts, [accounts]);
 
   useEffect(() => {
-    if (status === "idle") {
+    
       dispatch(fetchCategories());
       dispatch(fetchAccounts());
-    }
-  }, [dispatch, status]);
+    
+  }, [dispatch]);
 
   useEffect(() => {
-    if (status === "idle") {
+  
       dispatch(fetchCategories()).then((result) => {
         if (result.payload?.length > 0 && formData.category.id === 0) {
           setDefaultCategory(result.payload);
@@ -88,8 +88,8 @@ export default function AddEditEntryPage({ searchParams }) {
           setDefaultAccount(result.payload);
         }
       });
-    }
-  }, [dispatch, status]);
+    
+  }, [dispatch]);
 
   useEffect(() => {
     if (status === "failed") {

@@ -42,9 +42,9 @@ export default function CategoryPage() {
   const memoCategories = useMemo(() => categories, [categories]);
 
   useEffect(() => {
-    if (status === "idle") {
+   
       dispatch(fetchCategories());
-    }
+    
   }, [dispatch, status]);
 
   useEffect(() => {

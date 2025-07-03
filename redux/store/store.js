@@ -1,6 +1,8 @@
 "use client";
 
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
+import { persistStore, persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 import balanceReducer from "../slices/balanceSlice";
 import homeReducer from "../slices/homeSlice";
 import categoryReducer from "../slices/categorySlice";
@@ -12,18 +14,37 @@ import historyReducer from "../slices/historySlice";
 import snackbarReducer from "../slices/snackBarSlice";
 import authReducer from "../slices/authSlice";
 
-export const store = configureStore({
-  reducer: {
-    
-    home: homeReducer,
-    balance: balanceReducer,
-    category: categoryReducer,
-    entry: entryReducer,
-    graph: graphReducer,
-    monthEntry: monthEntryReducer,
-    entryDetail: entryDetailReducer,
-    history: historyReducer,
-    snackbar: snackbarReducer,
-    auth: authReducer,
-  },
+const persistConfig = {
+  key: 'root', // key for the storage
+  storage,     // storage engine (localStorage in this case)
+  whitelist: ['auth'], // specify which reducers to persist (e.g., 'auth' slice)
+  // blacklist: ['someNonPersistedSlice'], // optional: specify which reducers NOT to persist
+};
+
+const rootReducer = combineReducers({
+  auth: authReducer,
+  home: homeReducer,
+  balance: balanceReducer,
+  category: categoryReducer,
+  entry: entryReducer,
+  graph: graphReducer,
+  monthEntry: monthEntryReducer,
+  entryDetail: entryDetailReducer,
+  history: historyReducer,
+  snackbar: snackbarReducer,
 });
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+export const store = configureStore({
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        // Ignore these action types to avoid serialization warnings from redux-persist
+        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE', 'persist/PAUSE', 'persist/PURGE', 'persist/REGISTER', 'persist/FLUSH'],
+      },
+    }),
+});
+
+export const persistor = persistStore(store);

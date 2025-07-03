@@ -55,16 +55,12 @@ export default function HistoryPage() {
   const [isChecked, setIsChecked] = useState(false);
 
   useEffect(() => {
-    if (status === "idle") {
-      dispatch(fetchAccountsAndCategories());
-    }
-  }, [dispatch, status]);
+    dispatch(fetchAccountsAndCategories());
+  }, [dispatch]);
 
   useEffect(() => {
-    if (status === "idle") {
-      dispatch(fetchEntryData(filters));
-    }
-  }, [dispatch, filters, status]);
+    dispatch(fetchEntryData(filters));
+  }, [dispatch, filters]);
 
   // Close dropdown on outside click
   useEffect(() => {

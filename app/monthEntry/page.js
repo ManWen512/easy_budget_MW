@@ -44,10 +44,10 @@ export default function MonthEntryPage() {
   const error = useSelector(selectError);
 
   useEffect(() => {
-    if (status === "idle") {
+    
       dispatch(fetchMonthEntries({ year, month }));
-    }
-  }, [dispatch, year, month, status]);
+    
+  }, [dispatch, year, month]);
 
   useEffect(() => {
     const message = searchParams.get("triggerSnackbar");

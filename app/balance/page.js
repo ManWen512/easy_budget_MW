@@ -41,11 +41,9 @@ export default function BalancePage() {
   const [currentAccount, setCurrentAccount] = useState(null); // Hold the current account for editing
 
   useEffect(() => {
-    if (status === "idle") {
-      dispatch(fetchAccounts());
-      dispatch(fetchTotalBalance());
-    }
-  }, [dispatch, status]);
+    dispatch(fetchAccounts());
+    dispatch(fetchTotalBalance());
+  }, [dispatch]);
 
   useEffect(() => {
     if (status === "failed") {

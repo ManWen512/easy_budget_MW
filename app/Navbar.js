@@ -14,11 +14,12 @@ import { HiMenu, HiX } from "react-icons/hi";
 import Image from "next/image";
 import Pixel from "../public/Pixel.png";
 import { useDispatch, useSelector } from "react-redux";
-import {  logout } from "@/redux/slices/authSlice";
+import { logout } from "@/redux/slices/authSlice";
 import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { useRouter } from "next/navigation";
+import { persistor } from "@/redux/store/store";
 
 export default function Navbar({ children }) {
   const router = useRouter();
@@ -27,13 +28,12 @@ export default function Navbar({ children }) {
   const [isSmallScreenMenuOpen, setIsSmallScreenMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dispatch = useDispatch();
-  const { user, status, error } = useSelector((state) => state.auth);
+  const { user, status, error, isAuthenticated } = useSelector(
+    (state) => state.auth
+  );
   const dropdownRef = useRef(null);
   const { open, message, severity } = useSelector((state) => state.snackbar);
 
-
-
-  
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -74,7 +74,7 @@ export default function Navbar({ children }) {
   }, [status, error]);
 
   const menuItems = [
-    { name: "Dashboard", href: "/", icon: <MdDashboard size={30} /> },
+    { name: "Dashboard", href: "/dashboard", icon: <MdDashboard size={30} /> },
     {
       name: "Balance",
       href: "/balance",
@@ -88,12 +88,14 @@ export default function Navbar({ children }) {
 
   const handleLogout = () => {
     dispatch(logout());
+    persistor.purge();
     setDropdownOpen(false);
-    dispatch(showSnackbar({ message: "Logged out successfully", severity: "success" }));
+    dispatch(
+      showSnackbar({ message: "Logged out successfully", severity: "success" })
+    );
     router.push("/login");
   };
 
- 
   return (
     <div className="flex min-h-screen">
       <Snackbar
@@ -113,14 +115,18 @@ export default function Navbar({ children }) {
       </Snackbar>
       {/* Desktop Profile or Login/Sign Up buttons */}
       <div className="hidden sm:flex fixed top-0 right-0 z-50 space-x-3 p-4">
-        {user ? (
+        {isAuthenticated && user && (
           <div className="relative" ref={dropdownRef}>
             <button
               className="flex items-center space-x-2 px-3 py-2 bg-white border border-teal-500 text-teal-600 rounded-lg hover:bg-teal-50 font-semibold transition"
               onClick={() => setDropdownOpen((prev) => !prev)}
             >
               <img
-                src={user.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.username || "U")}
+                src={
+                  user?.avatar ||
+                  "https://ui-avatars.com/api/?name=" +
+                    encodeURIComponent(user?.username || "U")
+                }
                 alt="profile"
                 className="w-8 h-8 rounded-full object-cover border border-gray-300"
               />
@@ -130,7 +136,11 @@ export default function Navbar({ children }) {
               <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-4">
                 <div className="flex items-center space-x-3 mb-2">
                   <img
-                    src={user.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.username || "U")}
+                    src={
+                      user.avatar ||
+                      "https://ui-avatars.com/api/?name=" +
+                        encodeURIComponent(user.username || "U")
+                    }
                     alt="profile"
                     className="w-10 h-10 rounded-full object-cover border border-gray-300"
                   />
@@ -148,19 +158,6 @@ export default function Navbar({ children }) {
               </div>
             )}
           </div>
-        ) : (
-          <>
-            <Link href="/login">
-              <button className="px-4 py-2 bg-white border border-teal-500 text-teal-600 rounded-lg hover:bg-teal-50 font-semibold transition">
-                Login
-              </button>
-            </Link>
-            <Link href="/signup">
-              <button className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 font-semibold transition">
-                Sign Up
-              </button>
-            </Link>
-          </>
         )}
       </div>
       {/* Sidebar for md & lg screens */}
@@ -260,10 +257,14 @@ export default function Navbar({ children }) {
             </div>
             {/* Mobile Profile or Login/Sign Up buttons */}
             <div className="flex flex-col space-y-2 mt-6 mb-2">
-              {user ? (
+              {isAuthenticated && user && (
                 <div className="flex flex-col items-center">
                   <img
-                    src={user.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.username || "U")}
+                    src={
+                      user?.avatar ||
+                      "https://ui-avatars.com/api/?name=" +
+                        encodeURIComponent(user.username || "U")
+                    }
                     alt="profile"
                     className="w-12 h-12 rounded-full object-cover border border-gray-300 mb-2"
                   />
@@ -276,20 +277,7 @@ export default function Navbar({ children }) {
                     Log out
                   </button>
                 </div>
-              ) : (
-                <>
-                  <Link href="/login">
-                    <button className="w-full px-4 py-2 bg-white border border-teal-500 text-teal-600 rounded-lg hover:bg-teal-50 font-semibold transition">
-                      Login
-                    </button>
-                  </Link>
-                  <Link href="/signup">
-                    <button className="w-full px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 font-semibold transition">
-                      Sign Up
-                    </button>
-                  </Link>
-                </>
-              )}
+              ) }
             </div>
           </div>
         </>
