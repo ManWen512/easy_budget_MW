@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { FaPenSquare, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 import BalanceDialogPage from "./balancedialog/page"; // Import the dialog component
 import { useSearchParams } from "next/navigation";
 import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 import { currencySymbol } from "../currency";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -13,29 +14,47 @@ import {
   deleteAccount,
 } from "@/redux/slices/balanceSlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
+import {
+  selectAccounts,
+  selectTotalBalance,
+  selectStatus,
+  selectError,
+} from "@/redux/selectors/balanceSelectors";
 
 export default function BalancePage() {
   const dispatch = useDispatch();
 
   const searchParams = useSearchParams();
-  const { accounts, totalBalance, status, error } = useSelector(
-    (state) => state.balance
-  );
+  const accounts = useSelector(selectAccounts);
+  const totalBalance = useSelector(selectTotalBalance);
+  const status = useSelector(selectStatus);
+  const error = useSelector(selectError);
+  const { open, message, severity } = useSelector((state) => state.snackbar);
   const [isChecked, setIsChecked] = useState(false);
-  const [showSnackbar, setShowSnackbar] = useState(false);
   const [showDialog, setShowDialog] = useState(
     searchParams.get("showAddNew") === "true"
   );
-  const [snackbarMessage, setSnackbarMessage] = useState("");
+
   const [confirmDialog, setConfirmDialog] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState(null);
   const [currentAccount, setCurrentAccount] = useState(null); // Hold the current account for editing
-  const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
-  
+
   useEffect(() => {
-    dispatch(fetchAccounts());
-    dispatch(fetchTotalBalance());
-  }, [dispatch]);
+    if (status === "idle") {
+      dispatch(fetchAccounts());
+      dispatch(fetchTotalBalance());
+    }
+  }, [dispatch, status]);
+
+  useEffect(() => {
+    if (status === "failed") {
+      dispatch(showSnackbar({ message: error, severity: "error" }));
+    }
+  }, [status, error]);
+
+  // Memoize accounts for rendering
+  const memoAccounts = useMemo(() => accounts, [accounts]);
 
   // Open the dialog for either adding a new account or editing an existing one
   const openDialog = (account = null) => {
@@ -61,9 +80,8 @@ export default function BalancePage() {
     setIsChecked(false);
   };
 
-  const handleShowSnackbar = (message) => {
-    setSnackbarMessage(message);
-    setShowSnackbar(true);
+  const handleShowSnackbar = (message, severity = "success") => {
+    dispatch(showSnackbar({ message, severity }));
   };
 
   const toggleCheckbox = () => {
@@ -75,14 +93,15 @@ export default function BalancePage() {
     if (isChecked && accountToDelete) {
       dispatch(deleteAccount(accountToDelete));
       closeConfirmDialog();
-      setSnackbarMessage("Account deleted successfully!");
-      setShowSnackbar(true);
+      handleShowSnackbar("Account deleted successfully!", "success");
     }
   };
 
   return (
     <div className="p-5 mt-14 container content-center">
-      {status === "loading" ? <LoadingSpinner /> : (
+      {status === "loading" ? (
+        <LoadingSpinner />
+      ) : (
         <>
           <div className="grid grid-cols-1 w-full">
             <div className="h-48 rounded-2xl text-center p-6 bg-teal-100 border border-gray-200 shadow-lg hover:bg-teal-200">
@@ -95,7 +114,7 @@ export default function BalancePage() {
           </div>
 
           <ul>
-            {accounts.map((account) => (
+            {memoAccounts.map((account) => (
               <li key={account.id}>
                 <div className="grid grid-cols-4">
                   <div className="flex justify-between col-span-3 sm:w-96 rounded-2xl shadow-lg text-center content-center mt-3 p-6 bg-teal-100 border border-gray-200">
@@ -197,22 +216,20 @@ export default function BalancePage() {
           )}
 
           <Snackbar
-            message={snackbarMessage}
-            open={showSnackbar}
-            onClose={() => setShowSnackbar(false)}
+            open={open}
+            onClose={() => dispatch(closeSnackbar())}
             autoHideDuration={5000}
             anchorOrigin={{ vertical: "top", horizontal: "right" }}
-          />
-          {status === "failed" && (
-            <Snackbar
-              severity="error"
-              message={error}
-              open={showErrorSnackbar}
-              onClose={() => setShowErrorSnackbar(false)}
-              autoHideDuration={5000}
-              anchorOrigin={{ vertical: "top", horizontal: "right" }}
-            />
-          )}
+          >
+            <Alert
+              onClose={() => dispatch(closeSnackbar())}
+              severity={severity}
+              variant="filled"
+              sx={{ width: "100%" }}
+            >
+              {message}
+            </Alert>
+          </Snackbar>
         </>
       )}
     </div>

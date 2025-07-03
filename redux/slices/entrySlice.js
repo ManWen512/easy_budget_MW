@@ -40,6 +40,7 @@ const entrySlice = createSlice({
       state.error = null;
       state.successMessage = null;
     },
+    
   },
   extraReducers: (builder) => {
     builder

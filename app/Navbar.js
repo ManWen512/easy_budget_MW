@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -13,11 +13,40 @@ import { LuHistory } from "react-icons/lu";
 import { HiMenu, HiX } from "react-icons/hi";
 import Image from "next/image";
 import Pixel from "../public/Pixel.png";
+import { useDispatch, useSelector } from "react-redux";
+import {  logout } from "@/redux/slices/authSlice";
+import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+import { useRouter } from "next/navigation";
 
 export default function Navbar({ children }) {
+  const router = useRouter();
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSmallScreenMenuOpen, setIsSmallScreenMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dispatch = useDispatch();
+  const { user, status, error } = useSelector((state) => state.auth);
+  const dropdownRef = useRef(null);
+  const { open, message, severity } = useSelector((state) => state.snackbar);
+
+
+
+  
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    }
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [dropdownOpen]);
 
   useEffect(() => {
     const storedState = localStorage.getItem("sidebarState");
@@ -38,6 +67,12 @@ export default function Navbar({ children }) {
     closeSmallScreenMenu();
   }, [pathname]);
 
+  useEffect(() => {
+    if (status === "failed") {
+      dispatch(showSnackbar({ message: error, severity: "error" }));
+    }
+  }, [status, error]);
+
   const menuItems = [
     { name: "Dashboard", href: "/", icon: <MdDashboard size={30} /> },
     {
@@ -51,8 +86,83 @@ export default function Navbar({ children }) {
     { name: "History", href: "/history", icon: <LuHistory size={30} /> },
   ];
 
+  const handleLogout = () => {
+    dispatch(logout());
+    setDropdownOpen(false);
+    dispatch(showSnackbar({ message: "Logged out successfully", severity: "success" }));
+    router.push("/login");
+  };
+
+ 
   return (
     <div className="flex min-h-screen">
+      <Snackbar
+        open={open}
+        onClose={() => dispatch(closeSnackbar())}
+        autoHideDuration={5000}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={() => dispatch(closeSnackbar())}
+          severity={severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
+      {/* Desktop Profile or Login/Sign Up buttons */}
+      <div className="hidden sm:flex fixed top-0 right-0 z-50 space-x-3 p-4">
+        {user ? (
+          <div className="relative" ref={dropdownRef}>
+            <button
+              className="flex items-center space-x-2 px-3 py-2 bg-white border border-teal-500 text-teal-600 rounded-lg hover:bg-teal-50 font-semibold transition"
+              onClick={() => setDropdownOpen((prev) => !prev)}
+            >
+              <img
+                src={user.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.username || "U")}
+                alt="profile"
+                className="w-8 h-8 rounded-full object-cover border border-gray-300"
+              />
+              <span>{user.username}</span>
+            </button>
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-4">
+                <div className="flex items-center space-x-3 mb-2">
+                  <img
+                    src={user.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.username || "U")}
+                    alt="profile"
+                    className="w-10 h-10 rounded-full object-cover border border-gray-300"
+                  />
+                  <div>
+                    <div className="font-bold">{user.username}</div>
+                    <div className="text-sm text-gray-500">{user.email}</div>
+                  </div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="mt-2 w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-semibold transition"
+                >
+                  Log out
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            <Link href="/login">
+              <button className="px-4 py-2 bg-white border border-teal-500 text-teal-600 rounded-lg hover:bg-teal-50 font-semibold transition">
+                Login
+              </button>
+            </Link>
+            <Link href="/signup">
+              <button className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 font-semibold transition">
+                Sign Up
+              </button>
+            </Link>
+          </>
+        )}
+      </div>
       {/* Sidebar for md & lg screens */}
       <div
         className="fixed h-full bg-white shadow-lg hidden sm:block z-40 transition-all duration-300"
@@ -117,36 +227,69 @@ export default function Navbar({ children }) {
             onClick={closeSmallScreenMenu}
           />
 
-          <div
-            className="fixed top-0 left-0 w-64 h-full bg-white shadow-lg z-50 p-4 sm:hidden transition-transform duration-300"
-          >
-            <button
-              onClick={closeSmallScreenMenu}
-              className="mb-4 hover:scale-105 active:scale-95 transition-transform"
-            >
-              <HiX size={30} />
-            </button>
-            <div className="flex flex-col space-y-5 text-xl">
-              {menuItems.map((item, index) => (
-                <div key={item.name}>
-                  <Link
-                    href={item.href}
-                    onClick={closeSmallScreenMenu}
-                    className={`block px-2 py-3 rounded-xl text-gray-600 hover:bg-teal-100 transition-all duration-300 ${
-                      pathname === item.href
-                        ? "bg-teal-100 border-l-4 border-teal-500"
-                        : ""
-                    }`}
+          <div className="fixed top-0 left-0 w-64 h-full bg-white shadow-lg z-50 p-4 sm:hidden flex flex-col justify-between transition-transform duration-300">
+            <div>
+              <button
+                onClick={closeSmallScreenMenu}
+                className="mb-4 hover:scale-105 active:scale-95 transition-transform"
+              >
+                <HiX size={30} />
+              </button>
+              <div className="flex flex-col space-y-5 text-xl">
+                {menuItems.map((item, index) => (
+                  <div key={item.name}>
+                    <Link
+                      href={item.href}
+                      onClick={closeSmallScreenMenu}
+                      className={`block px-2 py-3 rounded-xl text-gray-600 hover:bg-teal-100 transition-all duration-300 ${
+                        pathname === item.href
+                          ? "bg-teal-100 border-l-4 border-teal-500"
+                          : ""
+                      }`}
+                    >
+                      <div className="flex space-x-2 hover:translate-x-1 transition-transform">
+                        <span className="hover:rotate-5 transition-transform">
+                          {item.icon}
+                        </span>
+                        <span>{item.name}</span>
+                      </div>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Mobile Profile or Login/Sign Up buttons */}
+            <div className="flex flex-col space-y-2 mt-6 mb-2">
+              {user ? (
+                <div className="flex flex-col items-center">
+                  <img
+                    src={user.avatar || "https://ui-avatars.com/api/?name=" + encodeURIComponent(user.username || "U")}
+                    alt="profile"
+                    className="w-12 h-12 rounded-full object-cover border border-gray-300 mb-2"
+                  />
+                  <div className="font-bold">{user.username}</div>
+                  <div className="text-sm text-gray-500 mb-2">{user.email}</div>
+                  <button
+                    onClick={handleLogout}
+                    className="mt-2 w-full px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-semibold transition"
                   >
-                    <div className="flex space-x-2 hover:translate-x-1 transition-transform">
-                      <span className="hover:rotate-5 transition-transform">
-                        {item.icon}
-                      </span>
-                      <span>{item.name}</span>
-                    </div>
-                  </Link>
+                    Log out
+                  </button>
                 </div>
-              ))}
+              ) : (
+                <>
+                  <Link href="/login">
+                    <button className="w-full px-4 py-2 bg-white border border-teal-500 text-teal-600 rounded-lg hover:bg-teal-50 font-semibold transition">
+                      Login
+                    </button>
+                  </Link>
+                  <Link href="/signup">
+                    <button className="w-full px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 font-semibold transition">
+                      Sign Up
+                    </button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </>
@@ -157,7 +300,11 @@ export default function Navbar({ children }) {
         className="flex-1 sm:block transition-all duration-300"
         style={{ marginLeft: isSidebarOpen ? 256 : 0 }}
       >
-        <div className={`w-full ${!isSidebarOpen ? "sm:max-w-4xl sm:mx-auto" : ""}`}>
+        <div
+          className={`w-full ${
+            !isSidebarOpen ? "sm:max-w-4xl sm:mx-auto" : ""
+          }`}
+        >
           <div key={pathname} className="transition-all duration-300">
             {children}
           </div>

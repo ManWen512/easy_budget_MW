@@ -13,6 +13,9 @@ import {
   clearEntryDetail,
 } from "@/redux/slices/entryDetailSlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 const EntryDetailPage = ({ params }) => {
   const [isChecked, setIsChecked] = useState(false);
@@ -20,7 +23,7 @@ const EntryDetailPage = ({ params }) => {
   const router = useRouter();
   const [confirmDialog, setConfirmDialog] = useState(false);
   const dispatch = useDispatch();
-  
+
   const { entry, status, error } = useSelector((state) => state.entryDetail);
 
   useEffect(() => {
@@ -31,6 +34,12 @@ const EntryDetailPage = ({ params }) => {
       dispatch(clearEntryDetail());
     };
   }, [id, dispatch]);
+
+  useEffect(() => {
+    if (status === "failed") {
+      dispatch(showSnackbar({ message: error, severity: "error" }));
+    }
+  }, [status, error]);
 
   const handleDelete = () => {
     if (isChecked) {
@@ -58,13 +67,10 @@ const EntryDetailPage = ({ params }) => {
 
   if (status === "loading") return <LoadingSpinner />;
 
-  if (error) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-red-500">Error: {error}</div>
-      </div>
-    );
-  }
+  
+      
+  
+  
 
   if (!entry) {
     return (
@@ -76,17 +82,36 @@ const EntryDetailPage = ({ params }) => {
 
   return (
     <div className="month-entry-page p-5">
+      <Snackbar
+        open={open}
+        onClose={() => dispatch(closeSnackbar())}
+        autoHideDuration={5000}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={() => dispatch(closeSnackbar())}
+          severity={severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
       <div className="sm:mx-40 m-5 mt-20 sm:mt-0 p-10 sm:p-20 bg-white rounded-lg shadow-lg">
         <button onClick={() => router.back()} className="mb-4">
           <BsArrowLeftCircleFill size={30} />
         </button>
-        
+
         <h1 className="text-2xl font-bold mb-4">Details</h1>
         <div className="grid grid-cols-2 mb-4">
           <div className="text-gray-500 mr-3 flex justify-between">
             Date<div>:</div>
           </div>
-          <div>{entry.dateTime ? new Date(entry.dateTime).toLocaleDateString() : "N/A"}</div>
+          <div>
+            {entry.dateTime
+              ? new Date(entry.dateTime).toLocaleDateString()
+              : "N/A"}
+          </div>
         </div>
         <div className="grid grid-cols-2 mb-4">
           <div className="text-gray-500 mr-3 flex justify-between">
@@ -108,8 +133,9 @@ const EntryDetailPage = ({ params }) => {
             Card<div>:</div>
           </div>
           <div>
-            {entry.account?.name ? 
-              entry.account.name.charAt(0).toUpperCase() + entry.account.name.slice(1) 
+            {entry.account?.name
+              ? entry.account.name.charAt(0).toUpperCase() +
+                entry.account.name.slice(1)
               : "N/A"}
           </div>
         </div>
@@ -155,10 +181,7 @@ const EntryDetailPage = ({ params }) => {
             </Link>
           </div>
           <div>
-            <button
-              onClick={openConfirmDialog}
-              className="ml-5"
-            >
+            <button onClick={openConfirmDialog} className="ml-5">
               <FaTrash size={30} className="text-red-400" />
             </button>
           </div>
@@ -168,9 +191,7 @@ const EntryDetailPage = ({ params }) => {
       {confirmDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-2">
           <div className="bg-teal-100 p-6 rounded-lg shadow-lg sm:w-1/3">
-            <h2 className="text-2xl mb-4 font-bold">
-              Delete Entry
-            </h2>
+            <h2 className="text-2xl mb-4 font-bold">Delete Entry</h2>
             <div className="flex justify-evenly">
               <FaExclamationTriangle className="text-red-500 mr-4" size={40} />
               <div>
@@ -205,7 +226,9 @@ const EntryDetailPage = ({ params }) => {
               <button
                 onClick={handleDelete}
                 className={`px-4 py-2 rounded transition-colors ${
-                  isChecked ? "bg-red-500 text-white hover:bg-red-600" : "bg-gray-300"
+                  isChecked
+                    ? "bg-red-500 text-white hover:bg-red-600"
+                    : "bg-gray-300"
                 }`}
                 disabled={!isChecked}
               >

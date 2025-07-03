@@ -1,7 +1,7 @@
 "use client";
 
 import PieChart from "@/components/pieChart";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { currencySymbol } from "../currency";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -14,6 +14,18 @@ import dynamic from "next/dynamic";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { MenuItem, FormControl, InputLabel, Select } from "@mui/material";
 import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
+import {
+  selectIncomeList,
+  selectOutcomeList,
+  selectIncomeCategoryList,
+  selectOutcomeCategoryList,
+  selectIncomeCategoryCostList,
+  selectOutcomeCategoryCostList,
+  selectStatus,
+  selectError,
+} from "@/redux/selectors/graphSelectors";
 
 const EChartBar = dynamic(() => import("@/components/EChartBar"), {
   ssr: false,
@@ -22,7 +34,7 @@ const EChartBar = dynamic(() => import("@/components/EChartBar"), {
 export default function GraphsPage() {
   const dispatch = useDispatch();
   const [selectedOption, setSelectedOption] = useState("");
-  const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
+  const { open, message, severity } = useSelector((state) => state.snackbar);
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [selectedYear, setSelectedYear] = useState(null);
   const [yearRange, setYearRange] = useState({
@@ -30,16 +42,22 @@ export default function GraphsPage() {
     endYear: null,
   });
 
-  const {
-    incomeList,
-    outcomeList,
-    incomeCategoryList,
-    outcomeCategoryList,
-    incomeCategoryCostList,
-    outcomeCategoryCostList,
-    status,
-    error,
-  } = useSelector((state) => state.graph);
+  const incomeList = useSelector(selectIncomeList);
+  const outcomeList = useSelector(selectOutcomeList);
+  const incomeCategoryList = useSelector(selectIncomeCategoryList);
+  const outcomeCategoryList = useSelector(selectOutcomeCategoryList);
+  const incomeCategoryCostList = useSelector(selectIncomeCategoryCostList);
+  const outcomeCategoryCostList = useSelector(selectOutcomeCategoryCostList);
+  const status = useSelector(selectStatus);
+  const error = useSelector(selectError);
+
+  // Memoize chart data for rendering
+  const memoIncomeList = useMemo(() => incomeList, [incomeList]);
+  const memoOutcomeList = useMemo(() => outcomeList, [outcomeList]);
+  const memoIncomeCategoryList = useMemo(() => incomeCategoryList, [incomeCategoryList]);
+  const memoOutcomeCategoryList = useMemo(() => outcomeCategoryList, [outcomeCategoryList]);
+  const memoIncomeCategoryCostList = useMemo(() => incomeCategoryCostList, [incomeCategoryCostList]);
+  const memoOutcomeCategoryCostList = useMemo(() => outcomeCategoryCostList, [outcomeCategoryCostList]);
 
   const months = [
     "January",
@@ -57,6 +75,12 @@ export default function GraphsPage() {
   ];
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 30 }, (_, i) => currentYear - i); // Generates a list of years from 2024 to 1995
+
+  useEffect(() => {
+    if (status === "failed") {
+      dispatch(showSnackbar({ message: error, severity: "error" }));
+    }
+  }, [status, error]);
 
   const handleOptionChange = (option) => {
     setSelectedOption(option);
@@ -272,17 +296,26 @@ export default function GraphsPage() {
         )}
       </div>
 
-      {status === "failed" && (
+      
         <Snackbar
-          severity="error"
-          message={error}
-          open={showErrorSnackbar}
-          onClose={() => setShowErrorSnackbar(false)}
+          open={open}
+          onClose={() => dispatch(closeSnackbar())}
           autoHideDuration={5000}
           anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        />
-      )}
-      {status === "loading" ? <LoadingSpinner /> : (
+        >
+          <Alert
+            onClose={() => dispatch(closeSnackbar())}
+            severity={severity}
+            variant="filled"
+            sx={{ width: '100%' }}
+          >
+            {message}
+          </Alert>
+        </Snackbar>
+      
+      {status === "loading" ? (
+        <LoadingSpinner />
+      ) : (
         <>
           {((selectedOption === "month" && selectedMonth && selectedYear) ||
             (selectedOption === "year" && selectedYear) ||
@@ -293,7 +326,7 @@ export default function GraphsPage() {
               <div className="col-span-3 mt-20 ">
                 <div>Income</div>
                 <EChartBar
-                  data={incomeList}
+                  data={memoIncomeList}
                   selectedMonth={selectedMonth}
                   selectedYear={selectedYear}
                   startYear={yearRange.startYear}
@@ -304,15 +337,15 @@ export default function GraphsPage() {
               </div>
               <div className=" mt-20">
                 <PieChart
-                  data={incomeCategoryList}
-                  cost={incomeCategoryCostList}
+                  data={memoIncomeCategoryList}
+                  cost={memoIncomeCategoryCostList}
                   currency={currencySymbol}
                 />
               </div>
               <div className="col-span-3 mt-20">
                 <div>Outcome</div>
                 <EChartBar
-                  data={outcomeList}
+                  data={memoOutcomeList}
                   currency={currencySymbol}
                   selectedMonth={selectedMonth}
                   selectedYear={selectedYear}
@@ -321,8 +354,8 @@ export default function GraphsPage() {
               </div>
               <div className="mt-20">
                 <PieChart
-                  data={outcomeCategoryList}
-                  cost={outcomeCategoryCostList}
+                  data={memoOutcomeCategoryList}
+                  cost={memoOutcomeCategoryCostList}
                   currency={currencySymbol}
                 />
               </div>

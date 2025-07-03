@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { FaSortDown } from "react-icons/fa";
 import { FaArrowDownWideShort, FaArrowUpShortWide } from "react-icons/fa6";
 import { useRouter } from "next/navigation";
@@ -14,6 +14,7 @@ import {
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { FaPenSquare, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -21,39 +22,49 @@ import FormControl from "@mui/material/FormControl";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
+import {
+  selectAccountsData,
+  selectCategoriesData,
+  selectEntryData,
+  selectTotalCost,
+  selectStatus,
+  selectError,
+  selectFilters,
+} from "@/redux/selectors/historySelectors";
 
 export default function HistoryPage() {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const {
-    accountsData,
-    categoriesData,
-    entryData,
-    totalCost,
-    status,
-    filters,
-    error,
-  } = useSelector((state) => state.history);
+  const accountsData = useSelector(selectAccountsData);
+  const categoriesData = useSelector(selectCategoriesData);
+  const entryData = useSelector(selectEntryData);
+  const totalCost = useSelector(selectTotalCost);
+  const status = useSelector(selectStatus);
+  const filters = useSelector(selectFilters);
+  const error = useSelector(selectError);
 
   // UI State
 
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const dropdownRef = useRef(null);
-  const [showSnackbar, setShowSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const { open, message, severity } = useSelector((state) => state.snackbar);
   const [confirmDialog, setConfirmDialog] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState(null);
   const [isChecked, setIsChecked] = useState(false);
-  const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchAccountsAndCategories());
-  }, [dispatch]);
+    if (status === "idle") {
+      dispatch(fetchAccountsAndCategories());
+    }
+  }, [dispatch, status]);
 
   useEffect(() => {
-    dispatch(fetchEntryData(filters));
-  }, [dispatch, filters]);
+    if (status === "idle") {
+      dispatch(fetchEntryData(filters));
+    }
+  }, [dispatch, filters, status]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -66,12 +77,21 @@ export default function HistoryPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (status === "failed") {
+      dispatch(showSnackbar({ message: error, severity: "error" }));
+    }
+  }, [status, error]);
+
+  // Memoize entryData for table rendering
+  const memoEntryData = useMemo(() => entryData, [entryData]);
+
   const handleSort = () => {
     const newSortOrder = filters.sortOrder === "DESC" ? "ASC" : "DESC";
     dispatch(setFilters({ sortOrder: newSortOrder }));
   };
 
-  const handleRowClick = (item) => {
+  const handleEditClick = (item) => {
     const { id, type, category, account } = item;
     const params = new URLSearchParams({
       itemId: id,
@@ -85,10 +105,19 @@ export default function HistoryPage() {
     router.push(`/entry/addEditEntry?${params.toString()}`);
   };
 
+  const handleRowClick = (item) => {
+    router.prefetch(`/monthEntry/${item.id}`);
+    router.push(`/monthEntry/${item.id}`);
+  };
+
   const handleDelete = (id) => {
     dispatch(deleteEntry(id));
-    setSnackbarMessage("Entry deleted successfully!");
-    setShowSnackbar(true);
+    dispatch(
+      showSnackbar({
+        message: "Entry deleted successfully!",
+        severity: "",
+      })
+    );
   };
 
   const openConfirmDialog = (entryId) => {
@@ -301,21 +330,13 @@ export default function HistoryPage() {
       </div>
 
       <div className="mt-4">
-        {status === "failed" && (
-            <Snackbar
-            severity="error"
-            message={error}
-            open={showErrorSnackbar}
-            onClose={() => setShowErrorSnackbar(false)}
-            autoHideDuration={5000}
-            anchorOrigin={{ vertical: "top", horizontal: "right" }}
-          />
-        )}
-        {status === "loading" ? <LoadingSpinner /> : entryData.length > 0 ? (
+        {status === "loading" ? (
+          <LoadingSpinner />
+        ) : memoEntryData.length > 0 ? (
           <div className="w-full">
             {/* Mobile card layout for sm screens */}
             <div className="block sm:hidden">
-              {entryData.map((item) => (
+              {memoEntryData.map((item) => (
                 <div
                   key={item.id}
                   className={`rounded-xl shadow  px-3 py-2 mb-3 border border-gray-100 cursor-pointer ${
@@ -371,7 +392,7 @@ export default function HistoryPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {entryData.map((item, index) => (
+                  {memoEntryData.map((item, index) => (
                     <tr
                       key={item.id}
                       className={`border-b cursor-pointer ${
@@ -401,7 +422,7 @@ export default function HistoryPage() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleRowClick(item);
+                              handleEditClick(item);
                             }}
                           >
                             <FaPenSquare className="text-blue-500" />
@@ -472,12 +493,20 @@ export default function HistoryPage() {
       )}
 
       <Snackbar
-        message={snackbarMessage}
-        open={showSnackbar}
-        onClose={() => setShowSnackbar(false)}
+        open={open}
+        onClose={() => dispatch(closeSnackbar())}
         autoHideDuration={5000}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      />
+      >
+        <Alert
+          onClose={() => dispatch(closeSnackbar())}
+          severity={severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

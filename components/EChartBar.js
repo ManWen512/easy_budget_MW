@@ -79,4 +79,4 @@ const EChartBar = ({ data = [], title, currency, height = 400 }) => {
   return <div ref={chartRef} style={{ width: "100%", height }} />;
 };
 
-export default EChartBar;
+export default React.memo(EChartBar);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { currencySymbol } from "@/app/currency";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "@/redux/slices/categorySlice";
@@ -19,14 +19,23 @@ import OutlinedInput from "@mui/material/OutlinedInput";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import Snackbar from "@mui/material/Snackbar";
-
+import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
+import { selectCategories as selectCategoryList } from "@/redux/selectors/categorySelectors";
+import { selectAccounts as selectAccountList } from "@/redux/selectors/balanceSelectors";
+import {
+  selectStatus as selectEntryStatus,
+  selectError as selectEntryError,
+  selectSuccessMessage,
+} from "@/redux/selectors/entrySelectors";
 
 // only "searchParams" works, name cannot be changed
 export default function AddEditEntryPage({ searchParams }) {
   const dispatch = useDispatch();
-  const { categories } = useSelector((state) => state.category);
-  const { accounts } = useSelector((state) => state.balance);
-  const { status, error, successMessage } = useSelector((state) => state.entry);
+  const categories = useSelector(selectCategoryList);
+  const accounts = useSelector(selectAccountList);
+  const status = useSelector(selectEntryStatus);
+  const error = useSelector(selectEntryError);
+  const successMessage = useSelector(selectSuccessMessage);
 
   const router = useRouter();
   const { itemId, type, category, balance, cost, dateTime, description } =
@@ -52,32 +61,40 @@ export default function AddEditEntryPage({ searchParams }) {
     dateTime: localDate || localDateTime,
     description: description || "",
   });
-  const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
+  const { open, message } = useSelector((state) => state.snackbar);
+
+  // Memoize categories and accounts for rendering
+  const memoCategories = useMemo(() => categories, [categories]);
+  const memoAccounts = useMemo(() => accounts, [accounts]);
 
   useEffect(() => {
-    dispatch(fetchCategories());
-    dispatch(fetchAccounts());
-  }, [dispatch]);
-
-  useEffect(() => {
-    dispatch(fetchCategories()).then((result) => {
-      if (result.payload?.length > 0 && formData.category.id === 0) {
-        setDefaultCategory(result.payload);
-      }
-    });
-
-    dispatch(fetchAccounts()).then((result) => {
-      if (result.payload?.length > 0 && formData.account.id === 0) {
-        setDefaultAccount(result.payload);
-      }
-    });
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (error) {
-      setShowErrorSnackbar(true);
+    if (status === "idle") {
+      dispatch(fetchCategories());
+      dispatch(fetchAccounts());
     }
-  }, [error]);
+  }, [dispatch, status]);
+
+  useEffect(() => {
+    if (status === "idle") {
+      dispatch(fetchCategories()).then((result) => {
+        if (result.payload?.length > 0 && formData.category.id === 0) {
+          setDefaultCategory(result.payload);
+        }
+      });
+
+      dispatch(fetchAccounts()).then((result) => {
+        if (result.payload?.length > 0 && formData.account.id === 0) {
+          setDefaultAccount(result.payload);
+        }
+      });
+    }
+  }, [dispatch, status]);
+
+  useEffect(() => {
+    if (status === "failed") {
+      dispatch(showSnackbar({ message: error, severity: "error" }));
+    }
+  }, [status, error]);
 
   const setDefaultCategory = (data) => {
     // I had to use "data", because even calling this function after fetch's .then,
@@ -128,7 +145,7 @@ export default function AddEditEntryPage({ searchParams }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "category") {
-      const selectedCategory = categories.find(
+      const selectedCategory = memoCategories.find(
         (cat) => cat.id === parseInt(value)
       );
       setFormData((prevData) => ({
@@ -139,7 +156,7 @@ export default function AddEditEntryPage({ searchParams }) {
         },
       }));
     } else if (name === "account") {
-      const selectedAccount = accounts.find(
+      const selectedAccount = memoAccounts.find(
         (acc) => acc.id === parseInt(value)
       );
       setFormData((prevData) => ({
@@ -159,8 +176,9 @@ export default function AddEditEntryPage({ searchParams }) {
 
   return (
     <div className="p-5 mt-14">
-      
-      {status === "loading" ? <LoadingSpinner /> : (
+      {status === "loading" ? (
+        <LoadingSpinner />
+      ) : (
         <>
           <h1 className="text-3xl mb-2 flex font-bold justify-center content-center">
             {itemId ? "Edit Entry" : "Create New Entry"}
@@ -236,7 +254,7 @@ export default function AddEditEntryPage({ searchParams }) {
                       <MenuItem value="">
                         <em>None</em>
                       </MenuItem>
-                      {categories.map((category) => (
+                      {memoCategories.map((category) => (
                         <MenuItem key={category.id} value={category.id}>
                           {category.name}
                         </MenuItem>
@@ -262,7 +280,6 @@ export default function AddEditEntryPage({ searchParams }) {
 
               <div className="items-center">
                 <div className="grid grid-cols-3 gap-4">
-                
                   <FormControl
                     className="w-full p-3 rounded-md col-span-2"
                     fullWidth
@@ -285,7 +302,7 @@ export default function AddEditEntryPage({ searchParams }) {
                       <MenuItem value="">
                         <em>None</em>
                       </MenuItem>
-                      {accounts.map((account) => (
+                      {memoAccounts.map((account) => (
                         <MenuItem key={account.id} value={account.id}>
                           {account.name}
                         </MenuItem>
@@ -348,19 +365,17 @@ export default function AddEditEntryPage({ searchParams }) {
               </div>
 
               <div className="items-center">
-               
-                  <TextField
-                    id="outlined-multiline-flexible"
-                    label="Description"
-                    multiline
-                    maxRows={4}
-                    name="description"
-                    required
-                    onChange={handleChange}
-                    value={formData.description}
-                    className="w-full p-2 border rounded-md"
-                  />
-
+                <TextField
+                  id="outlined-multiline-flexible"
+                  label="Description"
+                  multiline
+                  maxRows={4}
+                  name="description"
+                  required
+                  onChange={handleChange}
+                  value={formData.description}
+                  className="w-full p-2 border rounded-md"
+                />
               </div>
 
               <button
@@ -371,15 +386,22 @@ export default function AddEditEntryPage({ searchParams }) {
               </button>
             </form>
           </div>
-          {status === "failed" && error && (
-            <Snackbar
-              open={showErrorSnackbar}
-              autoHideDuration={6000}
-              onClose={() => setShowErrorSnackbar(false)}
-              message={error}
-              anchorOrigin={{ vertical: "top", horizontal: "center" }}
-            />
-          )}
+
+          <Snackbar
+            open={open}
+            onClose={() => dispatch(closeSnackbar())}
+            autoHideDuration={5000}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          >
+            <Alert
+              onClose={() => dispatch(closeSnackbar())}
+              severity={severity}
+              variant="filled"
+              sx={{ width: "100%" }}
+            >
+              {message}
+            </Alert>
+          </Snackbar>
         </>
       )}
     </div>

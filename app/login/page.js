@@ -1,11 +1,70 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
+import { signinUser, fetchResetData, fetchUser } from "@/redux/slices/authSlice";
+import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 export default function LoginPage() {
+  
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const {  error, status } = useSelector((state) => state.auth);
+  const { open, message, severity } = useSelector((state) => state.snackbar);
+
+ 
+
+  useEffect(() => {
+    const message = searchParams.get("signupSnackbar");
+    if (message) {
+      dispatch(showSnackbar({ message, severity: "success" }));
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (status === "failed") {
+      dispatch(showSnackbar({ message: error, severity: "error" }));
+    }
+  }, [status, error]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(signinUser(formData)).then((res) => {
+      if (res.meta.requestStatus === "fulfilled") {
+        dispatch(fetchUser());
+        
+        router.push("/");
+      }
+    });
+  };
+
+  const handleGuestLogin = () => {
+    dispatch(
+      signinUser({
+        email: process.env.NEXT_PUBLIC_EMAIL,
+        password: process.env.NEXT_PUBLIC_PASSWORD,
+      })
+    ).then((res) => {
+      if (res.meta.requestStatus === "fulfilled") {
+        dispatch(fetchUser());
+        dispatch(fetchResetData());
+        router.push("/");
+      }
+    });
+  };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -16,7 +75,7 @@ export default function LoginPage() {
             <p className="">Please sign in to your account</p>
           </div>
 
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label className="block text-sm font-medium mb-2">
                 Email Address
@@ -28,6 +87,10 @@ export default function LoginPage() {
                 <input
                   type="email"
                   name="email"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   required
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 outline-none transition-colors"
                   placeholder="Enter your email"
@@ -36,9 +99,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Password
-              </label>
+              <label className="block text-sm font-medium mb-2">Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <FaLock className="text-teal-400" />
@@ -46,6 +107,10 @@ export default function LoginPage() {
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                   required
                   className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 outline-none transition-colors"
                   placeholder="Enter your password"
@@ -109,8 +174,32 @@ export default function LoginPage() {
               </Link>
             </p>
           </div>
+          <div className="mt-6 text-center">
+            <button
+              className="font-bold text-teal-400 hover:text-teal-500"
+              onClick={handleGuestLogin}
+            >
+              Login as a Guest User
+            </button>
+          </div>
         </div>
       </div>
+
+      <Snackbar
+        open={open}
+        onClose={() => dispatch(closeSnackbar())}
+        autoHideDuration={5000}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={() => dispatch(closeSnackbar())}
+          severity={severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

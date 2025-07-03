@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import authFetch from "../lib/authFetch";
 
 const accUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -6,7 +7,7 @@ const accUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 export const fetchAccounts = createAsyncThunk(
   "balance/fetchAccounts",
   async () => {
-    const response = await fetch(`${accUrl}/account/all`);
+    const response = await authFetch(`${accUrl}/accounts`);
     return await response.json();
   }
 );
@@ -14,7 +15,7 @@ export const fetchAccounts = createAsyncThunk(
 export const fetchTotalBalance = createAsyncThunk(
   "balance/fetchTotalBalance",
   async () => {
-    const response = await fetch(`${accUrl}/account/totalBalance`);
+    const response = await authFetch(`${accUrl}/accounts/totalBalance`);
     return await response.json();
   }
 );
@@ -23,7 +24,7 @@ export const addAccount = createAsyncThunk(
   "balance/addAccount",
   async (newAccount, { dispatch, rejectWithValue }) => {
     try {
-      const response = await fetch(`${accUrl}/account`, {
+      const response = await authFetch(`${accUrl}/accounts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newAccount),
@@ -51,8 +52,8 @@ export const editAccount = createAsyncThunk(
         throw new Error("Account ID is required for editing.");
       }
 
-      const response = await fetch(
-        `${accUrl}/account?id=${updatedAccount.id}`,
+      const response = await authFetch(
+        `${accUrl}/accounts/${updatedAccount.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -78,7 +79,7 @@ export const deleteAccount = createAsyncThunk(
   "balance/deleteAccount",
   async (accountId, { dispatch, rejectWithValue }) => {
     try {
-      const response = await fetch(`${accUrl}/account?id=${accountId}`, {
+      const response = await authFetch(`${accUrl}/accounts/${accountId}`, {
         method: "DELETE",
       });
 

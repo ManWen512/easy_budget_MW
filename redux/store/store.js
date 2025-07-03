@@ -9,6 +9,8 @@ import graphReducer from "../slices/graphSlice";
 import monthEntryReducer from "../slices/monthEntrySlice";
 import entryDetailReducer from "../slices/entryDetailSlice";
 import historyReducer from "../slices/historySlice";
+import snackbarReducer from "../slices/snackBarSlice";
+import authReducer from "../slices/authSlice";
 
 export const store = configureStore({
   reducer: {
@@ -21,6 +23,7 @@ export const store = configureStore({
     monthEntry: monthEntryReducer,
     entryDetail: entryDetailReducer,
     history: historyReducer,
-    
+    snackbar: snackbarReducer,
+    auth: authReducer,
   },
 });

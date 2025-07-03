@@ -5,25 +5,38 @@ import { fetchTotalBalance, fetchMonthData } from "@/redux/slices/homeSlice";
 import PieChart from "@/components/pieChart";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { currencySymbol } from "./currency";
 import EChartBar from "@/components/EChartBar";
+import {
+  selectTotalBalance,
+  selectIncomeList,
+  selectOutcomeList,
+  selectIncomeCategoryList,
+  selectOutcomeCategoryList,
+  selectIncomeCategoryCostList,
+  selectOutcomeCategoryCostList,
+  selectStatus,
+  selectError,
+} from "@/redux/selectors/homeSelectors";
+import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
 import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+import { useSearchParams } from "next/navigation";
 
 export default function Home() {
   const dispatch = useDispatch();
-  const {
-    totalBalance,
-    incomeList,
-    outcomeList,
-    incomeCategoryList,
-    outcomeCategoryList,
-    incomeCategoryCostList,
-    outcomeCategoryCostList,
-    status,
-    error,
-  } = useSelector((state) => state.home);
-  const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
+  const searchParams = useSearchParams();
+  const totalBalance = useSelector(selectTotalBalance);
+  const incomeList = useSelector(selectIncomeList);
+  const outcomeList = useSelector(selectOutcomeList);
+  const incomeCategoryList = useSelector(selectIncomeCategoryList);
+  const outcomeCategoryList = useSelector(selectOutcomeCategoryList);
+  const incomeCategoryCostList = useSelector(selectIncomeCategoryCostList);
+  const outcomeCategoryCostList = useSelector(selectOutcomeCategoryCostList);
+  const status = useSelector(selectStatus);
+  const error = useSelector(selectError);
+  const { open, message, severity } = useSelector((state) => state.snackbar);
 
   useEffect(() => {
     if (status === "idle") {
@@ -32,12 +45,52 @@ export default function Home() {
     }
   }, [dispatch, status]);
 
+  useEffect(() => {
+    if (status === "failed") {
+      dispatch(showSnackbar({ message: error, severity: "error" }));
+    }
+  }, [status, error]);
+
+  useEffect(() => {
+    const message = searchParams.get("loginSnackbar");
+    if (message) {
+      dispatch(showSnackbar({ message, severity: "" }));
+    }
+  }, [searchParams]);
+
   const date = new Date();
   const currentMonthName = date.toLocaleString("default", { month: "long" });
 
-  const hasIncomeData = incomeList && incomeList.length > 0;
-  const hasOutcomeData = outcomeList && outcomeList.length > 0;
-  const hasAnyData = hasIncomeData || hasOutcomeData;
+  const hasIncomeData = useMemo(
+    () => incomeList && incomeList.length > 0,
+    [incomeList]
+  );
+  const hasOutcomeData = useMemo(
+    () => outcomeList && outcomeList.length > 0,
+    [outcomeList]
+  );
+  const hasAnyData = useMemo(
+    () => hasIncomeData || hasOutcomeData,
+    [hasIncomeData, hasOutcomeData]
+  );
+  const memoIncomeList = useMemo(() => incomeList, [incomeList]);
+  const memoOutcomeList = useMemo(() => outcomeList, [outcomeList]);
+  const memoIncomeCategoryList = useMemo(
+    () => incomeCategoryList,
+    [incomeCategoryList]
+  );
+  const memoOutcomeCategoryList = useMemo(
+    () => outcomeCategoryList,
+    [outcomeCategoryList]
+  );
+  const memoIncomeCategoryCostList = useMemo(
+    () => incomeCategoryCostList,
+    [incomeCategoryCostList]
+  );
+  const memoOutcomeCategoryCostList = useMemo(
+    () => outcomeCategoryCostList,
+    [outcomeCategoryCostList]
+  );
 
   return (
     <div className="p-5 mx-auto mt-14">
@@ -45,17 +98,23 @@ export default function Home() {
         {/* Show Loading State */}
         {status === "loading" && <LoadingSpinner />}
 
-        {/* Show Error Message */}
-        {status === "failed" && (
+       
           <Snackbar
-            severity="error"
-            message={error}
-            open={showErrorSnackbar}
-            onClose={() => setShowErrorSnackbar(false)}
+            open={open}
+            onClose={() => dispatch(closeSnackbar())}
             autoHideDuration={5000}
             anchorOrigin={{ vertical: "top", horizontal: "right" }}
-          />
-        )}
+          >
+            <Alert
+              onClose={() => dispatch(closeSnackbar())}
+              severity={severity}
+              variant="filled"
+              sx={{ width: "100%" }}
+            >
+              {message}
+            </Alert>
+          </Snackbar>
+        
 
         {/* Show UI only if data is successfully loaded */}
         {status === "succeeded" && (
@@ -84,42 +143,43 @@ export default function Home() {
                 </div>
               ) : (
                 <>
-                  {hasIncomeData && incomeList.length > 0 && (
+                  {hasIncomeData && memoIncomeList.length > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-4 mb-10">
                       <div className="sm:col-span-3 bd-white w-full overflow-x-auto">
                         <EChartBar
-                          data={incomeList}
+                          data={memoIncomeList}
                           title={["Income"]}
                           currency={currencySymbol}
                         />
                       </div>
-                      {incomeCategoryList && incomeCategoryList.length > 0 && (
-                        <div className="sm:mt-20">
-                          <PieChart
-                            data={incomeCategoryList}
-                            cost={incomeCategoryCostList}
-                            currency={currencySymbol}
-                          />
-                        </div>
-                      )}
+                      {memoIncomeCategoryList &&
+                        memoIncomeCategoryList.length > 0 && (
+                          <div className="">
+                            <PieChart
+                              data={memoIncomeCategoryList}
+                              cost={memoIncomeCategoryCostList}
+                              currency={currencySymbol}
+                            />
+                          </div>
+                        )}
                     </div>
                   )}
 
-                  {hasOutcomeData && outcomeList.length > 0 && (
+                  {hasOutcomeData && memoOutcomeList.length > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-4 mb-10">
                       <div className="sm:col-span-3 bd-white w-full overflow-x-auto">
                         <EChartBar
-                          data={outcomeList}
+                          data={memoOutcomeList}
                           title={["Outcome"]}
                           currency={currencySymbol}
                         />
                       </div>
-                      {outcomeCategoryList &&
-                        outcomeCategoryList.length > 0 && (
-                          <div className="sm:mt-20">
+                      {memoOutcomeCategoryList &&
+                        memoOutcomeCategoryList.length > 0 && (
+                          <div className="">
                             <PieChart
-                              data={outcomeCategoryList}
-                              cost={outcomeCategoryCostList}
+                              data={memoOutcomeCategoryList}
+                              cost={memoOutcomeCategoryCostList}
                               currency={currencySymbol}
                             />
                           </div>

@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 import { currencySymbol } from "../currency";
 import { BiSolidLeftArrow, BiSolidRightArrow } from "react-icons/bi";
 import { FiPlus } from "react-icons/fi";
 import { useSelector, useDispatch } from "react-redux";
+import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
 
 import {
   fetchMonthEntries,
@@ -16,42 +18,49 @@ import {
   clearSnackbar,
 } from "@/redux/slices/monthEntrySlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import {
+  selectMonthEntries,
+  selectTotalIncome,
+  selectTotalOutcome,
+  selectTotalBalance,
+  selectYear,
+  selectMonth,
+  selectStatus,
+  selectError,
+} from "@/redux/selectors/monthEntrySelectors";
 
 export default function MonthEntryPage() {
   const dispatch = useDispatch();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [snackbarMessage, setSnackbarMessage] = useState(""); // Snackbar message
-  const [showSnackbar, setShowSnackbar] = useState(false);
-  const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
-  const {
-    monthEntries,
-    totalIncome,
-    totalOutcome,
-    totalBalance,
-    year,
-    month,
-    status,
-    error,
-  } = useSelector((state) => state.monthEntry);
+  const { open, message, severity } = useSelector((state) => state.snackbar);
+  const monthEntries = useSelector(selectMonthEntries);
+  const totalIncome = useSelector(selectTotalIncome);
+  const totalOutcome = useSelector(selectTotalOutcome);
+  const totalBalance = useSelector(selectTotalBalance);
+  const year = useSelector(selectYear);
+  const month = useSelector(selectMonth);
+  const status = useSelector(selectStatus);
+  const error = useSelector(selectError);
 
   useEffect(() => {
-    dispatch(fetchMonthEntries({ year, month }));
-  }, [dispatch, year, month]);
+    if (status === "idle") {
+      dispatch(fetchMonthEntries({ year, month }));
+    }
+  }, [dispatch, year, month, status]);
 
   useEffect(() => {
     const message = searchParams.get("triggerSnackbar");
     if (message) {
-      setSnackbarMessage(message);
-      setShowSnackbar(true);
+      dispatch(showSnackbar({ message, severity: "success" }));
     }
   }, [searchParams]);
 
-  // Handle Snackbar close
-  const handleSnackbarClose = () => {
-    clearSnackbar();
-    setShowSnackbar(false);
-  };
+  useEffect(() => {
+    if (status === "failed") {
+      dispatch(showSnackbar({ message: error, severity: "error" }));
+    }
+  }, [status, error]);
 
   // Helper function to handle month navigation
   const handleMonthChange = (direction) => {
@@ -93,17 +102,19 @@ export default function MonthEntryPage() {
     router.push(`/monthEntry/${id}`);
   };
 
-  // Group entries by date for all views
-  const groupedEntries = monthEntries.reduce((acc, entry) => {
-    const date = new Date(entry.dateTime).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-    if (!acc[date]) acc[date] = [];
-    acc[date].push(entry);
-    return acc;
-  }, {});
+  // Group entries by date for all views (memoized)
+  const groupedEntries = useMemo(() => {
+    return monthEntries.reduce((acc, entry) => {
+      const date = new Date(entry.dateTime).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      if (!acc[date]) acc[date] = [];
+      acc[date].push(entry);
+      return acc;
+    }, {});
+  }, [monthEntries]);
 
   if (status === "loading") {
     return <LoadingSpinner />;
@@ -112,7 +123,7 @@ export default function MonthEntryPage() {
   return (
     <>
       {/* Top bar with month navigation */}
-      <div className="flex justify-center content-center p-5 mt-14 mx-auto w-[90vw] sm:w-[60vw]">
+      <div className="flex justify-center content-center p-5 mt-14 mx-auto w-[90vw] sm:w-full">
         <div className="flex justify-center content-center items-center mb-2 w-full">
           <button
             onClick={() => handleMonthChange("prev")}
@@ -224,23 +235,23 @@ export default function MonthEntryPage() {
         )}
       </div>
 
-      <Snackbar
-        message={snackbarMessage}
-        open={showSnackbar}
-        onClose={handleSnackbarClose}
-        autoHideDuration={5000}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      />
-      {status === "failed" && (
+      
         <Snackbar
-          severity="error"
-          message={error}
-          open={showErrorSnackbar}
-          onClose={() => setShowErrorSnackbar(false)}
+          open={open}
+          onClose={() => dispatch(closeSnackbar())}
           autoHideDuration={5000}
           anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        />
-      )}
+        >
+          <Alert
+            onClose={() => dispatch(closeSnackbar())}
+            severity={severity}
+            variant="filled"
+            sx={{ width: '100%' }}
+          >
+            {message}
+          </Alert>
+        </Snackbar>
+      
 
       {/* Add New Entry button: icon only on sm, text on larger screens */}
       <div className="fixed bottom-6 right-2 sm:bottom-10 sm:right-10">

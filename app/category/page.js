@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 
 import CategoryDialog from "./categorydialog/page";
@@ -11,36 +11,53 @@ import {
   FaPlus,
 } from "react-icons/fa";
 import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories, deleteCategory } from "@/redux/slices/categorySlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
+import {
+  selectCategories,
+  selectStatus,
+  selectError,
+} from "@/redux/selectors/categorySelectors";
 
 export default function CategoryPage() {
   const dispatch = useDispatch();
   const searchParams = useSearchParams();
-  const { categories, status, error } = useSelector((state) => state.category);
+  const categories = useSelector(selectCategories);
+  const status = useSelector(selectStatus);
+  const error = useSelector(selectError);
 
   const [showDialog, setShowDialog] = useState(
     searchParams.get("showAddNew") === "true"
   );
-  const [showSnackbar, setShowSnackbar] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const { open, message, severity } = useSelector((state) => state.snackbar);
   const [confirmDialog, setConfirmDialog] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState(null);
   const [isChecked, setIsChecked] = useState(false);
   const [currentCategory, setCurrentCategory] = useState(null);
-  const [showErrorSnackbar, setShowErrorSnackbar] = useState(false);
+
+  // Memoize categories for rendering
+  const memoCategories = useMemo(() => categories, [categories]);
 
   useEffect(() => {
-    dispatch(fetchCategories());
-  }, [dispatch]);
+    if (status === "idle") {
+      dispatch(fetchCategories());
+    }
+  }, [dispatch, status]);
+
+  useEffect(() => {
+    if (status === "failed") {
+      dispatch(showSnackbar({ message: error, severity: "error" }));
+    }
+  }, [status, error]);
 
   const handleDelete = async () => {
     if (isChecked && accountToDelete) {
       dispatch(deleteCategory(accountToDelete));
       closeConfirmDialog();
-      setSnackbarMessage("Category deleted successfully!");
-      setShowSnackbar(true);
+      handleShowSnackbar("Category deleted successfully!", "success");
     }
   };
 
@@ -55,9 +72,8 @@ export default function CategoryPage() {
     dispatch(fetchCategories());
   };
 
-  const handleShowSnackbar = (message) => {
-    setSnackbarMessage(message);
-    setShowSnackbar(true);
+  const handleShowSnackbar = (message, severity = "info") => {
+    dispatch(showSnackbar({ message, severity }));
   };
 
   const openConfirmDialog = (categoryId) => {
@@ -79,10 +95,12 @@ export default function CategoryPage() {
     <div className="balance-page mt-14 p-5">
       <div className="text-3xl font-bold mb-5">Categories</div>
 
-      {status === "loading" ? <LoadingSpinner /> : (
+      {status === "loading" ? (
+        <LoadingSpinner />
+      ) : (
         <>
           <ul className="accounts-list">
-            {categories.map((cat) => (
+            {memoCategories.map((cat) => (
               <li key={cat.id} className="account-item">
                 <div className="grid grid-cols-4 gap-2 sm:w-96">
                   <div className="flex justify-center col-span-3 shadow-lg rounded-2xl text-center content-center mt-3 p-6 bg-teal-100 border border-gray-200">
@@ -170,22 +188,20 @@ export default function CategoryPage() {
           )}
 
           <Snackbar
-            message={snackbarMessage}
-            open={showSnackbar}
-            onClose={() => setShowSnackbar(false)}
+            open={open}
+            onClose={() => dispatch(closeSnackbar())}
             autoHideDuration={5000}
             anchorOrigin={{ vertical: "top", horizontal: "right" }}
-          />
-          {status === "failed" && (
-            <Snackbar
-              severity="error"
-              message={error}
-              open={showErrorSnackbar}
-              onClose={() => setShowErrorSnackbar(false)}
-              autoHideDuration={5000}
-              anchorOrigin={{ vertical: "top", horizontal: "right" }}
-            />
-          )}
+          >
+            <Alert
+              onClose={() => dispatch(closeSnackbar())}
+              severity={severity}
+              variant="filled"
+              sx={{ width: "100%" }}
+            >
+              {message}
+            </Alert>
+          </Snackbar>
         </>
       )}
     </div>
