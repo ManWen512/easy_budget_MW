@@ -77,7 +77,7 @@ export default function HistoryPage() {
     if (status === "failed") {
       dispatch(showSnackbar({ message: error, severity: "error" }));
     }
-  }, [status, error]);
+  }, [status, error, dispatch]);
 
   // Memoize entryData for table rendering
   const memoEntryData = useMemo(() => entryData, [entryData]);
@@ -353,10 +353,10 @@ export default function HistoryPage() {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-bold text-gray-800">
-                      {item.category.name}
+                      {item.categoryDto.name}
                     </span>
                     <span className="text-xs text-gray-500">
-                      {item.account.name}
+                      {item.accountDto.name}
                     </span>
                   </div>
                 </div>
@@ -405,13 +405,13 @@ export default function HistoryPage() {
                         {item.type}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {item.category.name}
+                        {item.categoryDto.name}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {currencySymbol} {item.cost}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {item.account.name}
+                        {item.accountDto.name}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div className="flex space-x-2">

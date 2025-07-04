@@ -56,56 +56,49 @@ export default function AddEditEntryPage({ searchParams }) {
   // that would not be flexible for adding/removing fields
   const [formData, setFormData] = useState({
     type: type || "OUTCOME",
-    category: parsedCategory || { id: "", name: "" },
-    account: parsedAccount || { id: "", name: "" },
+    categoryId: parsedCategory || "",
+    accountId: parsedAccount || "",
     cost: cost || 1,
     dateTime: localDate || localDateTime,
     description: description || "",
   });
-  const { open, message } = useSelector((state) => state.snackbar);
+  const { open, message, severity } = useSelector((state) => state.snackbar);
 
   // Memoize categories and accounts for rendering
   const memoCategories = useMemo(() => categories, [categories]);
   const memoAccounts = useMemo(() => accounts, [accounts]);
 
   useEffect(() => {
-    
-      dispatch(fetchCategories());
-      dispatch(fetchAccounts());
-    
+    dispatch(fetchCategories());
+    dispatch(fetchAccounts());
   }, [dispatch]);
 
   useEffect(() => {
-  
-      dispatch(fetchCategories()).then((result) => {
-        if (result.payload?.length > 0 && formData.category.id === 0) {
-          setDefaultCategory(result.payload);
-        }
-      });
+    dispatch(fetchCategories()).then((result) => {
+      if (result.payload?.length > 0 && formData.categoryId === 0) {
+        setDefaultCategory(result.payload);
+      }
+    });
 
-      dispatch(fetchAccounts()).then((result) => {
-        if (result.payload?.length > 0 && formData.account.id === 0) {
-          setDefaultAccount(result.payload);
-        }
-      });
-    
+    dispatch(fetchAccounts()).then((result) => {
+      if (result.payload?.length > 0 && formData.accountId === 0) {
+        setDefaultAccount(result.payload);
+      }
+    });
   }, [dispatch]);
 
   useEffect(() => {
     if (status === "failed") {
       dispatch(showSnackbar({ message: error, severity: "error" }));
     }
-  }, [status, error]);
+  }, [status, error, dispatch]);
 
   const setDefaultCategory = (data) => {
     // I had to use "data", because even calling this function after fetch's .then,
     // categories array is still not updated somehow
     setFormData((prevData) => ({
       ...prevData,
-      category: {
-        id: data[0].id,
-        name: data[0].name,
-      },
+      categoryId: data[0].id,
     }));
   };
 
@@ -114,16 +107,14 @@ export default function AddEditEntryPage({ searchParams }) {
     // categories array is still not updated somehow
     setFormData((prevData) => ({
       ...prevData,
-      account: {
-        id: data[0].id,
-        name: data[0].name,
-      },
+      accountId: data[0].id,
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(submitEntry({ itemId, formData }));
+    console.log(formData);
   };
 
   useEffect(() => {
@@ -151,10 +142,7 @@ export default function AddEditEntryPage({ searchParams }) {
       );
       setFormData((prevData) => ({
         ...prevData,
-        category: {
-          id: selectedCategory?.id || 0,
-          name: selectedCategory?.name || "",
-        },
+        categoryId: selectedCategory?.id || 0,
       }));
     } else if (name === "account") {
       const selectedAccount = memoAccounts.find(
@@ -162,10 +150,7 @@ export default function AddEditEntryPage({ searchParams }) {
       );
       setFormData((prevData) => ({
         ...prevData,
-        account: {
-          id: selectedAccount?.id || 0,
-          name: selectedAccount?.name || "",
-        },
+        accountId: selectedAccount?.id || 0,
       }));
     } else {
       setFormData((prevData) => ({
@@ -246,7 +231,7 @@ export default function AddEditEntryPage({ searchParams }) {
                     <Select
                       labelId="demo-simple-select-autowidth-label"
                       id="demo-simple-select-autowidth"
-                      value={formData.category.id}
+                      value={formData.categoryId}
                       onChange={handleChange}
                       autoWidth
                       label="Category"
@@ -294,7 +279,7 @@ export default function AddEditEntryPage({ searchParams }) {
                     <Select
                       labelId="demo-simple-select-autowidth-label"
                       id="demo-simple-select-autowidth"
-                      value={formData.account.id}
+                      value={formData.accountId}
                       onChange={handleChange}
                       autoWidth
                       label="Account"

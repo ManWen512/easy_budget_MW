@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,7 +14,7 @@ export default function LoginPage() {
   
   const dispatch = useDispatch();
   const router = useRouter();
-  const searchParams = useSearchParams();
+
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -27,17 +26,10 @@ export default function LoginPage() {
  
 
   useEffect(() => {
-    const message = searchParams.get("signupSnackbar");
-    if (message) {
-      dispatch(showSnackbar({ message, severity: "success" }));
-    }
-  }, [searchParams]);
-
-  useEffect(() => {
     if (status === "failed") {
       dispatch(showSnackbar({ message: error, severity: "error" }));
     }
-  }, [status, error]);
+  }, [status, error, dispatch]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

@@ -80,7 +80,7 @@ export default function GraphsPage() {
     if (status === "failed") {
       dispatch(showSnackbar({ message: error, severity: "error" }));
     }
-  }, [status, error]);
+  }, [status, error, dispatch]);
 
   const handleOptionChange = (option) => {
     setSelectedOption(option);

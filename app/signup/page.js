@@ -54,7 +54,7 @@ export default function SignupPage() {
     if (passwordError) {
       dispatch(showSnackbar({ message: passwordError, severity: "error" }));
     }
-  }, [status, error, passwordError]);
+  }, [status, error, passwordError, dispatch]);
 
   const handleGuestLogin = () => {
     dispatch(

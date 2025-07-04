@@ -25,6 +25,7 @@ const EntryDetailPage = ({ params }) => {
   const dispatch = useDispatch();
 
   const { entry, status, error } = useSelector((state) => state.entryDetail);
+  const { open, message, severity } = useSelector((state) => state.snackbar);
 
   useEffect(() => {
     if (id) {
@@ -39,7 +40,7 @@ const EntryDetailPage = ({ params }) => {
     if (status === "failed") {
       dispatch(showSnackbar({ message: error, severity: "error" }));
     }
-  }, [status, error]);
+  }, [status, error, dispatch]);
 
   const handleDelete = () => {
     if (isChecked) {

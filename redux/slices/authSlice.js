@@ -12,9 +12,10 @@ export const signinUser = createAsyncThunk(
       localStorage.setItem("token", token);
       return { ...res.data, token };
     } catch (error) {
-      const status = error.response.status;
-      let message = error.response.data.message;
-      if (status === 401) message = "Wrong email or password!";
+      if (!response.ok) {
+        const errorText = await response.text(); // or use response.json() if it's JSON
+        throw new Error(errorText);
+      }
       return thunkAPI.rejectWithValue({  message });
     }
   }
@@ -29,9 +30,10 @@ export const signupUser = createAsyncThunk(
       localStorage.setItem("token", token);
       return { ...res.data, token };
     } catch (error) {
-      const status = error.response.status;
-      let message = error.response.data.message;
-      if (status === 409) message = "Email already exists! Please Login";
+      if (!response.ok) {
+        const errorText = await response.text(); // or use response.json() if it's JSON
+        throw new Error(errorText);
+      }
       return thunkAPI.rejectWithValue({ message });
     }
   }

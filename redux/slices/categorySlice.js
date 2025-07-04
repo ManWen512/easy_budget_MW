@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import authFetch from "../lib/authFetch";
 
 const mainUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -7,8 +8,11 @@ export const fetchCategories = createAsyncThunk(
   "category/fetchCategories",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${mainUrl}/category/all`);
-      if (!response.ok) throw new Error("Failed to fetch categories");
+      const response = await authFetch(`${mainUrl}/categories`);
+      if (!response.ok) {
+        const errorText = await response.text(); // or use response.json() if it's JSON
+        throw new Error(errorText);
+      }
       return await response.json();
     } catch (error) {
       return rejectWithValue(error.message);
@@ -21,13 +25,16 @@ export const addCategory = createAsyncThunk(
   "category/addCategory",
   async (newCategory, { dispatch, rejectWithValue }) => {
     try {
-      const response = await fetch(`${mainUrl}/category`, {
+      const response = await authFetch(`${mainUrl}/categories`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newCategory),
       });
 
-      if (!response.ok) throw new Error("Failed to add category");
+      if (!response.ok) {
+        const errorText = await response.text(); // or use response.json() if it's JSON
+        throw new Error(errorText);
+      }
 
       dispatch(fetchCategories()); // Refresh category list after adding
       return await response.json();
@@ -46,7 +53,7 @@ export const editCategory = createAsyncThunk(
         throw new Error("Category ID is required for editing.");
       }
 
-      const response = await fetch(`${mainUrl}/category?id=${updatedCategory.id}`, {
+      const response = await authFetch(`${mainUrl}/categories/${updatedCategory.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedCategory),
@@ -67,11 +74,14 @@ export const deleteCategory = createAsyncThunk(
   "category/deleteCategory",
   async (categoryId, { dispatch, rejectWithValue }) => {
     try {
-      const response = await fetch(`${mainUrl}/category?id=${categoryId}`, {
+      const response = await authFetch(`${mainUrl}/categories/${categoryId}`, {
         method: "DELETE",
       });
 
-      if (!response.ok) throw new Error("Failed to delete category");
+      if (!response.ok) {
+        const errorText = await response.text(); // or use response.json() if it's JSON
+        throw new Error(errorText);
+      }
 
       dispatch(fetchCategories()); // Refresh category list after deleting
       return categoryId; // Return deleted category ID if needed

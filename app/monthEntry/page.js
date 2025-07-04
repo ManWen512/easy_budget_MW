@@ -60,7 +60,7 @@ export default function MonthEntryPage() {
     if (status === "failed") {
       dispatch(showSnackbar({ message: error, severity: "error" }));
     }
-  }, [status, error]);
+  }, [status, error, dispatch]);
 
   // Helper function to handle month navigation
   const handleMonthChange = (direction) => {
@@ -204,7 +204,7 @@ export default function MonthEntryPage() {
                     >
                       <div className="flex justify-between items-center">
                         <div className="text-sm font-bold text-gray-800">
-                          {item.category.name}
+                          {item.categoryDto.name}
                         </div>
                         <div
                           className={
@@ -223,8 +223,8 @@ export default function MonthEntryPage() {
                           {item.description}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {item.account.name.charAt(0).toUpperCase() +
-                            item.account.name.slice(1)}
+                          {item.accountDto.name.charAt(0).toUpperCase() +
+                            item.accountDto.name.slice(1)}
                         </div>
                       </div>
                     </div>

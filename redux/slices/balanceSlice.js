@@ -15,7 +15,7 @@ export const fetchAccounts = createAsyncThunk(
 export const fetchTotalBalance = createAsyncThunk(
   "balance/fetchTotalBalance",
   async () => {
-    const response = await authFetch(`${accUrl}/accounts/totalBalance`);
+    const response = await authFetch(`${accUrl}/accounts/balance/total`);
     return await response.json();
   }
 );
@@ -60,11 +60,11 @@ export const editAccount = createAsyncThunk(
           body: JSON.stringify(updatedAccount),
         }
       );
-
       if (!response.ok) {
-        throw new Error("Failed to update account");
+        const errorText = await response.text(); // or use response.json() if it's JSON
+        throw new Error(errorText);
       }
-
+      
       dispatch(fetchAccounts());
       dispatch(fetchTotalBalance());
 
@@ -84,7 +84,8 @@ export const deleteAccount = createAsyncThunk(
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete account");
+        const errorText = await response.text(); // or use response.json() if it's JSON
+        throw new Error(errorText);
       }
 
       dispatch(fetchAccounts());

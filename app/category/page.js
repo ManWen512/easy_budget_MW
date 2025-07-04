@@ -42,16 +42,14 @@ export default function CategoryPage() {
   const memoCategories = useMemo(() => categories, [categories]);
 
   useEffect(() => {
-   
-      dispatch(fetchCategories());
-    
-  }, [dispatch, status]);
+    dispatch(fetchCategories());
+  }, [dispatch]);
 
   useEffect(() => {
     if (status === "failed") {
       dispatch(showSnackbar({ message: error, severity: "error" }));
     }
-  }, [status, error]);
+  }, [status, error, dispatch]);
 
   const handleDelete = async () => {
     if (isChecked && accountToDelete) {

@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import authFetch from "../lib/authFetch";
 
 const mainUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -6,7 +7,7 @@ const mainUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 export const fetchEntryDetail = createAsyncThunk(
   "entryDetail/fetchEntryDetail",
   async (id) => {
-    const response = await fetch(`${mainUrl}/entry?id=${id}`);
+    const response = await authFetch(`${mainUrl}/entries/${id}`);
     if (!response.ok) throw new Error("Failed to fetch entry");
 
     return await response.json(); 
@@ -16,7 +17,7 @@ export const fetchEntryDetail = createAsyncThunk(
 export const deleteEntry = createAsyncThunk(
   "entryDetail/deleteEntry",
   async (id, { rejectWithValue }) => {
-    const response = await fetch(`${mainUrl}/entry?id=${id}`, {
+    const response = await authFetch(`${mainUrl}/entries/${id}`, {
       method: "DELETE",
     });
     if (!response.ok) return rejectWithValue("Failed to delete entry");

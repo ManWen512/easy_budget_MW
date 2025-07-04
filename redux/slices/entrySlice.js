@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import authFetch from "../lib/authFetch";
 
 const mainUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -8,9 +9,11 @@ export const submitEntry = createAsyncThunk(
   async ({ itemId, formData }, { rejectWithValue }) => {
     try {
       const method = itemId ? "PUT" : "POST";
-      const url = itemId ? `${mainUrl}/entry?id=${itemId}` : `${mainUrl}/entry`;
+      const url = itemId
+        ? `${mainUrl}/entries/${itemId}`
+        : `${mainUrl}/entries`;
 
-      const response = await fetch(url, {
+      const response = await authFetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -18,7 +21,11 @@ export const submitEntry = createAsyncThunk(
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) throw new Error("Failed to submit entry");
+      if (!response.ok) {
+        const errorText = await response.text(); // or use response.json() if it's JSON
+
+        throw new Error(errorText);
+      }
 
       return await response.json();
     } catch (error) {
@@ -30,31 +37,30 @@ export const submitEntry = createAsyncThunk(
 const entrySlice = createSlice({
   name: "entry",
   initialState: {
-    status: 'idle',
+    status: "idle",
     error: null,
     successMessage: null,
   },
   reducers: {
     clearStatus: (state) => {
-      state.status = 'succeeded';
+      state.status = "succeeded";
       state.error = null;
       state.successMessage = null;
     },
-    
   },
   extraReducers: (builder) => {
     builder
       .addCase(submitEntry.pending, (state) => {
-        state.status = 'loading';
+        state.status = "loading";
         state.error = null;
         state.successMessage = null;
       })
       .addCase(submitEntry.fulfilled, (state) => {
-        state.status = 'loading';
+        state.status = "loading";
         state.successMessage = "Entry submitted successfully!";
       })
       .addCase(submitEntry.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = "failed";
         state.error = action.payload;
       });
   },

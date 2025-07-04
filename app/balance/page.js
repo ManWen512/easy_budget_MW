@@ -49,7 +49,7 @@ export default function BalancePage() {
     if (status === "failed") {
       dispatch(showSnackbar({ message: error, severity: "error" }));
     }
-  }, [status, error]);
+  }, [status, error, dispatch]);
 
   // Memoize accounts for rendering
   const memoAccounts = useMemo(() => accounts, [accounts]);

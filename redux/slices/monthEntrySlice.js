@@ -1,13 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import authFetch from "../lib/authFetch";
 
-const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entry`;
+const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entries`;
 
 // Async thunk for fetching month entries
 export const fetchMonthEntries = createAsyncThunk(
   "monthEntry/fetchMonthEntries",
   async ({ year, month }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${mainUrl}/monthEntry?year=${year}&month=${month}`);
+      const response = await authFetch(`${mainUrl}/monthEntry?year=${year}&month=${month}`);
       if (!response.ok) throw new Error("Network response was not ok");
       return await response.json();
     } catch (error) {

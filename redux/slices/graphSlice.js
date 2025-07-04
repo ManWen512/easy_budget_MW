@@ -1,14 +1,16 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import authFetch from "../lib/authFetch";
 
-const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entry/graphs`;
+const mainUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entries/graphs`;
 
 export const fetchMonthData = createAsyncThunk(
   "graph/fetchMonthData",
   async ({ year, month }) => {
-    const response = await fetch(
+    const response = await authFetch(
       `${mainUrl}/month?year=${year}&month=${month}`
     );
     const data = await response.json();
+    console.log(data);
 
     return {
       incomeCategoryList: transformData(
@@ -32,7 +34,7 @@ export const fetchMonthData = createAsyncThunk(
 export const fetchYearData = createAsyncThunk(
   "graph/fetchYearData",
   async (year) => {
-    const response = await fetch(`${mainUrl}/year?year=${year}`);
+    const response = await authFetch(`${mainUrl}/year?year=${year}`);
     const data = await response.json();
     return {
       incomeCategoryList: transformData(
@@ -56,7 +58,7 @@ export const fetchYearData = createAsyncThunk(
 export const fetchYearRangeData = createAsyncThunk(
   "graph/fetchYearRangeData",
   async (yearRange) => {
-    const response = await fetch(
+    const response = await authFetch(
       `${mainUrl}/years?startYear=${yearRange.startYear}&endYear=${yearRange.endYear}`
     );
     const data = await response.json();

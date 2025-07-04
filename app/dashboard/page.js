@@ -39,17 +39,17 @@ export default function Home() {
   const { open, message, severity } = useSelector((state) => state.snackbar);
 
   useEffect(() => {
-    if (status === "idle") {
+   
       dispatch(fetchTotalBalance());
       dispatch(fetchMonthData());
-    }
-  }, [dispatch, status]);
+    
+  }, [dispatch]);
 
   useEffect(() => {
     if (status === "failed") {
       dispatch(showSnackbar({ message: error, severity: "error" }));
     }
-  }, [status, error]);
+  }, [status, error, dispatch]);
 
   useEffect(() => {
     const message = searchParams.get("loginSnackbar");

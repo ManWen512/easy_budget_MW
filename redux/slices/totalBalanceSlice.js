@@ -1,13 +1,14 @@
 "use client";
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import authFetch from "../lib/authFetch";
 
 // Async action to fetch total balance from API
 export const fetchTotalBalance = createAsyncThunk(
   "totalBalance/fetchTotalBalance",
   async () => {
     const mainUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-    const response = await fetch(`${mainUrl}/account/totalBalance`);
+    const response = await authFetch(`${mainUrl}/accounts/balance/total`);
     const data = await response.json();
     return data;
   }

@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import authFetch from "../lib/authFetch";
 
 const mainUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -6,9 +7,9 @@ const mainUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 export const fetchAccountsAndCategories = createAsyncThunk(
   "history/fetchAccountsAndCategories",
   async () => {
-    const accountsResponse = await fetch(`${mainUrl}/account/all`);
+    const accountsResponse = await authFetch(`${mainUrl}/accounts`);
     const accountsData = await accountsResponse.json();
-    const categoriesResponse = await fetch(`${mainUrl}/category/all`);
+    const categoriesResponse = await authFetch(`${mainUrl}/categories`);
     const categoriesData = await categoriesResponse.json();
     return { accountsData, categoriesData };
   }
@@ -27,10 +28,10 @@ export const fetchEntryData = createAsyncThunk(
     if (sortField) params.append("sortField", sortField);
     if (sortOrder) params.append("sortOrder", sortOrder);
 
-    const url = `${mainUrl}/entry/history?${params}`;
-    console.log(url);
+    const url = `${mainUrl}/entries/history?${params}`;
+  
 
-    const response = await fetch(url);
+    const response = await authFetch(url);
     const data = await response.json();
     return { entryData: data.entries, totalCost: data.totalCost };
   }

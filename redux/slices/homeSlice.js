@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
+import authFetch from "../lib/authFetch";
 const mainUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Thunks for fetching data
@@ -7,7 +7,7 @@ export const fetchTotalBalance = createAsyncThunk(
   "home/fetchTotalBalance",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${mainUrl}/account/totalBalance`);
+      const response = await authFetch(`${mainUrl}/accounts/balance/total`);
       if (!response.ok) throw new Error("Failed to fetch total balance");
       const data = await response.json();
       return data;
@@ -23,8 +23,8 @@ export const fetchMonthData = createAsyncThunk(
     try {
       const currentYear = new Date().getFullYear();
       const currentMonth = new Date().getMonth() + 1;
-      const response = await fetch(
-        `${mainUrl}/entry/graphs/month?year=${currentYear}&month=${currentMonth}`
+      const response = await authFetch(
+        `${mainUrl}/entries/graphs/month?year=${currentYear}&month=${currentMonth}`
       );
       if (!response.ok) throw new Error("Failed to fetch month data");
       const data = await response.json();
