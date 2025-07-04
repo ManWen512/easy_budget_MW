@@ -9,11 +9,6 @@ const EChartBar = ({ data = [], title, currency, height = 400 }) => {
 
   const colors = [
     "#FF6384",
-    "#36A2EB",
-    "#FFCE56",
-    "#4BC0C0",
-    "#9966FF",
-    "#FF9F40",
   ];
 
   const formatDate = (day) => {
@@ -39,7 +34,7 @@ const EChartBar = ({ data = [], title, currency, height = 400 }) => {
     },
     yAxis: {
       type: "value",
-      name: `Balance (${currency})`,
+      name: `Cost (${currency})`,
     },
     series: [
       {

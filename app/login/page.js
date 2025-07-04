@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
@@ -14,7 +15,7 @@ export default function LoginPage() {
   
   const dispatch = useDispatch();
   const router = useRouter();
-
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -25,11 +26,14 @@ export default function LoginPage() {
 
  
 
+
+
   useEffect(() => {
-    if (status === "failed") {
-      dispatch(showSnackbar({ message: error, severity: "error" }));
+    const message = searchParams.get("logoutSnackbar");
+    if (message) {
+      dispatch(showSnackbar({ message, severity: "success" }));
     }
-  }, [status, error, dispatch]);
+  }, [searchParams]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -37,24 +41,28 @@ export default function LoginPage() {
       if (res.meta.requestStatus === "fulfilled") {
         dispatch(fetchUser());
         
-        router.push("/dashboard");
+        router.push(`/dashboard?loginSnackbar=${encodeURIComponent(
+          "Successfully logged in"
+        )}`);
       }
     });
   };
 
-  const handleGuestLogin = () => {
-    dispatch(
+  const handleGuestLogin = async () => {
+    const res = await dispatch(
       signinUser({
         email: process.env.NEXT_PUBLIC_EMAIL,
         password: process.env.NEXT_PUBLIC_PASSWORD,
       })
-    ).then((res) => {
-      if (res.meta.requestStatus === "fulfilled") {
-        dispatch(fetchUser());
-        dispatch(fetchResetData());
-        router.push("/dashboard");
-      }
-    });
+    );
+
+    if (res.meta.requestStatus === "fulfilled") {
+      await dispatch(fetchUser());
+      await dispatch(fetchResetData());
+      router.push(`/dashboard?loginSnackbar=${encodeURIComponent(
+        "Successfully logged in as a guest user"
+      )}`);
+    }
   };
 
 

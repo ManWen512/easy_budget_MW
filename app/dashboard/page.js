@@ -54,7 +54,7 @@ export default function Home() {
   useEffect(() => {
     const message = searchParams.get("loginSnackbar");
     if (message) {
-      dispatch(showSnackbar({ message, severity: "" }));
+      dispatch(showSnackbar({ message, severity: "success" }));
     }
   }, [searchParams]);
 

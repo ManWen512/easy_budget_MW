@@ -67,11 +67,7 @@ export default function Navbar({ children }) {
     closeSmallScreenMenu();
   }, [pathname]);
 
-  useEffect(() => {
-    if (status === "failed") {
-      dispatch(showSnackbar({ message: error, severity: "error" }));
-    }
-  }, [status, error]);
+
 
   const menuItems = [
     { name: "Dashboard", href: "/dashboard", icon: <MdDashboard size={30} /> },
@@ -81,8 +77,9 @@ export default function Navbar({ children }) {
       icon: <MdAccountBalanceWallet size={30} />,
     },
     { name: "Categories", href: "/category", icon: <MdCategory size={30} /> },
-    { name: "Graphs", href: "/graphs", icon: <VscGraphScatter size={30} /> },
     { name: "MonthEntry", href: "/monthEntry", icon: <IoCalendar size={30} /> },
+    { name: "Graphs", href: "/graphs", icon: <VscGraphScatter size={30} /> },
+
     { name: "History", href: "/history", icon: <LuHistory size={30} /> },
   ];
 
@@ -90,10 +87,10 @@ export default function Navbar({ children }) {
     dispatch(logout());
     persistor.purge();
     setDropdownOpen(false);
-    dispatch(
-      showSnackbar({ message: "Logged out successfully", severity: "success" })
+
+    router.push(
+      `/login?logoutSnackbar=${encodeURIComponent("Successfully logged out")}`
     );
-    router.push("/login");
   };
 
   return (
@@ -277,7 +274,7 @@ export default function Navbar({ children }) {
                     Log out
                   </button>
                 </div>
-              ) }
+              )}
             </div>
           </div>
         </>

@@ -70,7 +70,7 @@ export default function CategoryPage() {
     dispatch(fetchCategories());
   };
 
-  const handleShowSnackbar = (message, severity = "info") => {
+  const handleShowSnackbar = (message, severity = "success") => {
     dispatch(showSnackbar({ message, severity }));
   };
 

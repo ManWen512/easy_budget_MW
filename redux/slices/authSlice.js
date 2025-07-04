@@ -12,10 +12,7 @@ export const signinUser = createAsyncThunk(
       localStorage.setItem("token", token);
       return { ...res.data, token };
     } catch (error) {
-      if (!response.ok) {
-        const errorText = await response.text(); // or use response.json() if it's JSON
-        throw new Error(errorText);
-      }
+      
       return thunkAPI.rejectWithValue({  message });
     }
   }
@@ -30,10 +27,7 @@ export const signupUser = createAsyncThunk(
       localStorage.setItem("token", token);
       return { ...res.data, token };
     } catch (error) {
-      if (!response.ok) {
-        const errorText = await response.text(); // or use response.json() if it's JSON
-        throw new Error(errorText);
-      }
+    
       return thunkAPI.rejectWithValue({ message });
     }
   }
@@ -91,7 +85,7 @@ const authSlice = createSlice({
       .addCase(signinUser.rejected, (state, action) => {
         state.status = "failed";
         state.isAuthenticated = false;
-        state.error = action.payload?.message || "Request failed";
+        state.error = action.payload?.message || "Invalid email or password";
         state.errorStatus = action.payload?.status || null;
       })
       .addCase(signupUser.pending, (state) => {
@@ -105,7 +99,7 @@ const authSlice = createSlice({
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload?.message || "Request failed";
+        state.error = action.payload?.message || "Invalid email or password";
         state.errorStatus = action.payload?.status || null;
       })
       .addCase(fetchUser.pending, (state) => {

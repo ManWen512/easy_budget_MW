@@ -42,7 +42,9 @@ export default function SignupPage() {
       if (res.meta.requestStatus === "fulfilled") {
         dispatch(fetchUser());
 
-        router.push("/dashboard");
+        router.push(`/dashboard?loginSnackbar=${encodeURIComponent(
+          "Successfully logged in"
+        )}`);
       }
     });
   };
@@ -66,7 +68,9 @@ export default function SignupPage() {
       if (res.meta.requestStatus === "fulfilled") {
         dispatch(fetchUser());
         dispatch(fetchResetData());
-        router.push("/dashboard");
+        router.push(`/dashboard?loginSnackbar=${encodeURIComponent(
+          "Successfully logged in as a guest user"
+        )}`);
       }
     });
   };
