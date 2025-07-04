@@ -6,13 +6,17 @@ import { useSearchParams } from "next/navigation";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
-import { signinUser, fetchResetData, fetchUser } from "@/redux/slices/authSlice";
+import {
+  signinUser,
+  fetchResetData,
+  fetchUser,
+} from "@/redux/slices/authSlice";
 import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function LoginPage() {
-  
   const dispatch = useDispatch();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -21,12 +25,9 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
-  const {  error, status } = useSelector((state) => state.auth);
+  const { error, status } = useSelector((state) => state.auth);
   const { open, message, severity } = useSelector((state) => state.snackbar);
-
- 
-
-
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const message = searchParams.get("logoutSnackbar");
@@ -40,15 +41,18 @@ export default function LoginPage() {
     dispatch(signinUser(formData)).then((res) => {
       if (res.meta.requestStatus === "fulfilled") {
         dispatch(fetchUser());
-        
-        router.push(`/dashboard?loginSnackbar=${encodeURIComponent(
-          "Successfully logged in"
-        )}`);
+
+        router.push(
+          `/dashboard?loginSnackbar=${encodeURIComponent(
+            "Successfully logged in"
+          )}`
+        );
       }
     });
   };
 
   const handleGuestLogin = async () => {
+    setLoading(true);
     const res = await dispatch(
       signinUser({
         email: process.env.NEXT_PUBLIC_EMAIL,
@@ -59,15 +63,25 @@ export default function LoginPage() {
     if (res.meta.requestStatus === "fulfilled") {
       await dispatch(fetchUser());
       await dispatch(fetchResetData());
-      router.push(`/dashboard?loginSnackbar=${encodeURIComponent(
-        "Successfully logged in as a guest user"
-      )}`);
+
+      router.push(
+        `/dashboard?loginSnackbar=${encodeURIComponent(
+          "Successfully logged in as a guest user"
+        )}`
+      );
+     
+    } else {
+      setLoading(false);
     }
   };
 
-
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
+      {loading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-70">
+          <LoadingSpinner />
+        </div>
+      )}
       <div className="w-full max-w-sm ">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">

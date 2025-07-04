@@ -14,6 +14,7 @@ import {
 import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function SignupPage() {
   const dispatch = useDispatch();
@@ -29,7 +30,7 @@ export default function SignupPage() {
   const [passwordError, setPasswordError] = useState("");
   const { status, error } = useSelector((state) => state.auth);
   const { open, message, severity } = useSelector((state) => state.snackbar);
-
+  const [loading, setLoading] = useState(false);
   const handleSubmit = (e) => {
     e.preventDefault();
     setPasswordError("");
@@ -59,6 +60,7 @@ export default function SignupPage() {
   }, [status, error, passwordError, dispatch]);
 
   const handleGuestLogin = () => {
+    setLoading(true);
     dispatch(
       signinUser({
         email: process.env.NEXT_PUBLIC_EMAIL,
@@ -71,13 +73,21 @@ export default function SignupPage() {
         router.push(`/dashboard?loginSnackbar=${encodeURIComponent(
           "Successfully logged in as a guest user"
         )}`);
+        setLoading(false);
+      } else {
+        setLoading(false);
       }
     });
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <Snackbar
+      {loading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-70">
+          <LoadingSpinner />
+        </div>
+      )}
+        <Snackbar
         open={open}
         onClose={() => dispatch(closeSnackbar())}
         autoHideDuration={5000}
