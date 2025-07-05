@@ -60,16 +60,17 @@ const authSlice = createSlice({
   },
   reducers: {
     logout: (state) => {
+      
       state.token = null;
       state.user = null;
       state.isAuthenticated = false;
       state.status = "idle";
       localStorage.removeItem("token");
     },
-    loadUserFromStorage: (state) => {
-      const token = localStorage.getItem("token");
-      if (token) state.token = token;
-    },
+    // loadUserFromStorage: (state) => {
+    //   state.token = localStorage.getItem("token");
+      
+    // },
   },
   extraReducers: (builder) => {
     builder

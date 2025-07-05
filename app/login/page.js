@@ -34,6 +34,12 @@ export default function LoginPage() {
     }
   }, [searchParams]);
 
+  useEffect(()=>{
+    if(status == 'failed'){
+      dispatch(showSnackbar({ message: error, severity:"error"}))
+    }
+  })
+
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(signinUser(formData)).then((res) => {
@@ -50,6 +56,8 @@ export default function LoginPage() {
       }
     });
   };
+
+  
 
   const handleGuestLogin = async () => {
     setLoading(true);

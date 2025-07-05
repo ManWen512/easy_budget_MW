@@ -33,6 +33,7 @@ export default function Navbar({ children }) {
   );
   const dropdownRef = useRef(null);
   const { open, message, severity } = useSelector((state) => state.snackbar);
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -56,6 +57,7 @@ export default function Navbar({ children }) {
   }, []);
 
   useEffect(() => {
+    
     localStorage.setItem("sidebarState", JSON.stringify(isSidebarOpen));
   }, [isSidebarOpen]);
 
@@ -64,6 +66,7 @@ export default function Navbar({ children }) {
   const closeSmallScreenMenu = () => setIsSmallScreenMenuOpen(false);
 
   useEffect(() => {
+    
     closeSmallScreenMenu();
   }, [pathname]);
 
@@ -111,7 +114,7 @@ export default function Navbar({ children }) {
       </Snackbar>
       {/* Desktop Profile or Login/Sign Up buttons */}
       <div className="hidden sm:flex fixed top-0 right-0 z-50 space-x-3 p-4">
-        {isAuthenticated && user && (
+        {token && user && (
           <div className="relative" ref={dropdownRef}>
             <button
               className="flex items-center space-x-2 px-3 py-2 bg-white border border-teal-500 text-teal-600 rounded-lg hover:bg-teal-50 font-semibold transition"
