@@ -2,8 +2,29 @@
 import Link from "next/link";
 import Image from "next/image";
 import Pixel from "../public/Pixel.png";
+import { useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const router = useRouter();
+
+  const handleLogin = () => {
+    if (isAuthenticated) {
+      router.push("/dashboard");
+    } else {
+      router.push("/login");
+    }
+  };
+
+  const handleSignUp = () => {
+    if (isAuthenticated) {
+      router.push("/dashboard");
+    } else {
+      router.push("/signup");
+    }
+  };
+
   return (
     <div className="relative min-h-screen  bg-gradient-to-br from-teal-50 to-white flex flex-col">
       {/* Top Left: Logo and Text */}
@@ -14,16 +35,18 @@ export default function Home() {
 
       {/* Top Right: Login and Signup */}
       <div className="absolute top-0 right-0 flex space-x-2 p-6">
-        <Link href="/login">
-          <button className="px-4 py-2 bg-white border border-teal-500 text-teal-600 rounded-lg hover:bg-teal-50 font-semibold transition">
-            Login
-          </button>
-        </Link>
-        <Link href="/signup">
-          <button className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 font-semibold transition">
-            Sign Up
-          </button>
-        </Link>
+        <button
+          onClick={handleLogin}
+          className="px-4 py-2 bg-white border border-teal-500 text-teal-600 rounded-lg hover:bg-teal-50 font-semibold transition"
+        >
+          Login
+        </button>
+        <button
+          onClick={handleSignUp}
+          className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 font-semibold transition"
+        >
+          Sign Up
+        </button>
       </div>
 
       {/* Center Content */}
@@ -34,11 +57,12 @@ export default function Home() {
         <p className="text-lg text-gray-600 mb-10 text-center max-w-xl px-4">
           Take control of your finances with EasyBudget. Track your expenses, manage your categories, and visualize your spending with ease.
         </p>
-        <Link href="/login">
-          <button className="px-8 py-4 bg-teal-500 text-white rounded-xl text-xl font-bold shadow-lg hover:bg-teal-600 transition">
-            Get Started - Login
-          </button>
-        </Link>
+        <button
+          onClick={handleLogin}
+          className="px-8 py-4 bg-teal-500 text-white rounded-xl text-xl font-bold shadow-lg hover:bg-teal-600 transition"
+        >
+          Get Started - Login
+        </button>
       </div>
     </div>
   );

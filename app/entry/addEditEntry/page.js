@@ -18,9 +18,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
-import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
+import { showSnackbar } from "@/redux/slices/snackBarSlice";
 import { selectCategories as selectCategoryList } from "@/redux/selectors/categorySelectors";
 import { selectAccounts as selectAccountList } from "@/redux/selectors/balanceSelectors";
 import {
@@ -56,13 +54,13 @@ export default function AddEditEntryPage({ searchParams }) {
   // that would not be flexible for adding/removing fields
   const [formData, setFormData] = useState({
     type: type || "OUTCOME",
-    categoryId: parsedCategory || "",
-    accountId: parsedAccount || "",
+    categoryId: parsedCategory?.id || "",
+    accountId: parsedAccount?.id || "",
     cost: cost || 1,
     dateTime: localDate || localDateTime,
     description: description || "",
   });
-  const { open, message, severity } = useSelector((state) => state.snackbar);
+  // const { open, message, severity } = useSelector((state) => state.snackbar);
 
   // Memoize categories and accounts for rendering
   const memoCategories = useMemo(() => categories, [categories]);
@@ -119,9 +117,8 @@ export default function AddEditEntryPage({ searchParams }) {
 
   useEffect(() => {
     if (successMessage) {
-      router.push(
-        `/monthEntry?triggerSnackbar=${encodeURIComponent(successMessage)}`
-      );
+      router.push("/monthEntry");
+      dispatch(showSnackbar({ message: successMessage, severity: "success" }));
       dispatch(clearStatus()); // Reset state after redirection
     }
   }, [successMessage, router, dispatch]);
@@ -161,7 +158,7 @@ export default function AddEditEntryPage({ searchParams }) {
   };
 
   return (
-    <div className="p-5 mt-14">
+    <div className="p-5 mt-14 sm:mt-0">
       {status === "loading" ? (
         <LoadingSpinner />
       ) : (
@@ -373,21 +370,7 @@ export default function AddEditEntryPage({ searchParams }) {
             </form>
           </div>
 
-          <Snackbar
-            open={open}
-            onClose={() => dispatch(closeSnackbar())}
-            autoHideDuration={5000}
-            anchorOrigin={{ vertical: "top", horizontal: "right" }}
-          >
-            <Alert
-              onClose={() => dispatch(closeSnackbar())}
-              severity={severity}
-              variant="filled"
-              sx={{ width: "100%" }}
-            >
-              {message}
-            </Alert>
-          </Snackbar>
+          
         </>
       )}
     </div>

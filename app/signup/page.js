@@ -11,9 +11,7 @@ import {
   signinUser,
   fetchUser,
 } from "@/redux/slices/authSlice";
-import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
+import { showSnackbar } from "@/redux/slices/snackBarSlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function SignupPage() {
@@ -29,7 +27,7 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const { status, error } = useSelector((state) => state.auth);
-  const { open, message, severity } = useSelector((state) => state.snackbar);
+  //  const { open, message, severity } = useSelector((state) => state.snackbar);
   const [loading, setLoading] = useState(false);
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -42,10 +40,10 @@ export default function SignupPage() {
     dispatch(signupUser(formData)).then((res) => {
       if (res.meta.requestStatus === "fulfilled") {
         dispatch(fetchUser());
-
-        router.push(`/dashboard?loginSnackbar=${encodeURIComponent(
-          "Successfully logged in"
-        )}`);
+        dispatch(showSnackbar({ message: "Successfully logged in", severity: "success" }));
+        router.push(
+          "/dashboard"
+        );
       }
     });
   };
@@ -70,9 +68,10 @@ export default function SignupPage() {
       if (res.meta.requestStatus === "fulfilled") {
         dispatch(fetchUser());
         dispatch(fetchResetData());
-        router.push(`/dashboard?loginSnackbar=${encodeURIComponent(
-          "Successfully logged in as a guest user"
-        )}`);
+        dispatch(showSnackbar({ message: "Successfully logged in as a guest user", severity: "success" }));
+        router.push(
+          "/dashboard"
+        );
         setLoading(false);
       } else {
         setLoading(false);
@@ -87,21 +86,8 @@ export default function SignupPage() {
           <LoadingSpinner />
         </div>
       )}
-        <Snackbar
-        open={open}
-        onClose={() => dispatch(closeSnackbar())}
-        autoHideDuration={5000}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={() => dispatch(closeSnackbar())}
-          severity={severity}
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {message}
-        </Alert>
-      </Snackbar>
+
+
       <div className="w-full max-w-sm   ">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">

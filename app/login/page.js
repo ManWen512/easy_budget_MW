@@ -11,9 +11,7 @@ import {
   fetchResetData,
   fetchUser,
 } from "@/redux/slices/authSlice";
-import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
+import { showSnackbar } from "@/redux/slices/snackBarSlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function LoginPage() {
@@ -26,7 +24,7 @@ export default function LoginPage() {
     password: "",
   });
   const { error, status } = useSelector((state) => state.auth);
-  const { open, message, severity } = useSelector((state) => state.snackbar);
+  // const { open, message, severity } = useSelector((state) => state.snackbar);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -42,10 +40,12 @@ export default function LoginPage() {
       if (res.meta.requestStatus === "fulfilled") {
         dispatch(fetchUser());
 
-        router.push(
-          `/dashboard?loginSnackbar=${encodeURIComponent(
-            "Successfully logged in"
-          )}`
+        router.push("/dashboard");
+        dispatch(
+          showSnackbar({
+            message: "Successfully logged in",
+            severity: "success",
+          })
         );
       }
     });
@@ -64,12 +64,13 @@ export default function LoginPage() {
       await dispatch(fetchUser());
       await dispatch(fetchResetData());
 
-      router.push(
-        `/dashboard?loginSnackbar=${encodeURIComponent(
-          "Successfully logged in as a guest user"
-        )}`
+      router.push("/dashboard");
+      dispatch(
+        showSnackbar({
+          message: "Successfully logged in as a guest user",
+          severity: "success",
+        })
       );
-     
     } else {
       setLoading(false);
     }
@@ -198,22 +199,6 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
-
-      <Snackbar
-        open={open}
-        onClose={() => dispatch(closeSnackbar())}
-        autoHideDuration={5000}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={() => dispatch(closeSnackbar())}
-          severity={severity}
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {message}
-        </Alert>
-      </Snackbar>
     </div>
   );
 }

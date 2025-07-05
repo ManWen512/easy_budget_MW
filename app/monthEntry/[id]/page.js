@@ -13,9 +13,7 @@ import {
   clearEntryDetail,
 } from "@/redux/slices/entryDetailSlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
+import { showSnackbar } from "@/redux/slices/snackBarSlice";
 
 const EntryDetailPage = ({ params }) => {
   const [isChecked, setIsChecked] = useState(false);
@@ -25,7 +23,7 @@ const EntryDetailPage = ({ params }) => {
   const dispatch = useDispatch();
 
   const { entry, status, error } = useSelector((state) => state.entryDetail);
-  const { open, message, severity } = useSelector((state) => state.snackbar);
+  // const { open, message, severity } = useSelector((state) => state.snackbar);
 
   useEffect(() => {
     if (id) {
@@ -45,10 +43,13 @@ const EntryDetailPage = ({ params }) => {
   const handleDelete = () => {
     if (isChecked) {
       dispatch(deleteEntry(id));
-      router.push(
-        `/monthEntry?triggerSnackbar=${encodeURIComponent(
-          "Entry deleted successfully!"
-        )}`
+
+      router.push("/monthEntry");
+      dispatch(
+        showSnackbar({
+          message: "Entry deleted successfully!",
+          severity: "success",
+        })
       );
     }
   };
@@ -68,11 +69,6 @@ const EntryDetailPage = ({ params }) => {
 
   if (status === "loading") return <LoadingSpinner />;
 
-  
-      
-  
-  
-
   if (!entry) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -81,24 +77,10 @@ const EntryDetailPage = ({ params }) => {
     );
   }
 
+
   return (
     <div className="month-entry-page p-5">
-      <Snackbar
-        open={open}
-        onClose={() => dispatch(closeSnackbar())}
-        autoHideDuration={5000}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={() => dispatch(closeSnackbar())}
-          severity={severity}
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
-          {message}
-        </Alert>
-      </Snackbar>
-      <div className="sm:mx-40 m-5 mt-20 sm:mt-0 p-10 sm:p-20 bg-white rounded-lg shadow-lg">
+      <div className="sm:mx-40 m-5 mt-16 sm:mt-0 p-6 sm:p-20 bg-white rounded-lg shadow-lg ">
         <button onClick={() => router.back()} className="mb-4">
           <BsArrowLeftCircleFill size={30} />
         </button>
@@ -118,7 +100,7 @@ const EntryDetailPage = ({ params }) => {
           <div className="text-gray-500 mr-3 flex justify-between">
             Category<div>:</div>
           </div>
-          <div>{entry.category?.name || "N/A"}</div>
+          <div>{entry.categoryDto?.name || "N/A"}</div>
         </div>
         <div className="grid grid-cols-2 mb-4">
           <div className="text-gray-500 mr-3 flex justify-between">
@@ -134,9 +116,9 @@ const EntryDetailPage = ({ params }) => {
             Card<div>:</div>
           </div>
           <div>
-            {entry.account?.name
-              ? entry.account.name.charAt(0).toUpperCase() +
-                entry.account.name.slice(1)
+            {entry.accountDto?.name
+              ? entry.accountDto.name.charAt(0).toUpperCase() +
+                entry.accountDto.name.slice(1)
               : "N/A"}
           </div>
         </div>
@@ -168,8 +150,8 @@ const EntryDetailPage = ({ params }) => {
                 query: {
                   itemId: entry.id,
                   type: entry.type,
-                  category: JSON.stringify(entry.category),
-                  balance: JSON.stringify(entry.account),
+                  category: JSON.stringify(entry.categoryDto),
+                  balance: JSON.stringify(entry.accountDto),
                   cost: entry.cost,
                   dateTime: entry.dateTime,
                   description: entry.description,

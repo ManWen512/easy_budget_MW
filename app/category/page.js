@@ -10,17 +10,16 @@ import {
   FaExclamationTriangle,
   FaPlus,
 } from "react-icons/fa";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories, deleteCategory } from "@/redux/slices/categorySlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
+import { showSnackbar } from "@/redux/slices/snackBarSlice";
 import {
   selectCategories,
   selectStatus,
   selectError,
 } from "@/redux/selectors/categorySelectors";
+
 
 export default function CategoryPage() {
   const dispatch = useDispatch();
@@ -32,7 +31,7 @@ export default function CategoryPage() {
   const [showDialog, setShowDialog] = useState(
     searchParams.get("showAddNew") === "true"
   );
-  const { open, message, severity } = useSelector((state) => state.snackbar);
+  // const { open, message, severity } = useSelector((state) => state.snackbar);
   const [confirmDialog, setConfirmDialog] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState(null);
   const [isChecked, setIsChecked] = useState(false);
@@ -90,7 +89,7 @@ export default function CategoryPage() {
   };
 
   return (
-    <div className="balance-page mt-14 p-5">
+    <div className="balance-page mt-14 p-5 sm:mt-0">
       <div className="text-3xl font-bold mb-5">Categories</div>
 
       {status === "loading" ? (
@@ -185,21 +184,7 @@ export default function CategoryPage() {
             </div>
           )}
 
-          <Snackbar
-            open={open}
-            onClose={() => dispatch(closeSnackbar())}
-            autoHideDuration={2000}
-            anchorOrigin={{ vertical: "top", horizontal: "right" }}
-          >
-            <Alert
-              onClose={() => dispatch(closeSnackbar())}
-              severity={severity}
-              variant="filled"
-              sx={{ width: "100%" }}
-            >
-              {message}
-            </Alert>
-          </Snackbar>
+          
         </>
       )}
     </div>

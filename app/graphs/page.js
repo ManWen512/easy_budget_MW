@@ -13,9 +13,7 @@ import {
 import dynamic from "next/dynamic";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { MenuItem, FormControl, InputLabel, Select } from "@mui/material";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
-import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
+import { showSnackbar } from "@/redux/slices/snackBarSlice";
 import {
   selectIncomeList,
   selectOutcomeList,
@@ -34,7 +32,7 @@ const EChartBar = dynamic(() => import("@/components/EChartBar"), {
 export default function GraphsPage() {
   const dispatch = useDispatch();
   const [selectedOption, setSelectedOption] = useState("");
-  const { open, message, severity } = useSelector((state) => state.snackbar);
+  // const { open, message, severity } = useSelector((state) => state.snackbar);
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [selectedYear, setSelectedYear] = useState(null);
   const [yearRange, setYearRange] = useState({
@@ -54,10 +52,22 @@ export default function GraphsPage() {
   // Memoize chart data for rendering
   const memoIncomeList = useMemo(() => incomeList, [incomeList]);
   const memoOutcomeList = useMemo(() => outcomeList, [outcomeList]);
-  const memoIncomeCategoryList = useMemo(() => incomeCategoryList, [incomeCategoryList]);
-  const memoOutcomeCategoryList = useMemo(() => outcomeCategoryList, [outcomeCategoryList]);
-  const memoIncomeCategoryCostList = useMemo(() => incomeCategoryCostList, [incomeCategoryCostList]);
-  const memoOutcomeCategoryCostList = useMemo(() => outcomeCategoryCostList, [outcomeCategoryCostList]);
+  const memoIncomeCategoryList = useMemo(
+    () => incomeCategoryList,
+    [incomeCategoryList]
+  );
+  const memoOutcomeCategoryList = useMemo(
+    () => outcomeCategoryList,
+    [outcomeCategoryList]
+  );
+  const memoIncomeCategoryCostList = useMemo(
+    () => incomeCategoryCostList,
+    [incomeCategoryCostList]
+  );
+  const memoOutcomeCategoryCostList = useMemo(
+    () => outcomeCategoryCostList,
+    [outcomeCategoryCostList]
+  );
 
   const months = [
     "January",
@@ -102,7 +112,7 @@ export default function GraphsPage() {
   }, [selectedMonth, selectedYear, yearRange]);
 
   return (
-    <div className="p-5 mt-14">
+    <div className="p-5 mt-14 sm:mt-0">
       <div className="flex space-x-4 mb-4 w-full sm:w-[60vw]">
         {/* Radio Buttons */}
         <label
@@ -296,23 +306,6 @@ export default function GraphsPage() {
         )}
       </div>
 
-      
-        <Snackbar
-          open={open}
-          onClose={() => dispatch(closeSnackbar())}
-          autoHideDuration={5000}
-          anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        >
-          <Alert
-            onClose={() => dispatch(closeSnackbar())}
-            severity={severity}
-            variant="filled"
-            sx={{ width: '100%' }}
-          >
-            {message}
-          </Alert>
-        </Snackbar>
-      
       {status === "loading" ? (
         <LoadingSpinner />
       ) : (

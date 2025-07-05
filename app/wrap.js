@@ -4,7 +4,8 @@
 import { useState, useEffect } from "react";
 import Navbar from "./Navbar";
 import { usePathname } from "next/navigation";
-
+import AuthGuard from "./AuthGuard";
+import AppSnackbar from "@/components/AppSnackbar";
 
 export default function Wrap({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -20,14 +21,17 @@ export default function Wrap({ children }) {
   }, []);
 
   return (
-    <div className={showNavbar ? "flex min-h-screen" : ""}>
+    <div className={showNavbar ? "sm:flex sm:min-h-screen " : ""}>
       {showNavbar && <Navbar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />}
+      <AppSnackbar />
       <div className={
         showNavbar
           ? "transition-all duration-300 sm:flex-1 sm:flex sm:flex-col sm:items-center px-4 sm:px-6 md:px-8 sm:max-w-4xl sm:mx-auto sm:w-full"
           : ""
       }>
-        {children}
+        <AuthGuard>
+          {children}
+        </AuthGuard>
       </div>
     </div>
   );

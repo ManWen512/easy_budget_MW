@@ -1,22 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useMemo } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
+import { useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { currencySymbol } from "../currency";
 import { BiSolidLeftArrow, BiSolidRightArrow } from "react-icons/bi";
 import { FiPlus } from "react-icons/fi";
 import { useSelector, useDispatch } from "react-redux";
-import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
-
-import {
-  fetchMonthEntries,
-  setMonth,
-  setYear,
-  clearSnackbar,
-} from "@/redux/slices/monthEntrySlice";
+import { showSnackbar } from "@/redux/slices/snackBarSlice";
+import { fetchMonthEntries, setMonth, setYear } from "@/redux/slices/monthEntrySlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import {
   selectMonthEntries,
@@ -32,8 +24,7 @@ import {
 export default function MonthEntryPage() {
   const dispatch = useDispatch();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { open, message, severity } = useSelector((state) => state.snackbar);
+  // const { open, message, severity } = useSelector((state) => state.snackbar);
   const monthEntries = useSelector(selectMonthEntries);
   const totalIncome = useSelector(selectTotalIncome);
   const totalOutcome = useSelector(selectTotalOutcome);
@@ -44,17 +35,8 @@ export default function MonthEntryPage() {
   const error = useSelector(selectError);
 
   useEffect(() => {
-    
-      dispatch(fetchMonthEntries({ year, month }));
-    
+    dispatch(fetchMonthEntries({ year, month }));
   }, [dispatch, year, month]);
-
-  useEffect(() => {
-    const message = searchParams.get("triggerSnackbar");
-    if (message) {
-      dispatch(showSnackbar({ message, severity: "success" }));
-    }
-  }, [searchParams]);
 
   useEffect(() => {
     if (status === "failed") {
@@ -123,7 +105,7 @@ export default function MonthEntryPage() {
   return (
     <>
       {/* Top bar with month navigation */}
-      <div className="flex justify-center content-center p-5 mt-14 mx-auto w-[90vw] sm:w-full">
+      <div className="flex justify-center content-center p-5 mt-14 sm:mt-0 mx-auto w-[90vw] sm:w-full">
         <div className="flex justify-center content-center items-center mb-2 w-full">
           <button
             onClick={() => handleMonthChange("prev")}
@@ -235,23 +217,6 @@ export default function MonthEntryPage() {
         )}
       </div>
 
-      
-        <Snackbar
-          open={open}
-          onClose={() => dispatch(closeSnackbar())}
-          autoHideDuration={5000}
-          anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        >
-          <Alert
-            onClose={() => dispatch(closeSnackbar())}
-            severity={severity}
-            variant="filled"
-            sx={{ width: '100%' }}
-          >
-            {message}
-          </Alert>
-        </Snackbar>
-      
 
       {/* Add New Entry button: icon only on sm, text on larger screens */}
       <div className="fixed bottom-6 right-2 sm:bottom-10 sm:right-10">

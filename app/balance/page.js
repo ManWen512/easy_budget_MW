@@ -4,8 +4,6 @@ import { useEffect, useState, useMemo } from "react";
 import { FaPenSquare, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 import BalanceDialogPage from "./balancedialog/page"; // Import the dialog component
 import { useSearchParams } from "next/navigation";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
 import { currencySymbol } from "../currency";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -14,13 +12,14 @@ import {
   deleteAccount,
 } from "@/redux/slices/balanceSlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
+import {showSnackbar} from "@/redux/slices/snackBarSlice";
 import {
   selectAccounts,
   selectTotalBalance,
   selectStatus,
   selectError,
 } from "@/redux/selectors/balanceSelectors";
+
 
 export default function BalancePage() {
   const dispatch = useDispatch();
@@ -30,7 +29,7 @@ export default function BalancePage() {
   const totalBalance = useSelector(selectTotalBalance);
   const status = useSelector(selectStatus);
   const error = useSelector(selectError);
-  const { open, message, severity } = useSelector((state) => state.snackbar);
+  // const { open, message, severity } = useSelector((state) => state.snackbar);
   const [isChecked, setIsChecked] = useState(false);
   const [showDialog, setShowDialog] = useState(
     searchParams.get("showAddNew") === "true"
@@ -96,7 +95,7 @@ export default function BalancePage() {
   };
 
   return (
-    <div className="p-5 mt-14 container content-center">
+    <div className="p-5 mt-14 container content-center sm:mt-0">
       {status === "loading" ? (
         <LoadingSpinner />
       ) : (
@@ -213,21 +212,8 @@ export default function BalancePage() {
             </div>
           )}
 
-          <Snackbar
-            open={open}
-            onClose={() => dispatch(closeSnackbar())}
-            autoHideDuration={5000}
-            anchorOrigin={{ vertical: "top", horizontal: "right" }}
-          >
-            <Alert
-              onClose={() => dispatch(closeSnackbar())}
-              severity={severity}
-              variant="filled"
-              sx={{ width: "100%" }}
-            >
-              {message}
-            </Alert>
-          </Snackbar>
+     
+          
         </>
       )}
     </div>

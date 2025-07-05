@@ -88,13 +88,12 @@ export default function Navbar({ children }) {
     persistor.purge();
     setDropdownOpen(false);
 
-    router.push(
-      `/login?logoutSnackbar=${encodeURIComponent("Successfully logged out")}`
-    );
+    router.push("/login");
+    dispatch(showSnackbar({ message: "Successfully logged out", severity: "success" }));
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="sm:flex sm:min-h-screen">
       <Snackbar
         open={open}
         onClose={() => dispatch(closeSnackbar())}

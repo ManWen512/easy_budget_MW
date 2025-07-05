@@ -13,8 +13,6 @@ import {
 } from "@/redux/slices/historySlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { FaPenSquare, FaTrash, FaExclamationTriangle } from "react-icons/fa";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
 import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -22,7 +20,7 @@ import FormControl from "@mui/material/FormControl";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
+import { showSnackbar } from "@/redux/slices/snackBarSlice";
 import {
   selectAccountsData,
   selectCategoriesData,
@@ -49,7 +47,7 @@ export default function HistoryPage() {
 
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const dropdownRef = useRef(null);
-  const { open, message, severity } = useSelector((state) => state.snackbar);
+  // const { open, message, severity } = useSelector((state) => state.snackbar);
   const [confirmDialog, setConfirmDialog] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState(null);
   const [isChecked, setIsChecked] = useState(false);
@@ -132,7 +130,7 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className=" mt-14 p-5">
+    <div className=" mt-14 p-5 sm:mt-0">
       <div className="text-3xl font-bold mb-5">History</div>
 
       <div className="grid grid-cols-2 gap-4 sm:flex sm:items-center sm:space-x-4 mb-4">
@@ -488,21 +486,7 @@ export default function HistoryPage() {
         </div>
       )}
 
-      <Snackbar
-        open={open}
-        onClose={() => dispatch(closeSnackbar())}
-        autoHideDuration={5000}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={() => dispatch(closeSnackbar())}
-          severity={severity}
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {message}
-        </Alert>
-      </Snackbar>
+
     </div>
   );
 }

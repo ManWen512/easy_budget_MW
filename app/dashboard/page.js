@@ -5,7 +5,7 @@ import { fetchTotalBalance, fetchMonthData } from "@/redux/slices/homeSlice";
 import PieChart from "@/components/pieChart";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Link from "next/link";
-import { useEffect,  useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { currencySymbol } from "../currency";
 import EChartBar from "@/components/EChartBar";
 import {
@@ -19,10 +19,9 @@ import {
   selectStatus,
   selectError,
 } from "@/redux/selectors/homeSelectors";
-import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
+import { showSnackbar } from "@/redux/slices/snackBarSlice";
 import { useSearchParams } from "next/navigation";
+
 
 export default function Home() {
   const dispatch = useDispatch();
@@ -36,13 +35,11 @@ export default function Home() {
   const outcomeCategoryCostList = useSelector(selectOutcomeCategoryCostList);
   const status = useSelector(selectStatus);
   const error = useSelector(selectError);
-  const { open, message, severity } = useSelector((state) => state.snackbar);
+  // const { open, message, severity } = useSelector((state) => state.snackbar);
 
   useEffect(() => {
-   
-      dispatch(fetchTotalBalance());
-      dispatch(fetchMonthData());
-    
+    dispatch(fetchTotalBalance());
+    dispatch(fetchMonthData());
   }, [dispatch]);
 
   useEffect(() => {
@@ -93,28 +90,10 @@ export default function Home() {
   );
 
   return (
-    <div className="p-5 mx-auto mt-14">
+    <div className="p-5 mx-auto mt-14 sm:mt-0">
       <div>
         {/* Show Loading State */}
         {status === "loading" && <LoadingSpinner />}
-
-       
-          <Snackbar
-            open={open}
-            onClose={() => dispatch(closeSnackbar())}
-            autoHideDuration={5000}
-            anchorOrigin={{ vertical: "top", horizontal: "right" }}
-          >
-            <Alert
-              onClose={() => dispatch(closeSnackbar())}
-              severity={severity}
-              variant="filled"
-              sx={{ width: "100%" }}
-            >
-              {message}
-            </Alert>
-          </Snackbar>
-        
 
         {/* Show UI only if data is successfully loaded */}
         {status === "succeeded" && (
@@ -144,7 +123,7 @@ export default function Home() {
               ) : (
                 <>
                   {hasIncomeData && memoIncomeList.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-4 mb-10">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 mb-10 w-full">
                       <div className="sm:col-span-3 bd-white w-full overflow-x-auto">
                         <EChartBar
                           data={memoIncomeList}
@@ -166,7 +145,7 @@ export default function Home() {
                   )}
 
                   {hasOutcomeData && memoOutcomeList.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-4 mb-10">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 mb-10 w-full">
                       <div className="sm:col-span-3 bd-white w-full overflow-x-auto">
                         <EChartBar
                           data={memoOutcomeList}
