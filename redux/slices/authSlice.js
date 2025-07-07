@@ -13,7 +13,7 @@ export const signinUser = createAsyncThunk(
       return { ...res.data, token };
     } catch (error) {
       
-      return thunkAPI.rejectWithValue({  message });
+      return thunkAPI.rejectWithValue({ message });
     }
   }
 );
@@ -100,7 +100,7 @@ const authSlice = createSlice({
       })
       .addCase(signupUser.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload?.message || "Invalid email or password";
+        state.error = action.payload?.message || "Email already exit";
         state.errorStatus = action.payload?.status || null;
       })
       .addCase(fetchUser.pending, (state) => {

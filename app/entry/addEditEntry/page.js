@@ -1,12 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import { currencySymbol } from "@/app/currency";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCategories } from "@/redux/slices/categorySlice";
 import { fetchAccounts } from "@/redux/slices/balanceSlice";
-import { submitEntry, clearStatus } from "@/redux/slices/entrySlice";
+import { submitEntry, clearStatus, clearEditEntry } from "@/redux/slices/entrySlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
@@ -27,21 +27,22 @@ import {
   selectSuccessMessage,
 } from "@/redux/selectors/entrySelectors";
 
-// only "searchParams" works, name cannot be changed
-export default function AddEditEntryPage({ searchParams }) {
+export default function AddEditEntryPage() {
   const dispatch = useDispatch();
+  const searchParams = useSearchParams();
+  const itemId = searchParams.get("itemId");
   const categories = useSelector(selectCategoryList);
   const accounts = useSelector(selectAccountList);
   const status = useSelector(selectEntryStatus);
   const error = useSelector(selectEntryError);
   const successMessage = useSelector(selectSuccessMessage);
+  const editEntry = useSelector((state) => state.entry.editEntry);
 
   const router = useRouter();
-  const { itemId, type, category, balance, cost, dateTime, description } =
-    searchParams;
-  // Without parsing, category.id or category.name cannot be called
-  const parsedCategory = category ? JSON.parse(category) : null;
-  const parsedAccount = balance ? JSON.parse(balance) : null;
+
+  // Parse category/account if present in editEntry
+  const parsedCategory = editEntry.category ? (typeof editEntry.category === 'string' ? JSON.parse(editEntry.category) : editEntry.category) : null;
+  const parsedAccount = editEntry.balance ? (typeof editEntry.balance === 'string' ? JSON.parse(editEntry.balance) : editEntry.balance) : null;
   const localDate = new Date();
   const localDateTime = new Date(
     localDate.getTime() - localDate.getTimezoneOffset() * 60000
@@ -49,18 +50,18 @@ export default function AddEditEntryPage({ searchParams }) {
     .toISOString()
     .slice(0, 16);
 
-  // if you don't use formData and declare one useState for each field,
-  // you would have to write handleChange function for each field,
-  // that would not be flexible for adding/removing fields
+  // Initialize formData from editEntry or defaults
   const [formData, setFormData] = useState({
-    type: type || "OUTCOME",
+    type: editEntry.type || "OUTCOME",
     categoryId: parsedCategory?.id || "",
     accountId: parsedAccount?.id || "",
-    cost: cost || 1,
-    dateTime: localDate || localDateTime,
-    description: description || "",
+    cost: editEntry.cost || 1,
+    dateTime: editEntry.dateTime
+      ? new Date(editEntry.dateTime)
+      : localDate || localDateTime,
+    description: editEntry.description || "",
   });
-  // const { open, message, severity } = useSelector((state) => state.snackbar);
+
 
   // Memoize categories and accounts for rendering
   const memoCategories = useMemo(() => categories, [categories]);
@@ -91,9 +92,13 @@ export default function AddEditEntryPage({ searchParams }) {
     }
   }, [status, error, dispatch]);
 
+  useEffect(() => {
+    if (!itemId) {
+      dispatch(clearEditEntry());
+    }
+  }, [itemId, dispatch]);
+
   const setDefaultCategory = (data) => {
-    // I had to use "data", because even calling this function after fetch's .then,
-    // categories array is still not updated somehow
     setFormData((prevData) => ({
       ...prevData,
       categoryId: data[0].id,
@@ -101,8 +106,6 @@ export default function AddEditEntryPage({ searchParams }) {
   };
 
   const setDefaultAccount = (data) => {
-    // I had to use "data", because even calling this function after fetch's .then,
-    // categories array is still not updated somehow
     setFormData((prevData) => ({
       ...prevData,
       accountId: data[0].id,
@@ -111,8 +114,8 @@ export default function AddEditEntryPage({ searchParams }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(submitEntry({ itemId, formData }));
-    console.log(formData);
+    dispatch(submitEntry({ itemId: editEntry.itemId, formData }));
+    console.log(formData.dateTime)
   };
 
   useEffect(() => {
@@ -123,6 +126,8 @@ export default function AddEditEntryPage({ searchParams }) {
     }
   }, [successMessage, router, dispatch]);
 
+
+  
   //new handleDateTimeChange because the MUI datepicker doesnt send in string
   const handleDateTimeChange = (newDate) => {
     setFormData((prevData) => ({
@@ -130,6 +135,8 @@ export default function AddEditEntryPage({ searchParams }) {
       dateTime: newDate,
     }));
   };
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -156,6 +163,12 @@ export default function AddEditEntryPage({ searchParams }) {
       }));
     }
   };
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearEditEntry());
+    };
+  }, [dispatch]);
 
   return (
     <div className="p-5 mt-14 sm:mt-0">
@@ -234,9 +247,6 @@ export default function AddEditEntryPage({ searchParams }) {
                       label="Category"
                       name="category"
                     >
-                      <MenuItem value="">
-                        <em>None</em>
-                      </MenuItem>
                       {memoCategories.map((category) => (
                         <MenuItem key={category.id} value={category.id}>
                           {category.name}
@@ -282,9 +292,6 @@ export default function AddEditEntryPage({ searchParams }) {
                       label="Account"
                       name="account"
                     >
-                      <MenuItem value="">
-                        <em>None</em>
-                      </MenuItem>
                       {memoAccounts.map((account) => (
                         <MenuItem key={account.id} value={account.id}>
                           {account.name}
@@ -360,17 +367,23 @@ export default function AddEditEntryPage({ searchParams }) {
                   className="w-full p-2 border rounded-md"
                 />
               </div>
-
-              <button
-                type="submit"
-                className="font-bold rounded px-4 py-2 bg-orange-400 hover:bg-orange-400"
-              >
-                {status === "loading" ? "...saving" : "Save"}
-              </button>
+              <div>
+                <button
+                  type="submit"
+                  className="font-bold rounded px-4 py-2 bg-orange-400 hover:bg-orange-400 mr-2"
+                >
+                  {status === "loading" ? "...saving" : "Save"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  className="font-bold rounded px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white"
+                >
+                  Cancel
+                </button>
+              </div>
             </form>
           </div>
-
-          
         </>
       )}
     </div>

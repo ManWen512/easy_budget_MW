@@ -19,6 +19,7 @@ export const submitEntry = createAsyncThunk(
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
+        
       });
 
       if (!response.ok) {
@@ -26,7 +27,7 @@ export const submitEntry = createAsyncThunk(
 
         throw new Error(errorText);
       }
-
+      console.log(formData)
       return await response.json();
     } catch (error) {
       return rejectWithValue(error.message);
@@ -40,6 +41,14 @@ const entrySlice = createSlice({
     status: "idle",
     error: null,
     successMessage: null,
+    editEntry: {
+      type: null,
+      category: null,
+      balance: null,
+      cost: null,
+      dateTime: new Date().toISOString(),
+      description: null,
+    },
   },
   reducers: {
     clearStatus: (state) => {
@@ -47,6 +56,20 @@ const entrySlice = createSlice({
       state.error = null;
       state.successMessage = null;
     },
+    setEditEntry: ( state,action)=>{
+      const newEditEntry = { ...state.editEntry, ...action.payload };
+      state.editEntry = newEditEntry;
+    },
+    clearEditEntry: (state) => {
+      state.editEntry = {
+        type: null,
+        category: null,
+        balance: null,
+        cost: null,
+        dateTime: new Date().toISOString(),
+        description: null,
+      };
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -66,5 +89,5 @@ const entrySlice = createSlice({
   },
 });
 
-export const { clearStatus } = entrySlice.actions;
+export const { clearStatus, setEditEntry, clearEditEntry } = entrySlice.actions;
 export default entrySlice.reducer;

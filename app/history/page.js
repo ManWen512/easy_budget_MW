@@ -48,9 +48,7 @@ export default function HistoryPage() {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const dropdownRef = useRef(null);
   // const { open, message, severity } = useSelector((state) => state.snackbar);
-  const [confirmDialog, setConfirmDialog] = useState(false);
-  const [entryToDelete, setEntryToDelete] = useState(null);
-  const [isChecked, setIsChecked] = useState(false);
+ 
 
   useEffect(() => {
     dispatch(fetchAccountsAndCategories());
@@ -85,49 +83,27 @@ export default function HistoryPage() {
     dispatch(setFilters({ sortOrder: newSortOrder }));
   };
 
-  const handleEditClick = (item) => {
-    const { id, type, category, account } = item;
-    const params = new URLSearchParams({
-      itemId: id,
-      type,
-      category: JSON.stringify(category),
-      balance: JSON.stringify(account),
-      cost: item.cost,
-      dateTime: item.dateTime,
-      description: item.description,
-    });
-    router.push(`/entry/addEditEntry?${params.toString()}`);
-  };
+  // const handleEditClick = (item) => {
+  //   const { id, type, category, account } = item;
+  //   const params = new URLSearchParams({
+  //     itemId: id,
+  //     type,
+  //     category: JSON.stringify(category),
+  //     balance: JSON.stringify(account),
+  //     cost: item.cost,
+  //     dateTime: item.dateTime,
+  //     description: item.description,
+  //   });
+  //   router.push(`/entry/addEditEntry?${params.toString()}`);
+  // };
 
   const handleRowClick = (item) => {
     router.prefetch(`/monthEntry/${item.id}`);
     router.push(`/monthEntry/${item.id}`);
   };
 
-  const handleDelete = (id) => {
-    dispatch(deleteEntry(id));
-    dispatch(
-      showSnackbar({
-        message: "Entry deleted successfully!",
-        severity: "",
-      })
-    );
-  };
 
-  const openConfirmDialog = (entryId) => {
-    setEntryToDelete(entryId);
-    setConfirmDialog(true);
-  };
 
-  const closeConfirmDialog = () => {
-    setConfirmDialog(false);
-    setEntryToDelete(null);
-    setIsChecked(false);
-  };
-
-  const toggleCheckbox = () => {
-    setIsChecked(!isChecked);
-  };
 
   return (
     <div className=" mt-14 p-5 sm:mt-0">
@@ -380,9 +356,7 @@ export default function HistoryPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Account
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
+                    
                   </tr>
                 </thead>
                 <tbody>
@@ -411,26 +385,7 @@ export default function HistoryPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {item.accountDto.name}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEditClick(item);
-                            }}
-                          >
-                            <FaPenSquare className="text-blue-500" />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openConfirmDialog(item.id);
-                            }}
-                          >
-                            <FaTrash className="text-red-500" />
-                          </button>
-                        </div>
-                      </td>
+                     
                     </tr>
                   ))}
                 </tbody>
@@ -444,47 +399,7 @@ export default function HistoryPage() {
         )}
       </div>
 
-      {confirmDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
-            <div className="flex items-center mb-4">
-              <FaExclamationTriangle className="text-yellow-500 text-2xl mr-2" />
-              <h3 className="text-lg font-semibold">Confirm Delete</h3>
-            </div>
-            <p className="mb-4">Are you sure you want to delete this entry?</p>
-            <div className="flex items-center mb-4">
-              <input
-                type="checkbox"
-                checked={isChecked}
-                onChange={toggleCheckbox}
-                className="mr-2"
-              />
-              <label>I understand this action cannot be undone</label>
-            </div>
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={closeConfirmDialog}
-                className="px-4 py-2 bg-gray-200 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  if (isChecked) {
-                    handleDelete(entryToDelete);
-                    closeConfirmDialog();
-                  }
-                }}
-                className={`px-4 py-2 rounded ${
-                  isChecked ? "bg-red-500 text-white" : "bg-gray-300"
-                }`}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      
 
 
     </div>

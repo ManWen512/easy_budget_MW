@@ -15,9 +15,7 @@ import Image from "next/image";
 import Pixel from "../public/Pixel.png";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/redux/slices/authSlice";
-import { showSnackbar, closeSnackbar } from "@/redux/slices/snackBarSlice";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
+import { showSnackbar } from "@/redux/slices/snackBarSlice";
 import { useRouter } from "next/navigation";
 import { persistor } from "@/redux/store/store";
 
@@ -32,7 +30,6 @@ export default function Navbar({ children }) {
     (state) => state.auth
   );
   const dropdownRef = useRef(null);
-  const { open, message, severity } = useSelector((state) => state.snackbar);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -97,21 +94,7 @@ export default function Navbar({ children }) {
 
   return (
     <div className="sm:flex sm:min-h-screen">
-      <Snackbar
-        open={open}
-        onClose={() => dispatch(closeSnackbar())}
-        autoHideDuration={5000}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      >
-        <Alert
-          onClose={() => dispatch(closeSnackbar())}
-          severity={severity}
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {message}
-        </Alert>
-      </Snackbar>
+     
       {/* Desktop Profile or Login/Sign Up buttons */}
       <div className="hidden sm:flex fixed top-0 right-0 z-50 space-x-3 p-4">
         {token && user && (
@@ -175,7 +158,7 @@ export default function Navbar({ children }) {
 
         <div className="flex flex-col space-y-5 text-xl p-2">
           {menuItems.map((item, index) => (
-            <div key={item.name}>
+            <div key={item.name} className="relative group">
               <Link
                 href={item.href}
                 className={`flex items-center px-2 py-3 rounded-xl text-gray-600 hover:bg-teal-100 transition-all duration-300 ease-in-out ${
@@ -195,6 +178,14 @@ export default function Navbar({ children }) {
                   {item.name}
                 </span>
               </Link>
+              {/* Tooltip for collapsed sidebar */}
+              {!isSidebarOpen && (
+                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                  {item.name}
+                  {/* Tooltip arrow */}
+                  <div className="absolute top-1/2 -left-1 transform -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-r-4 border-transparent border-r-gray-800"></div>
+                </div>
+              )}
             </div>
           ))}
         </div>

@@ -14,6 +14,7 @@ import {
 } from "@/redux/slices/entryDetailSlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { showSnackbar } from "@/redux/slices/snackBarSlice";
+import { setEditEntry } from "@/redux/slices/entrySlice";
 
 const EntryDetailPage = ({ params }) => {
   const [isChecked, setIsChecked] = useState(false);
@@ -67,6 +68,22 @@ const EntryDetailPage = ({ params }) => {
     setIsChecked(!isChecked);
   };
 
+
+
+  const handleEditEntry = () => {
+    dispatch(
+      setEditEntry({
+        type: entry.type,
+        category: JSON.stringify(entry.categoryDto),
+        balance: JSON.stringify(entry.accountDto),
+        cost: entry.cost,
+        dateTime: new Date(entry.dateTime).toLocaleString(),
+        description: entry.description,
+      })
+    );
+    router.push(`/entry/addEditEntry?itemId=${entry.id}`);
+  };
+
   if (status === "loading") return <LoadingSpinner />;
 
   if (!entry) {
@@ -76,7 +93,6 @@ const EntryDetailPage = ({ params }) => {
       </div>
     );
   }
-
 
   return (
     <div className="month-entry-page p-5">
@@ -92,7 +108,10 @@ const EntryDetailPage = ({ params }) => {
           </div>
           <div>
             {entry.dateTime
-              ? new Date(entry.dateTime).toLocaleDateString()
+              ? new Date(entry.dateTime).toLocaleString("en-US", {
+                dateStyle: "medium",
+                timeStyle: "short",
+              })
               : "N/A"}
           </div>
         </div>
@@ -144,7 +163,7 @@ const EntryDetailPage = ({ params }) => {
         </div>
         <div className="flex justify-end">
           <div>
-            <Link
+            {/* <Link
               href={{
                 pathname: "/entry/addEditEntry",
                 query: {
@@ -157,11 +176,11 @@ const EntryDetailPage = ({ params }) => {
                   description: entry.description,
                 },
               }}
-            >
-              <button className="ml-5">
-                <FaPenSquare size={30} />
-              </button>
-            </Link>
+            > */}
+            
+            <button className="ml-5" onClick={handleEditEntry}>
+              <FaPenSquare size={30} />
+            </button>
           </div>
           <div>
             <button onClick={openConfirmDialog} className="ml-5">
