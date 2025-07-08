@@ -11,7 +11,7 @@ import {
   FaPlus,
 } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchCategories, deleteCategory } from "@/redux/slices/categorySlice";
+import { fetchCategories, deleteCategory, clearNewCategory } from "@/redux/slices/categorySlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { showSnackbar } from "@/redux/slices/snackBarSlice";
 import {
@@ -54,7 +54,7 @@ export default function CategoryPage() {
     if (isChecked && accountToDelete) {
       dispatch(deleteCategory(accountToDelete));
       closeConfirmDialog();
-      handleShowSnackbar("Category deleted successfully!", "success");
+      dispatch(showSnackbar({message:"Category deleted successfully!", severity:"success"}));
     }
   };
 
@@ -67,11 +67,10 @@ export default function CategoryPage() {
     setShowDialog(false);
     setCurrentCategory(null);
     dispatch(fetchCategories());
+   
   };
 
-  const handleShowSnackbar = (message, severity = "success") => {
-    dispatch(showSnackbar({ message, severity }));
-  };
+ 
 
   const openConfirmDialog = (categoryId) => {
     setAccountToDelete(categoryId);
@@ -131,7 +130,7 @@ export default function CategoryPage() {
               catId={currentCategory?.id}
               name={currentCategory?.name}
               onClose={closeDialog}
-              onSuccess={handleShowSnackbar}
+              
             />
           )}
 

@@ -10,16 +10,16 @@ import {
   fetchAccounts,
   fetchTotalBalance,
   deleteAccount,
+  clearNewAccount,
 } from "@/redux/slices/balanceSlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import {showSnackbar} from "@/redux/slices/snackBarSlice";
+import { showSnackbar } from "@/redux/slices/snackBarSlice";
 import {
   selectAccounts,
   selectTotalBalance,
   selectStatus,
   selectError,
 } from "@/redux/selectors/balanceSelectors";
-
 
 export default function BalancePage() {
   const dispatch = useDispatch();
@@ -29,11 +29,8 @@ export default function BalancePage() {
   const totalBalance = useSelector(selectTotalBalance);
   const status = useSelector(selectStatus);
   const error = useSelector(selectError);
-  // const { open, message, severity } = useSelector((state) => state.snackbar);
   const [isChecked, setIsChecked] = useState(false);
-  const [showDialog, setShowDialog] = useState(
-    searchParams.get("showAddNew") === "true"
-  );
+  const [showDialog, setShowDialog] = useState();
 
   const [confirmDialog, setConfirmDialog] = useState(false);
   const [accountToDelete, setAccountToDelete] = useState(null);
@@ -69,16 +66,14 @@ export default function BalancePage() {
     setShowDialog(false);
     setCurrentAccount(null);
     fetchAccounts(); // Refresh accounts after save
+   
   };
 
   const closeConfirmDialog = () => {
     setConfirmDialog(false);
     setAccountToDelete(null);
     setIsChecked(false);
-  };
-
-  const handleShowSnackbar = (message, severity = "success") => {
-    dispatch(showSnackbar({ message, severity }));
+    
   };
 
   const toggleCheckbox = () => {
@@ -90,7 +85,7 @@ export default function BalancePage() {
     if (isChecked && accountToDelete) {
       dispatch(deleteAccount(accountToDelete));
       closeConfirmDialog();
-      handleShowSnackbar("Account deleted successfully!", "success");
+      dispatch(showSnackbar({message:"Account deleted successfully!", severity:"success"}));
     }
   };
 
@@ -150,9 +145,7 @@ export default function BalancePage() {
             <BalanceDialogPage
               accId={currentAccount?.id}
               name={currentAccount?.name}
-              balance={currentAccount?.balance}
               onClose={closeDialog}
-              onSuccess={handleShowSnackbar}
             />
           )}
 
@@ -211,9 +204,6 @@ export default function BalancePage() {
               </div>
             </div>
           )}
-
-     
-          
         </>
       )}
     </div>

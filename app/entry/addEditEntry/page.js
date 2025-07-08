@@ -4,15 +4,19 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import { currencySymbol } from "@/app/currency";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchCategories } from "@/redux/slices/categorySlice";
-import { fetchAccounts } from "@/redux/slices/balanceSlice";
-import { submitEntry, clearStatus, clearEditEntry } from "@/redux/slices/entrySlice";
+import { fetchCategories, clearNewCategory } from "@/redux/slices/categorySlice";
+import { fetchAccounts, clearNewAccount } from "@/redux/slices/balanceSlice";
+import {
+  submitEntry,
+  clearStatus,
+  clearEditEntry,
+} from "@/redux/slices/entrySlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
-import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import OutlinedInput from "@mui/material/OutlinedInput";
@@ -20,12 +24,14 @@ import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import { showSnackbar } from "@/redux/slices/snackBarSlice";
 import { selectCategories as selectCategoryList } from "@/redux/selectors/categorySelectors";
-import { selectAccounts as selectAccountList } from "@/redux/selectors/balanceSelectors";
+import { selectAccounts as selectAccountList, selectNewAccount } from "@/redux/selectors/balanceSelectors";
 import {
   selectStatus as selectEntryStatus,
   selectError as selectEntryError,
   selectSuccessMessage,
 } from "@/redux/selectors/entrySelectors";
+import CategoryDialog from "@/app/category/categorydialog/page";
+import BalanceDialogPage from "@/app/balance/balancedialog/page";
 
 export default function AddEditEntryPage() {
   const dispatch = useDispatch();
@@ -36,13 +42,23 @@ export default function AddEditEntryPage() {
   const status = useSelector(selectEntryStatus);
   const error = useSelector(selectEntryError);
   const successMessage = useSelector(selectSuccessMessage);
+  const newAccount = useSelector((state) => state.balance.newAccount);
+  const newCategory = useSelector((state)=> state.category.newCategory);
   const editEntry = useSelector((state) => state.entry.editEntry);
 
   const router = useRouter();
 
   // Parse category/account if present in editEntry
-  const parsedCategory = editEntry.category ? (typeof editEntry.category === 'string' ? JSON.parse(editEntry.category) : editEntry.category) : null;
-  const parsedAccount = editEntry.balance ? (typeof editEntry.balance === 'string' ? JSON.parse(editEntry.balance) : editEntry.balance) : null;
+  const parsedCategory = editEntry.category
+    ? typeof editEntry.category === "string"
+      ? JSON.parse(editEntry.category)
+      : editEntry.category
+    : null;
+  const parsedAccount = editEntry.balance
+    ? typeof editEntry.balance === "string"
+      ? JSON.parse(editEntry.balance)
+      : editEntry.balance
+    : null;
   const localDate = new Date();
   const localDateTime = new Date(
     localDate.getTime() - localDate.getTimezoneOffset() * 60000
@@ -61,7 +77,8 @@ export default function AddEditEntryPage() {
       : localDate || localDateTime,
     description: editEntry.description || "",
   });
-
+  const [openBalanceDialog, setOpenBalanceDialog] = useState(false);
+  const [openCategoryDialog, setOpenCategoryDialog] = useState(false);
 
   // Memoize categories and accounts for rendering
   const memoCategories = useMemo(() => categories, [categories]);
@@ -97,6 +114,7 @@ export default function AddEditEntryPage() {
       dispatch(clearEditEntry());
     }
   }, [itemId, dispatch]);
+  
 
   const setDefaultCategory = (data) => {
     setFormData((prevData) => ({
@@ -114,8 +132,8 @@ export default function AddEditEntryPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(submitEntry({ itemId: editEntry.itemId, formData }));
-    console.log(formData.dateTime)
+    dispatch(submitEntry({ itemId, formData }));
+
   };
 
   useEffect(() => {
@@ -126,8 +144,26 @@ export default function AddEditEntryPage() {
     }
   }, [successMessage, router, dispatch]);
 
+  useEffect(() => {
+    if (newAccount && newAccount.id) {
+      setFormData((prevData) => ({
+        ...prevData,
+        accountId: newAccount.id,
+      }));
+      dispatch(clearNewAccount()); // Clear after using
+    }
+  }, [newAccount, dispatch]);
 
-  
+  useEffect(() => {
+    if (newCategory && newCategory.id) {
+      setFormData((prevData) => ({
+        ...prevData,
+        categoryId: newCategory.id,
+      }));
+      dispatch(clearNewCategory()); // Clear after using
+    }
+  }, [newCategory, dispatch]);
+
   //new handleDateTimeChange because the MUI datepicker doesnt send in string
   const handleDateTimeChange = (newDate) => {
     setFormData((prevData) => ({
@@ -135,8 +171,6 @@ export default function AddEditEntryPage() {
       dateTime: newDate,
     }));
   };
-
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -169,6 +203,19 @@ export default function AddEditEntryPage() {
       dispatch(clearEditEntry());
     };
   }, [dispatch]);
+
+   // Close the dialog
+   const closeBalanceDialog = () => {
+    setOpenBalanceDialog(false);
+    dispatch(fetchAccounts()); // Just fetch, don't set manually
+  };
+
+
+  // Close the dialog
+  const closeCategoryDialog = () => {
+    setOpenCategoryDialog(false);
+    dispatch(fetchCategories());
+  };
 
   return (
     <div className="p-5 mt-14 sm:mt-0">
@@ -257,13 +304,7 @@ export default function AddEditEntryPage() {
 
                   <button
                     type="button"
-                    onClick={() => {
-                      router.push(
-                        `/category?showAddNew=true&returnTo=${encodeURIComponent(
-                          "/entry/addEditEntry"
-                        )}`
-                      );
-                    }}
+                    onClick={() => setOpenCategoryDialog(true)}
                     className="w-full p-3 rounded-md bg-orange-400 font-bold text-sm"
                   >
                     Add New
@@ -302,13 +343,7 @@ export default function AddEditEntryPage() {
 
                   <button
                     type="button"
-                    onClick={() => {
-                      router.push(
-                        `/balance?showAddNew=true&returnTo=${encodeURIComponent(
-                          "/entry/addEditEntry"
-                        )}`
-                      );
-                    }}
+                    onClick={() => setOpenBalanceDialog(true)}
                     className="w-full p-3 rounded-md bg-orange-400 font-bold text-sm"
                   >
                     Add New
@@ -341,15 +376,15 @@ export default function AddEditEntryPage() {
 
               <div className="items-center">
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
-                  <DateTimePicker
-                    className="w-full p-3 border rounded-md  focus:outline-none"
-                    type="datetime-local"
+                  <DatePicker
+                    className="w-full p-3 border rounded-md focus:outline-none"
                     id="dateTime"
-                    label=" Date Time "
+                    label="Date"
                     name="dateTime"
                     value={formData.dateTime}
                     required
                     onChange={handleDateTimeChange}
+                    renderInput={(params) => <TextField {...params} />}
                   />
                 </LocalizationProvider>
               </div>
@@ -385,6 +420,13 @@ export default function AddEditEntryPage() {
             </form>
           </div>
         </>
+      )}
+
+      {openBalanceDialog && (
+        <BalanceDialogPage  onClose={closeBalanceDialog} />
+      )}
+      {openCategoryDialog && (
+        <CategoryDialog  onClose={closeCategoryDialog} />
       )}
     </div>
   );

@@ -5,12 +5,11 @@ import { useDispatch } from "react-redux";
 import { useRouter, useSearchParams } from "next/navigation";
 import { addCategory, editCategory } from "@/redux/slices/categorySlice";
 import TextField from "@mui/material/TextField";
+import { showSnackbar } from "@/redux/slices/snackBarSlice";
 
-export default function CategoryDialog({ catId, name, onClose, onSuccess }) {
+export default function CategoryDialog({ catId, name, onClose }) {
   const dispatch = useDispatch();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const returnTo = searchParams.get("returnTo");
+
 
   const [catData, setCatData] = useState({
     name: name || "",
@@ -27,15 +26,13 @@ export default function CategoryDialog({ catId, name, onClose, onSuccess }) {
     e.preventDefault();
     if (catId) {
       dispatch(editCategory({ id: catId, ...catData }));
-      onSuccess("Category updated successfully!");
+      dispatch(showSnackbar({message:"Category updated successfully!", severity:"success"}));
       onClose();
     } else {
       dispatch(addCategory(catData));
-      onSuccess("Category added successfully!");
+      dispatch(showSnackbar({message:"Category added successfully!", severity:"success"}));
       onClose();
-      if (returnTo) {
-        router.push(returnTo);
-      }
+      
     }
   };
 

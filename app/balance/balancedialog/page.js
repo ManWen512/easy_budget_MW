@@ -5,19 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { addAccount, editAccount } from "@/redux/slices/balanceSlice";
 import TextField from "@mui/material/TextField";
+import { showSnackbar } from "@/redux/slices/snackBarSlice";
 
-
-export default function BalanceDialogPage({
-  accId,
-  name,
-  balance,
-  onClose,
-  onSuccess,
-}) {
+export default function BalanceDialogPage({ accId, name, onClose }) {
   const dispatch = useDispatch();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const returnTo = searchParams.get("returnTo");
+
   const [accData, setAccData] = useState({
     name: name || "",
   });
@@ -33,15 +25,22 @@ export default function BalanceDialogPage({
     e.preventDefault();
     if (accId) {
       dispatch(editAccount({ id: accId, ...accData }));
-      onSuccess("Account updated successfully!");
+      dispatch(
+        showSnackbar({
+          message: "Account updated successfully!",
+          severity: "success",
+        })
+      );
     } else {
       dispatch(addAccount(accData));
-      onSuccess("Account added successfully!");
+      dispatch(
+        showSnackbar({
+          message: "Account added successfully!",
+          severity: "success",
+        })
+      );
     }
     onClose();
-    if (returnTo) {
-      router.push(returnTo);
-    }
   };
 
   //border color and text color for input

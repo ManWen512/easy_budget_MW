@@ -97,8 +97,13 @@ const categorySlice = createSlice({
     categories: [],
     status: 'idle',
     error: null,
+    newCategory: null,
   },
-  reducers: {}, // No reducers needed since we handle everything with async thunks
+  reducers: {
+    clearNewCategory: (state) => {
+      state.newCategory = null;
+    }
+  }, // No reducers needed since we handle everything with async thunks
   extraReducers: (builder) => {
     builder
       .addCase(fetchCategories.pending, (state) => {
@@ -117,8 +122,9 @@ const categorySlice = createSlice({
         state.status = 'loading';
         state.error = null;
       })
-      .addCase(addCategory.fulfilled, (state) => {
+      .addCase(addCategory.fulfilled, (state, action) => {
         state.status = 'succeeded';
+        state.newCategory = action.payload;
       })
       .addCase(addCategory.rejected, (state, action) => {
         state.status = 'failed';
@@ -151,4 +157,5 @@ const categorySlice = createSlice({
   },
 });
 
+export const {clearNewCategory } = categorySlice.actions;
 export default categorySlice.reducer;

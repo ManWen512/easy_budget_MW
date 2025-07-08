@@ -108,9 +108,8 @@ const EntryDetailPage = ({ params }) => {
           </div>
           <div>
             {entry.dateTime
-              ? new Date(entry.dateTime).toLocaleString("en-US", {
+              ? new Date(entry.dateTime).toLocaleDateString("en-US", {
                 dateStyle: "medium",
-                timeStyle: "short",
               })
               : "N/A"}
           </div>

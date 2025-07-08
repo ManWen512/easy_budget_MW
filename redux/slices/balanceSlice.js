@@ -36,7 +36,7 @@ export const addAccount = createAsyncThunk(
 
       dispatch(fetchAccounts());
       dispatch(fetchTotalBalance());
-
+      
       return await response.json(); // Return response if needed
     } catch (error) {
       return rejectWithValue(error.message); // Send error message to Redux state
@@ -105,8 +105,14 @@ const balanceSlice = createSlice({
     totalBalance: 0,
     status: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
     error: null,
+    newAccount: null,
   },
-  reducers: {},
+  reducers: {
+    
+    clearNewAccount: (state) => {
+      state.newAccount = null;
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchAccounts.pending, (state) => {
@@ -127,8 +133,9 @@ const balanceSlice = createSlice({
       .addCase(addAccount.pending, (state) => {
         state.status = "loading";
       })
-      .addCase(addAccount.fulfilled, (state) => {
+      .addCase(addAccount.fulfilled, (state, action) => {
         state.status = "succeeded";
+        state.newAccount = action.payload; // Store the newly added account
       })
       .addCase(addAccount.rejected, (state, action) => {
         state.status = "failed";
@@ -161,4 +168,5 @@ const balanceSlice = createSlice({
   },
 });
 
+export const {  clearNewAccount } = balanceSlice.actions;
 export default balanceSlice.reducer;
