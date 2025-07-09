@@ -90,29 +90,29 @@ const PieChart = ({ data, cost, currency }) => {
   }, [data, cost, currency]); // Dependencies remain the same
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-0">
       <div className="w-full h-auto" style={{ minHeight: '200px' }}>
         <div ref={chartRef} style={{ width: '100%', height: '200px' }} />
       </div>
-      <div className="max-h-[200px] overflow-y-auto">
-        <div className="grid grid-rows-1 gap-1 p-4">
+      <div className="max-h-[152px] overflow-y-auto">
+        <div className="grid grid-rows-1 gap-1 ">
           {data && data.map((item, index) => {
             const matchingCost = cost.find((cos) => cos.name === item.name);
             // Use the globally defined color array for the legend
             const backgroundColor = PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]; // Use modulo for safety if data length > colors
             return (
-              <div key={index} className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg">
+              <div key={index} className="flex items-center gap-2 bg-gray-50 p-1 rounded-lg">
                 <div
                   className="w-3 h-3 rounded-full flex-shrink-0"
                   style={{ backgroundColor: backgroundColor }}
                 />
                 <div className="flex flex-col min-w-0">
-                  <span className="font-outfit text-sm truncate">
-                    {item.name}
+                  <span className="font-outfit text-xs truncate">
+                    {item.name}: {item.percentage}% {matchingCost && `(${currency} ${matchingCost.total})`}
                   </span>
-                  <span className="font-outfit text-xs text-gray-500 truncate">
+                  {/* <span className="font-outfit text-xs text-gray-500 truncate">
                     {item.percentage}% {matchingCost && `(${currency} ${matchingCost.total})`}
-                  </span>
+                  </span> */}
                 </div>
               </div>
             );

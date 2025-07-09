@@ -11,6 +11,7 @@ import { VscGraphScatter } from "react-icons/vsc";
 import { IoCalendar } from "react-icons/io5";
 import { LuHistory } from "react-icons/lu";
 import { HiMenu, HiX } from "react-icons/hi";
+import { RiRobot2Fill } from "react-icons/ri";
 import Image from "next/image";
 import Pixel from "../public/Pixel.png";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,7 +23,7 @@ import { persistor } from "@/redux/store/store";
 export default function Navbar({ children }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isSmallScreenMenuOpen, setIsSmallScreenMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dispatch = useDispatch();
@@ -72,7 +73,7 @@ export default function Navbar({ children }) {
   const menuItems = [
     { name: "Dashboard", href: "/dashboard", icon: <MdDashboard size={30} /> },
     {
-      name: "Balance",
+      name: "Accounts",
       href: "/balance",
       icon: <MdAccountBalanceWallet size={30} />,
     },
@@ -81,6 +82,7 @@ export default function Navbar({ children }) {
     { name: "Graphs", href: "/graphs", icon: <VscGraphScatter size={30} /> },
 
     { name: "History", href: "/history", icon: <LuHistory size={30} /> },
+    { name: "AI Assistant", href: "/ai-chat", icon: <RiRobot2Fill size={30}/> },
   ];
 
   const handleLogout = () => {
@@ -156,7 +158,7 @@ export default function Navbar({ children }) {
           </button>
         </div>
 
-        <div className="flex flex-col space-y-5 text-xl p-2">
+        <div className="flex flex-col space-y-2 text-lg p-2">
           {menuItems.map((item, index) => (
             <div key={item.name} className="relative group">
               <Link
@@ -222,13 +224,13 @@ export default function Navbar({ children }) {
               >
                 <HiX size={30} />
               </button>
-              <div className="flex flex-col space-y-5 text-xl">
+              <div className="flex flex-col space-y-3 text-lg">
                 {menuItems.map((item, index) => (
                   <div key={item.name}>
                     <Link
                       href={item.href}
                       onClick={closeSmallScreenMenu}
-                      className={`block px-2 py-3 rounded-xl text-gray-600 hover:bg-teal-100 transition-all duration-300 ${
+                      className={`block px-2 py-2 rounded-xl text-gray-600 hover:bg-teal-100 transition-all duration-300 ${
                         pathname === item.href
                           ? "bg-teal-100 border-l-4 border-teal-500"
                           : ""

@@ -31,10 +31,12 @@ const EChartBar = dynamic(() => import("@/components/EChartBar"), {
 
 export default function GraphsPage() {
   const dispatch = useDispatch();
-  const [selectedOption, setSelectedOption] = useState("");
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1;
+  const [selectedOption, setSelectedOption] = useState("month");
   // const { open, message, severity } = useSelector((state) => state.snackbar);
-  const [selectedMonth, setSelectedMonth] = useState(null);
-  const [selectedYear, setSelectedYear] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const [selectedYear, setSelectedYear] = useState(currentYear);
   const [yearRange, setYearRange] = useState({
     startYear: null,
     endYear: null,
@@ -83,7 +85,7 @@ export default function GraphsPage() {
     "November",
     "December",
   ];
-  const currentYear = new Date().getFullYear();
+  
   const years = Array.from({ length: 30 }, (_, i) => currentYear - i); // Generates a list of years from 2024 to 1995
 
   useEffect(() => {
@@ -113,6 +115,7 @@ export default function GraphsPage() {
 
   return (
     <div className="p-5 mt-14 sm:mt-0">
+      <div className="text-3xl font-bold mb-5">Graphs</div>
       <div className="flex space-x-4 mb-4 w-full sm:w-[60vw]">
         {/* Radio Buttons */}
         <label
@@ -315,9 +318,9 @@ export default function GraphsPage() {
             (selectedOption === "yearRange" &&
               yearRange.startYear &&
               yearRange.endYear)) && (
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-5">
-              <div className="col-span-3 mt-20 ">
-                <div>Income</div>
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-0 ">
+              <div className="col-span-3 mt-0 sm:mt-5 ">
+                
                 <EChartBar
                   data={memoIncomeList}
                   selectedMonth={selectedMonth}
@@ -328,15 +331,15 @@ export default function GraphsPage() {
                   currency={currencySymbol}
                 />
               </div>
-              <div className=" mt-20">
+              <div className="-mt-10 sm:mt-10">
                 <PieChart
                   data={memoIncomeCategoryList}
                   cost={memoIncomeCategoryCostList}
                   currency={currencySymbol}
                 />
               </div>
-              <div className="col-span-3 mt-20">
-                <div>Outcome</div>
+              <div className="col-span-3 mt-10 sm:mt-10">
+                
                 <EChartBar
                   data={memoOutcomeList}
                   currency={currencySymbol}
@@ -345,7 +348,7 @@ export default function GraphsPage() {
                   title={["Outcome"]}
                 />
               </div>
-              <div className="mt-20">
+              <div className="-mt-10 sm:mt-16">
                 <PieChart
                   data={memoOutcomeCategoryList}
                   cost={memoOutcomeCategoryCostList}

@@ -95,7 +95,7 @@ const EntryDetailPage = ({ params }) => {
   }
 
   return (
-    <div className="month-entry-page p-5">
+    <div className="month-entry-page p-5 w-full">
       <div className="sm:mx-40 m-5 mt-16 sm:mt-0 p-6 sm:p-20 bg-white rounded-lg shadow-lg ">
         <button onClick={() => router.back()} className="mb-4">
           <BsArrowLeftCircleFill size={30} />

@@ -5,7 +5,7 @@ import { fetchTotalBalance, fetchMonthData } from "@/redux/slices/homeSlice";
 import PieChart from "@/components/pieChart";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Link from "next/link";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { currencySymbol } from "../currency";
 import EChartBar from "@/components/EChartBar";
 import {
@@ -20,12 +20,10 @@ import {
   selectError,
 } from "@/redux/selectors/homeSelectors";
 import { showSnackbar } from "@/redux/slices/snackBarSlice";
-import { useSearchParams } from "next/navigation";
-
+import Joyride from "react-joyride";
 
 export default function Home() {
   const dispatch = useDispatch();
-  const searchParams = useSearchParams();
   const totalBalance = useSelector(selectTotalBalance);
   const incomeList = useSelector(selectIncomeList);
   const outcomeList = useSelector(selectOutcomeList);
@@ -35,6 +33,7 @@ export default function Home() {
   const outcomeCategoryCostList = useSelector(selectOutcomeCategoryCostList);
   const status = useSelector(selectStatus);
   const error = useSelector(selectError);
+  const [runTour, setRunTour] = useState(false);
   // const { open, message, severity } = useSelector((state) => state.snackbar);
 
   useEffect(() => {
@@ -49,11 +48,14 @@ export default function Home() {
   }, [status, error, dispatch]);
 
   useEffect(() => {
-    const message = searchParams.get("loginSnackbar");
-    if (message) {
-      dispatch(showSnackbar({ message, severity: "success" }));
+    if (status === "succeeded") {
+      const hasSeenTour = localStorage.getItem("hasSeenAddNewTour");
+      if (!hasSeenTour) {
+        setRunTour(true);
+        localStorage.setItem("hasSeenAddNewTour", "true");
+      }
     }
-  }, [searchParams]);
+  }, [status]);
 
   const date = new Date();
   const currentMonthName = date.toLocaleString("default", { month: "long" });
@@ -91,6 +93,7 @@ export default function Home() {
 
   return (
     <div className="p-5 mx-auto mt-14 sm:mt-0">
+      <div className="text-3xl font-bold mb-5">Dashboard</div>
       <div>
         {/* Show Loading State */}
         {status === "loading" && <LoadingSpinner />}
@@ -107,7 +110,7 @@ export default function Home() {
                 </div>
               </div>
               <Link href={"/entry/addEditEntry"}>
-                <div className="p-8 rounded-2xl text-center content-center block max-w bg-teal-100 shadow-lg hover:bg-teal-200 h-32">
+                <div className="add-new-button p-8 rounded-2xl text-center content-center block max-w bg-teal-100 shadow-lg hover:bg-teal-200 h-32">
                   <div className="mb-2 text-2xl font-bold">Add New</div>
                 </div>
               </Link>
@@ -171,6 +174,36 @@ export default function Home() {
           </>
         )}
       </div>
+      <Joyride
+        run={runTour}
+        steps={[
+          {
+            target: ".add-new-button",
+            content: "Click here to add a new entry!",
+            placement: "top",
+            disableBeacon: true,
+          },
+        ]}
+        showSkipButton
+        showProgress
+        continuous
+        locale={{
+          last: "OK",
+        }}
+        styles={{
+          options: {
+            zIndex: 10000,
+            primaryColor: "#14b8a6",
+            backgroundColor: "#fff",
+            textColor: "#333",
+          },
+        }}
+        callback={(data) => {
+          if (data.status === "finished" || data.status === "skipped") {
+            setRunTour(false);
+          }
+        }}
+      />
     </div>
   );
 }

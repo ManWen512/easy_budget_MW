@@ -105,7 +105,9 @@ export default function MonthEntryPage() {
   return (
     <>
       {/* Top bar with month navigation */}
-      <div className="flex justify-center content-center p-5 mt-14 sm:mt-0 mx-auto w-[90vw] sm:w-full">
+      
+      <div className=" p-5 mt-14 sm:mt-0 mx-auto w-[90vw] sm:w-full">
+      <div className="text-3xl font-bold mb-5">Entries</div>
         <div className="flex justify-center content-center items-center mb-2 w-full">
           <button
             onClick={() => handleMonthChange("prev")}

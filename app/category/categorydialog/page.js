@@ -64,7 +64,7 @@ export default function CategoryDialog({ catId, name, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-teal-100 p-6 rounded-lg shadow-lg sm:w-1/3">
+      <div className="bg-teal-100 p-6 rounded-lg shadow-lg mx-5 w-full sm:w-1/3">
         <h2 className="text-xl font-semibold mb-5">
           {catId ? "Edit Category" : "Add New Category"}
         </h2>
@@ -86,7 +86,7 @@ export default function CategoryDialog({ catId, name, onClose }) {
 
           <div className="flex justify-end gap-3">
             <button type="button" onClick={onClose}>
-              Close
+              Cancel
             </button>
             <button type="submit">Save</button>
           </div>

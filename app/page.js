@@ -18,11 +18,7 @@ export default function Home() {
   };
 
   const handleSignUp = () => {
-    if (isAuthenticated) {
-      router.push("/dashboard");
-    } else {
-      router.push("/signup");
-    }
+    router.push("/signup");
   };
 
   return (
@@ -30,7 +26,9 @@ export default function Home() {
       {/* Top Left: Logo and Text */}
       <div className="absolute top-0 left-0 flex items-center p-6">
         <Image src={Pixel} alt="logo" width={40} height={40} />
-        <span className="ml-2 text-sm sm:text-2xl font-bold text-teal-700 tracking-wide">EASYBUDGET</span>
+        <span className="ml-2 text-sm sm:text-2xl font-bold text-teal-700 tracking-wide">
+          EASYBUDGET
+        </span>
       </div>
 
       {/* Top Right: Login and Signup */}
@@ -55,7 +53,8 @@ export default function Home() {
           Welcome to EasyBudget
         </h1>
         <p className="text-lg text-gray-600 mb-10 text-center max-w-xl px-4">
-          Take control of your finances with EasyBudget. Track your expenses, manage your categories, and visualize your spending with ease.
+          Take control of your finances with EasyBudget. Track your expenses,
+          manage your categories, and visualize your spending with ease.
         </p>
         <button
           onClick={handleLogin}

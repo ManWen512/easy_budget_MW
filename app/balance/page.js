@@ -66,14 +66,12 @@ export default function BalancePage() {
     setShowDialog(false);
     setCurrentAccount(null);
     fetchAccounts(); // Refresh accounts after save
-   
   };
 
   const closeConfirmDialog = () => {
     setConfirmDialog(false);
     setAccountToDelete(null);
     setIsChecked(false);
-    
   };
 
   const toggleCheckbox = () => {
@@ -85,7 +83,12 @@ export default function BalancePage() {
     if (isChecked && accountToDelete) {
       dispatch(deleteAccount(accountToDelete));
       closeConfirmDialog();
-      dispatch(showSnackbar({message:"Account deleted successfully!", severity:"success"}));
+      dispatch(
+        showSnackbar({
+          message: "Account deleted successfully!",
+          severity: "success",
+        })
+      );
     }
   };
 
@@ -96,6 +99,7 @@ export default function BalancePage() {
       ) : (
         <>
           <div className="grid grid-cols-1 w-full">
+          <div className="text-3xl font-bold mb-5">Accounts</div>
             <div className="h-48 rounded-2xl text-center p-6 bg-teal-100 border border-gray-200 shadow-lg hover:bg-teal-200">
               <div className="mb-2 text-2xl font-bold">Total Balance</div>
               <br></br>
@@ -104,7 +108,7 @@ export default function BalancePage() {
               </div>
             </div>
           </div>
-
+          
           <ul>
             {memoAccounts.map((account) => (
               <li key={account.id}>

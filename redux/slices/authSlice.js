@@ -66,6 +66,7 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.status = "idle";
       localStorage.removeItem("token");
+      
     },
     // loadUserFromStorage: (state) => {
     //   state.token = localStorage.getItem("token");
