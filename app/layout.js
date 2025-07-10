@@ -10,6 +10,8 @@ export const metadata = {
   },
 };
 
+
+
 export default function RootLayout({ children }) {
 
   return (
@@ -20,7 +22,7 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen">
+      <body className="min-h-screen  bg-gradient-to-br from-teal-50 to-white dark:bg-gradient-to-br dark:from-teal-900 dark:to-black ">
         <Providers>
           <Wrap>{children}</Wrap>
         </Providers>

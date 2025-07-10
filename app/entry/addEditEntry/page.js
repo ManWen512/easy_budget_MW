@@ -4,14 +4,17 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import { currencySymbol } from "@/app/currency";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchCategories, clearNewCategory } from "@/redux/slices/categorySlice";
+import {
+  fetchCategories,
+  clearNewCategory,
+} from "@/redux/slices/categorySlice";
 import { fetchAccounts, clearNewAccount } from "@/redux/slices/balanceSlice";
 import {
   submitEntry,
   clearStatus,
   clearEditEntry,
 } from "@/redux/slices/entrySlice";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import LoadingSpinner from "@mui/material/styles";
 import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -24,7 +27,10 @@ import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import { showSnackbar } from "@/redux/slices/snackBarSlice";
 import { selectCategories as selectCategoryList } from "@/redux/selectors/categorySelectors";
-import { selectAccounts as selectAccountList, selectNewAccount } from "@/redux/selectors/balanceSelectors";
+import {
+  selectAccounts as selectAccountList,
+  selectNewAccount,
+} from "@/redux/selectors/balanceSelectors";
 import {
   selectStatus as selectEntryStatus,
   selectError as selectEntryError,
@@ -32,6 +38,27 @@ import {
 } from "@/redux/selectors/entrySelectors";
 import CategoryDialog from "@/app/category/categorydialog/page";
 import BalanceDialogPage from "@/app/balance/balancedialog/page";
+import { selectTheme } from "@/redux/selectors/settingsSelectors";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+
+const darkMuiTheme = createTheme({
+  palette: {
+    mode: "dark",
+    background: {
+      paper: "#1f2937", // Tailwind gray-800
+      default: "#111827", // Tailwind gray-900
+    },
+    text: {
+      primary: "#fff",
+    },
+  },
+});
+
+const lightMuiTheme = createTheme({
+  palette: {
+    mode: "light",
+  },
+});
 
 export default function AddEditEntryPage() {
   const dispatch = useDispatch();
@@ -43,8 +70,9 @@ export default function AddEditEntryPage() {
   const error = useSelector(selectEntryError);
   const successMessage = useSelector(selectSuccessMessage);
   const newAccount = useSelector((state) => state.balance.newAccount);
-  const newCategory = useSelector((state)=> state.category.newCategory);
+  const newCategory = useSelector((state) => state.category.newCategory);
   const editEntry = useSelector((state) => state.entry.editEntry);
+  const theme = useSelector(selectTheme);
 
   const router = useRouter();
 
@@ -114,7 +142,6 @@ export default function AddEditEntryPage() {
       dispatch(clearEditEntry());
     }
   }, [itemId, dispatch]);
-  
 
   const setDefaultCategory = (data) => {
     setFormData((prevData) => ({
@@ -133,7 +160,6 @@ export default function AddEditEntryPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     dispatch(submitEntry({ itemId, formData }));
-
   };
 
   useEffect(() => {
@@ -204,12 +230,11 @@ export default function AddEditEntryPage() {
     };
   }, [dispatch]);
 
-   // Close the dialog
-   const closeBalanceDialog = () => {
+  // Close the dialog
+  const closeBalanceDialog = () => {
     setOpenBalanceDialog(false);
     dispatch(fetchAccounts()); // Just fetch, don't set manually
   };
-
 
   // Close the dialog
   const closeCategoryDialog = () => {
@@ -217,13 +242,26 @@ export default function AddEditEntryPage() {
     dispatch(fetchCategories());
   };
 
+  const menuProps =
+    theme === "dark"
+      ? {
+          PaperProps: {
+            sx: {
+              bgcolor: "grey.900",
+              color: "white",
+            },
+            className: "dark:bg-gray-800 dark:text-white",
+          },
+        }
+      : {};
+
   return (
-    <div className="p-5 mt-14 sm:mt-0">
+    <div className="p-5 mt-14 sm:mt-0 dark:text-white">
       {status === "loading" ? (
         <LoadingSpinner />
       ) : (
         <>
-          <h1 className="text-3xl mb-2 flex font-bold justify-center content-center">
+          <h1 className="text-3xl mb-2 flex font-bold justify-center content-center ">
             {itemId ? "Edit Entry" : "Create New Entry"}
           </h1>
           <div className="flex justify-center">
@@ -237,7 +275,7 @@ export default function AddEditEntryPage() {
                   <label
                     className={`w-full relative font-bold cursor-pointer p-3 border rounded-lg transition-all ${
                       formData.type === "OUTCOME"
-                        ? "border-l-4 border-teal-500 bg-teal-100"
+                        ? "dark:text-black border-l-4 border-teal-500 bg-teal-100"
                         : "border-teal-500"
                     }`}
                   >
@@ -255,7 +293,7 @@ export default function AddEditEntryPage() {
                   <label
                     className={`ml-3 w-full font-bold  relative cursor-pointer p-3 border rounded-lg transition-all ${
                       formData.type === "INCOME"
-                        ? "border-l-4 border-teal-500 bg-teal-100"
+                        ? "dark:text-black border-l-4 border-teal-500 bg-teal-100"
                         : "border-teal-500"
                     }`}
                   >
@@ -281,25 +319,29 @@ export default function AddEditEntryPage() {
                   >
                     <InputLabel
                       id="demo-simple-select-autowidth-label"
-                      className="font-bold"
+                      className="font-bold dark:text-white"
                     >
                       Category
                     </InputLabel>
-                    <Select
-                      labelId="demo-simple-select-autowidth-label"
-                      id="demo-simple-select-autowidth"
-                      value={formData.categoryId}
-                      onChange={handleChange}
-                      autoWidth
-                      label="Category"
-                      name="category"
+                    <ThemeProvider
+                      theme={theme === "dark" ? darkMuiTheme : lightMuiTheme}
                     >
-                      {memoCategories.map((category) => (
-                        <MenuItem key={category.id} value={category.id}>
-                          {category.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
+                      <Select
+                        labelId="demo-simple-select-autowidth-label"
+                        id="demo-simple-select-autowidth"
+                        value={formData.categoryId}
+                        onChange={handleChange}
+                        autoWidth
+                        label="Category"
+                        name="category"
+                      >
+                        {memoCategories.map((category) => (
+                          <MenuItem key={category.id} value={category.id}>
+                            {category.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </ThemeProvider>
                   </FormControl>
 
                   <button
@@ -320,25 +362,30 @@ export default function AddEditEntryPage() {
                   >
                     <InputLabel
                       id="demo-simple-select-autowidth-label"
-                      className="font-bold"
+                      className="font-bold dark:text-white"
                     >
                       Account
                     </InputLabel>
-                    <Select
-                      labelId="demo-simple-select-autowidth-label"
-                      id="demo-simple-select-autowidth"
-                      value={formData.accountId}
-                      onChange={handleChange}
-                      autoWidth
-                      label="Account"
-                      name="account"
+                    <ThemeProvider
+                      theme={theme === "dark" ? darkMuiTheme : lightMuiTheme}
                     >
-                      {memoAccounts.map((account) => (
-                        <MenuItem key={account.id} value={account.id}>
-                          {account.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
+                      <Select
+                        labelId="demo-simple-select-autowidth-label"
+                        id="demo-simple-select-autowidth"
+                        value={formData.accountId}
+                        onChange={handleChange}
+                        autoWidth
+                        label="Account"
+                        name="account"
+                        MenuProps={menuProps}
+                      >
+                        {memoAccounts.map((account) => (
+                          <MenuItem key={account.id} value={account.id}>
+                            {account.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </ThemeProvider>
                   </FormControl>
 
                   <button
@@ -353,54 +400,71 @@ export default function AddEditEntryPage() {
 
               <div className="items-center">
                 <FormControl fullWidth>
-                  <InputLabel htmlFor="outlined-adornment-amount">
+                  <InputLabel htmlFor="outlined-adornment-amount" className="dark:text-white">
                     Amount
                   </InputLabel>
-                  <OutlinedInput
-                    id="outlined-adornment-amount"
-                    name="cost"
-                    value={formData.cost}
-                    onChange={handleChange}
-                    className="w-full  rounded-md relative"
-                    min="1"
-                    required
-                    startAdornment={
-                      <InputAdornment position="start">
-                        {currencySymbol}
-                      </InputAdornment>
-                    }
-                    label="Amount"
-                  />
+                  <ThemeProvider
+                    theme={theme === "dark" ? darkMuiTheme : lightMuiTheme}
+                  >
+                    <OutlinedInput
+                      id="outlined-adornment-amount"
+                      name="cost"
+                      value={formData.cost}
+                      onChange={handleChange}
+                      className="w-full  rounded-md relative"
+                      min="1"
+                      required
+                      startAdornment={
+                        <InputAdornment position="start">
+                          {currencySymbol}
+                        </InputAdornment>
+                      }
+                      label="Amount"
+                    />
+                  </ThemeProvider>
                 </FormControl>
               </div>
 
               <div className="items-center">
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
-                  <DatePicker
-                    className="w-full p-3 border rounded-md focus:outline-none"
-                    id="dateTime"
-                    label="Date"
-                    name="dateTime"
-                    value={formData.dateTime}
-                    required
-                    onChange={handleDateTimeChange}
-                    renderInput={(params) => <TextField {...params} />}
-                  />
+                  <ThemeProvider
+                    theme={theme === "dark" ? darkMuiTheme : lightMuiTheme}
+                  >
+                    <DatePicker
+                      className="w-full p-3 border rounded-md focus:outline-none"
+                      id="dateTime"
+                      label="Date"
+                      name="dateTime"
+                      value={formData.dateTime}
+                      required
+                      onChange={handleDateTimeChange}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          className="w-full p-3 border rounded-md focus:outline-none dark:bg-gray-800 dark:text-white"
+                        />
+                      )}
+                    />
+                  </ThemeProvider>
                 </LocalizationProvider>
               </div>
 
               <div className="items-center">
-                <TextField
-                  id="outlined-multiline-flexible"
-                  label="Description"
-                  multiline
-                  maxRows={4}
-                  name="description"
-                  required
-                  onChange={handleChange}
-                  value={formData.description}
-                  className="w-full p-2 border rounded-md"
-                />
+                <ThemeProvider
+                  theme={theme === "dark" ? darkMuiTheme : lightMuiTheme}
+                >
+                  <TextField
+                    id="outlined-multiline-flexible"
+                    label="Description"
+                    multiline
+                    maxRows={4}
+                    name="description"
+                    required
+                    onChange={handleChange}
+                    value={formData.description}
+                    className="w-full p-2 border rounded-md"
+                  />
+                </ThemeProvider>
               </div>
               <div>
                 <button
@@ -422,12 +486,8 @@ export default function AddEditEntryPage() {
         </>
       )}
 
-      {openBalanceDialog && (
-        <BalanceDialogPage  onClose={closeBalanceDialog} />
-      )}
-      {openCategoryDialog && (
-        <CategoryDialog  onClose={closeCategoryDialog} />
-      )}
+      {openBalanceDialog && <BalanceDialogPage onClose={closeBalanceDialog} />}
+      {openCategoryDialog && <CategoryDialog onClose={closeCategoryDialog} />}
     </div>
   );
 }

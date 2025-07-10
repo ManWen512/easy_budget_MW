@@ -10,3 +10,4 @@ export const selectIncomeCategoryCostList = createSelector([selectGraph], (s) =>
 export const selectOutcomeCategoryCostList = createSelector([selectGraph], (s) => s.outcomeCategoryCostList);
 export const selectStatus = createSelector([selectGraph], (s) => s.status);
 export const selectError = createSelector([selectGraph], (s) => s.error); 
+export const selectSelected = createSelector([selectGraph], (s)=> s.selected);

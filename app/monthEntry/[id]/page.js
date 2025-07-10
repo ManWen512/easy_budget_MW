@@ -5,7 +5,7 @@ import { FaPenSquare, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 import { BsArrowLeftCircleFill } from "react-icons/bs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { currencySymbol } from "@/app/currency";
+import { selectCurrency } from "@/redux/selectors/settingsSelectors";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchEntryDetail,
@@ -24,6 +24,7 @@ const EntryDetailPage = ({ params }) => {
   const dispatch = useDispatch();
 
   const { entry, status, error } = useSelector((state) => state.entryDetail);
+  const currencySymbol = useSelector(selectCurrency);
   // const { open, message, severity } = useSelector((state) => state.snackbar);
 
   useEffect(() => {
@@ -68,8 +69,6 @@ const EntryDetailPage = ({ params }) => {
     setIsChecked(!isChecked);
   };
 
-
-
   const handleEditEntry = () => {
     dispatch(
       setEditEntry({
@@ -95,22 +94,22 @@ const EntryDetailPage = ({ params }) => {
   }
 
   return (
-    <div className="month-entry-page p-5 w-full">
-      <div className="sm:mx-40 m-5 mt-16 sm:mt-0 p-6 sm:p-20 bg-white rounded-lg shadow-lg ">
+    <div className="month-entry-page p-5 w-full ">
+      <div className="sm:mx-10 dark:text-gray-200  m-5 mt-16 sm:mt-0 p-6 sm:p-20 bg-gradient-to-br from-teal-50 to-white dark:bg-gradient-to-br dark:from-teal-900 dark:to-black rounded-lg shadow-lg ">
         <button onClick={() => router.back()} className="mb-4">
-          <BsArrowLeftCircleFill size={30} />
+          <BsArrowLeftCircleFill size={30} className="dark:text-white"/>
         </button>
 
-        <h1 className="text-2xl font-bold mb-4">Details</h1>
-        <div className="grid grid-cols-2 mb-4">
-          <div className="text-gray-500 mr-3 flex justify-between">
+        <h1 className="text-2xl font-bold mb-4 dark:text-white">Details</h1>
+        <div className="grid grid-cols-2 mb-4 ">
+          <div className="text-gray-500  mr-3 flex justify-between">
             Date<div>:</div>
           </div>
           <div>
             {entry.dateTime
               ? new Date(entry.dateTime).toLocaleDateString("en-US", {
-                dateStyle: "medium",
-              })
+                  dateStyle: "medium",
+                })
               : "N/A"}
           </div>
         </div>
@@ -125,8 +124,7 @@ const EntryDetailPage = ({ params }) => {
             Cost<div>:</div>
           </div>
           <div>
-            {currencySymbol}
-            {entry.cost || "N/A"}
+            {currencySymbol} {entry.cost || "N/A"}
           </div>
         </div>
         <div className="grid grid-cols-2 mb-4">
@@ -176,7 +174,7 @@ const EntryDetailPage = ({ params }) => {
                 },
               }}
             > */}
-            
+
             <button className="ml-5" onClick={handleEditEntry}>
               <FaPenSquare size={30} />
             </button>

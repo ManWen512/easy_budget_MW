@@ -1,13 +1,17 @@
 "use client";
 
 import PieChart from "@/components/pieChart";
-import { useState, useEffect, useMemo } from "react";
-import { currencySymbol } from "../currency";
+import { useEffect, useMemo } from "react";
+import {
+  selectCurrency,
+  selectTheme,
+} from "@/redux/selectors/settingsSelectors";
 import { useSelector, useDispatch } from "react-redux";
 import {
   fetchMonthData,
   fetchYearData,
   fetchYearRangeData,
+  setSelected,
 } from "@/redux/slices/graphSlice";
 
 import dynamic from "next/dynamic";
@@ -23,24 +27,44 @@ import {
   selectOutcomeCategoryCostList,
   selectStatus,
   selectError,
+  selectSelected,
 } from "@/redux/selectors/graphSelectors";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 
 const EChartBar = dynamic(() => import("@/components/EChartBar"), {
   ssr: false,
+});
+
+const darkMuiTheme = createTheme({
+  palette: {
+    mode: "dark",
+    background: {
+      paper: "#1f2937", // Tailwind gray-800
+      default: "#111827", // Tailwind gray-900
+    },
+    text: {
+      primary: "#fff",
+    },
+  },
+});
+
+const lightMuiTheme = createTheme({
+  palette: {
+    mode: "light",
+  },
 });
 
 export default function GraphsPage() {
   const dispatch = useDispatch();
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
-  const [selectedOption, setSelectedOption] = useState("month");
-  // const { open, message, severity } = useSelector((state) => state.snackbar);
-  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
-  const [selectedYear, setSelectedYear] = useState(currentYear);
-  const [yearRange, setYearRange] = useState({
-    startYear: null,
-    endYear: null,
-  });
+  const currentstartYear = new Date().getFullYear() - 1;
+  const selected = useSelector(selectSelected);
+
+  const selectedOption = selected.selectedOption;
+  const selectedMonth = selected.selectedMonth;
+  const selectedYear = selected.selectedYear;
+  const yearRange = selected.selectedYearRange;
 
   const incomeList = useSelector(selectIncomeList);
   const outcomeList = useSelector(selectOutcomeList);
@@ -50,6 +74,8 @@ export default function GraphsPage() {
   const outcomeCategoryCostList = useSelector(selectOutcomeCategoryCostList);
   const status = useSelector(selectStatus);
   const error = useSelector(selectError);
+  const currencySymbol = useSelector(selectCurrency);
+  const theme = useSelector(selectTheme);
 
   // Memoize chart data for rendering
   const memoIncomeList = useMemo(() => incomeList, [incomeList]);
@@ -85,7 +111,7 @@ export default function GraphsPage() {
     "November",
     "December",
   ];
-  
+
   const years = Array.from({ length: 30 }, (_, i) => currentYear - i); // Generates a list of years from 2024 to 1995
 
   useEffect(() => {
@@ -95,34 +121,65 @@ export default function GraphsPage() {
   }, [status, error, dispatch]);
 
   const handleOptionChange = (option) => {
-    setSelectedOption(option);
-    // Reset selected data when the option changes
-    setSelectedMonth(null);
-    setSelectedYear(null);
-    setYearRange({ startYear: null, endYear: null });
+    dispatch(
+      setSelected({
+        selectedOption: option,
+        selectedMonth: currentMonth,
+        selectedYear: currentYear,
+        selectedYearRange: {
+          startYear: currentstartYear,
+          endYear: currentYear,
+        },
+      })
+    );
+  };
+
+  const handleMonthChange = (month) => {
+    dispatch(setSelected({ selectedMonth: month }));
+  };
+
+  const handleYearChange = (year) => {
+    dispatch(setSelected({ selectedYear: year }));
+  };
+
+  const handleYearRangeChange = (range) => {
+    dispatch(setSelected({ selectedYearRange: range }));
   };
 
   // Fetch data when month and year are selected
   useEffect(() => {
-    if (selectedMonth && selectedYear) {
-      dispatch(fetchMonthData({ year: selectedYear, month: selectedMonth }));
-    } else if (selectedYear) {
-      dispatch(fetchYearData(selectedYear));
-    } else if (yearRange.startYear && yearRange.endYear) {
-      dispatch(fetchYearRangeData(yearRange));
+    if (
+      selected.selectedOption === "month" &&
+      selected.selectedMonth &&
+      selected.selectedYear
+    ) {
+      dispatch(
+        fetchMonthData({
+          year: selected.selectedYear,
+          month: selected.selectedMonth,
+        })
+      );
+    } else if (selected.selectedOption === "year" && selected.selectedYear) {
+      dispatch(fetchYearData(selected.selectedYear));
+    } else if (
+      selected.selectedOption === "yearRange" &&
+      selected.selectedYearRange.startYear &&
+      selected.selectedYearRange.endYear
+    ) {
+      dispatch(fetchYearRangeData(selected.selectedYearRange));
     }
-  }, [selectedMonth, selectedYear, yearRange]);
+  }, [selected, dispatch]);
 
   return (
     <div className="p-5 mt-14 sm:mt-0">
-      <div className="text-3xl font-bold mb-5">Graphs</div>
+      <div className="text-3xl font-bold mb-5 dark:text-white">Graphs</div>
       <div className="flex space-x-4 mb-4 w-full sm:w-[60vw]">
         {/* Radio Buttons */}
         <label
           className={`ml-3 font-bold shadow-lg relative cursor-pointer p-3 border rounded-lg transition-all ${
             selectedOption === "month"
               ? "border-l-4 border-teal-500 bg-teal-100"
-              : "border-teal-400"
+              : "border-teal-400 dark:text-white"
           }`}
         >
           <input
@@ -132,14 +189,14 @@ export default function GraphsPage() {
             className="sr-only peer"
             onChange={() => handleOptionChange("month")}
           />
-          <span className="text-sm sm:text-base">Select Month</span>
+          <span className="text-sm sm:text-base ">Select Month</span>
         </label>
 
         <label
           className={`ml-3 font-bold shadow-lg relative cursor-pointer p-3 border rounded-lg transition-all ${
             selectedOption === "year"
-              ? "border-l-4 border-teal-500 bg-teal-100"
-              : "border-teal-400"
+              ? "border-l-4 border-teal-500 bg-teal-100 "
+              : "border-teal-400 dark:text-white"
           }`}
         >
           <input
@@ -156,7 +213,7 @@ export default function GraphsPage() {
           className={`ml-3 font-bold shadow-lg relative cursor-pointer p-3 border rounded-lg transition-all ${
             selectedOption === "yearRange"
               ? "bg-teal-100 border-l-4 border-teal-500"
-              : "border-teal-400"
+              : "border-teal-400 dark:text-white"
           }`}
         >
           <input
@@ -177,39 +234,78 @@ export default function GraphsPage() {
             <FormControl className="w-full sm:w-1/4 p-3 rounded-md ">
               <InputLabel
                 id="demo-simple-select-autowidth-label"
-                className="font-bold"
+                className="font-bold dark:text-white"
               >
                 Month
               </InputLabel>
-              <Select
-                labelId="demo-simple-select-autowidth-label"
-                id="demo-simple-select-autowidth"
-                value={selectedMonth || ""}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-                autoWidth
-                label="Month"
-                name="month"
+              <ThemeProvider
+                theme={theme === "dark" ? darkMuiTheme : lightMuiTheme}
               >
-                {months.map((month, index) => (
-                  <MenuItem key={index} value={index + 1}>
-                    {month}
-                  </MenuItem>
-                ))}
-              </Select>
+                <Select
+                  labelId="demo-simple-select-autowidth-label"
+                  id="demo-simple-select-autowidth"
+                  value={selectedMonth || ""}
+                  onChange={(e) => handleMonthChange(e.target.value)}
+                  autoWidth
+                  label="Month"
+                  name="month"
+                >
+                  {months.map((month, index) => (
+                    <MenuItem key={index} value={index + 1}>
+                      {month}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </ThemeProvider>
             </FormControl>
 
             <FormControl className="w-full sm:w-1/4 p-3 rounded-md ">
               <InputLabel
                 id="demo-simple-select-autowidth-label"
-                className="font-bold"
+                className="font-bold dark:text-white"
               >
                 Year
               </InputLabel>
+              <ThemeProvider
+                theme={theme === "dark" ? darkMuiTheme : lightMuiTheme}
+              >
+                <Select
+                  labelId="demo-simple-select-autowidth-label"
+                  id="demo-simple-select-autowidth"
+                  value={selectedYear || ""}
+                  onChange={(e) => handleYearChange(e.target.value)}
+                  autoWidth
+                  label="Year"
+                  name="year"
+                >
+                  {years.map((year) => (
+                    <MenuItem key={year} value={year}>
+                      {year}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </ThemeProvider>
+            </FormControl>
+          </div>
+        )}
+
+        {/* Year Selection */}
+        {selectedOption === "year" && (
+          <FormControl className="w-1/2 sm:w-1/4 p-3 rounded-md ">
+            <InputLabel
+              id="demo-simple-select-autowidth-label"
+              className="font-bold  dark:text-white"
+            >
+              Year
+            </InputLabel>
+            <ThemeProvider
+              theme={theme === "dark" ? darkMuiTheme : lightMuiTheme}
+            >
               <Select
                 labelId="demo-simple-select-autowidth-label"
                 id="demo-simple-select-autowidth"
                 value={selectedYear || ""}
-                onChange={(e) => setSelectedYear(e.target.value)}
+                onChange={(e) => handleYearChange(e.target.value)}
                 autoWidth
                 label="Year"
                 name="year"
@@ -220,34 +316,7 @@ export default function GraphsPage() {
                   </MenuItem>
                 ))}
               </Select>
-            </FormControl>
-          </div>
-        )}
-
-        {/* Year Selection */}
-        {selectedOption === "year" && (
-          <FormControl className="w-1/2 sm:w-1/4 p-3 rounded-md ">
-            <InputLabel
-              id="demo-simple-select-autowidth-label"
-              className="font-bold"
-            >
-              Year
-            </InputLabel>
-            <Select
-              labelId="demo-simple-select-autowidth-label"
-              id="demo-simple-select-autowidth"
-              value={selectedYear || ""}
-              onChange={(e) => setSelectedYear(e.target.value)}
-              autoWidth
-              label="Year"
-              name="year"
-            >
-              {years.map((year) => (
-                <MenuItem key={year} value={year}>
-                  {year}
-                </MenuItem>
-              ))}
-            </Select>
+            </ThemeProvider>
           </FormControl>
         )}
 
@@ -257,53 +326,67 @@ export default function GraphsPage() {
             <FormControl className="w-full sm:w-1/4 p-3 rounded-md ">
               <InputLabel
                 id="demo-simple-select-autowidth-label"
-                className="font-bold"
+                className="font-bold dark:text-white"
               >
                 Start Year
               </InputLabel>
-              <Select
-                labelId="demo-simple-select-autowidth-label"
-                id="demo-simple-select-autowidth"
-                value={yearRange.startYear || ""}
-                onChange={(e) =>
-                  setYearRange({ ...yearRange, startYear: e.target.value })
-                }
-                autoWidth
-                label="Start Year"
-                name="startYear"
+              <ThemeProvider
+                theme={theme === "dark" ? darkMuiTheme : lightMuiTheme}
               >
-                {years.map((year) => (
-                  <MenuItem key={year} value={year}>
-                    {year}
-                  </MenuItem>
-                ))}
-              </Select>
+                <Select
+                  labelId="demo-simple-select-autowidth-label"
+                  id="demo-simple-select-autowidth"
+                  value={yearRange.startYear || ""}
+                  onChange={(e) =>
+                    handleYearRangeChange({
+                      ...yearRange,
+                      startYear: e.target.value,
+                    })
+                  }
+                  autoWidth
+                  label="Start Year"
+                  name="startYear"
+                >
+                  {years.map((year) => (
+                    <MenuItem key={year} value={year}>
+                      {year}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </ThemeProvider>
             </FormControl>
 
             <FormControl className="w-full sm:w-1/4 p-3 rounded-md ">
               <InputLabel
                 id="demo-simple-select-autowidth-label"
-                className="font-bold"
+                className="font-bold dark:text-white"
               >
                 End Year
               </InputLabel>
-              <Select
-                labelId="demo-simple-select-autowidth-label"
-                id="demo-simple-select-autowidth"
-                value={yearRange.endYear || ""}
-                onChange={(e) =>
-                  setYearRange({ ...yearRange, endYear: e.target.value })
-                }
-                autoWidth
-                label="End Year"
-                name="endYear"
+              <ThemeProvider
+                theme={theme === "dark" ? darkMuiTheme : lightMuiTheme}
               >
-                {years.map((year) => (
-                  <MenuItem key={year} value={year}>
-                    {year}
-                  </MenuItem>
-                ))}
-              </Select>
+                <Select
+                  labelId="demo-simple-select-autowidth-label"
+                  id="demo-simple-select-autowidth"
+                  value={yearRange.endYear || ""}
+                  onChange={(e) =>
+                    handleYearRangeChange({
+                      ...yearRange,
+                      endYear: e.target.value,
+                    })
+                  }
+                  autoWidth
+                  label="End Year"
+                  name="endYear"
+                >
+                  {years.map((year) => (
+                    <MenuItem key={year} value={year}>
+                      {year}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </ThemeProvider>
             </FormControl>
           </div>
         )}
@@ -320,7 +403,6 @@ export default function GraphsPage() {
               yearRange.endYear)) && (
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-0 ">
               <div className="col-span-3 mt-0 sm:mt-5 ">
-                
                 <EChartBar
                   data={memoIncomeList}
                   selectedMonth={selectedMonth}
@@ -339,7 +421,6 @@ export default function GraphsPage() {
                 />
               </div>
               <div className="col-span-3 mt-10 sm:mt-10">
-                
                 <EChartBar
                   data={memoOutcomeList}
                   currency={currencySymbol}

@@ -89,7 +89,7 @@ export default function CategoryPage() {
 
   return (
     <div className="balance-page mt-14 p-5 sm:mt-0">
-      <div className="text-3xl font-bold mb-5">Categories</div>
+      <div className="text-3xl font-bold mb-5 dark:text-white">Categories</div>
 
       {status === "loading" ? (
         <LoadingSpinner />
@@ -104,7 +104,7 @@ export default function CategoryPage() {
                   </div>
                   <div className="flex content-center">
                     <button onClick={() => openDialog(cat)} className="ml-3">
-                      <FaPenSquare size={30} />
+                      <FaPenSquare size={30} className="dark:text-gray-400"/>
                     </button>
                     <button
                       onClick={() => openConfirmDialog(cat.id)}

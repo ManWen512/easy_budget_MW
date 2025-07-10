@@ -13,11 +13,12 @@ import entryDetailReducer from "../slices/entryDetailSlice";
 import historyReducer from "../slices/historySlice";
 import snackbarReducer from "../slices/snackBarSlice";
 import authReducer from "../slices/authSlice";
+import settingReducer from "../slices/settingSlice";
 
 const persistConfig = {
   key: 'root', // key for the storage
   storage,     // storage engine (localStorage in this case)
-  whitelist: ['auth'], // specify which reducers to persist (e.g., 'auth' slice)
+  whitelist: ['auth', 'settings'], // specify which reducers to persist (e.g., 'auth' slice)
   // blacklist: ['someNonPersistedSlice'], // optional: specify which reducers NOT to persist
 };
 
@@ -32,6 +33,7 @@ const rootReducer = combineReducers({
   entryDetail: entryDetailReducer,
   history: historyReducer,
   snackbar: snackbarReducer,
+  setting: settingReducer, 
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

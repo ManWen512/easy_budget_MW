@@ -2,10 +2,13 @@
 
 import React, { useEffect, useRef } from "react";
 import * as echarts from "echarts";
+import { selectTheme } from "@/redux/selectors/settingsSelectors";
+import { useSelector } from "react-redux";
 
 const EChartBar = ({ data = [], title, currency, height = 400 }) => {
   const chartRef = useRef(null);
   const instanceRef = useRef(null);
+  const theme = useSelector(selectTheme);
 
   const colors = [
     "#FF6384",
@@ -19,6 +22,9 @@ const EChartBar = ({ data = [], title, currency, height = 400 }) => {
     title: {
       text: title,
       left: "center",
+      textStyle:{
+        color: theme === "dark" ? "#ffffff" : "#111827"
+      }
     },
     tooltip: {
       trigger: "axis",
@@ -31,10 +37,23 @@ const EChartBar = ({ data = [], title, currency, height = 400 }) => {
       type: "category",
       data: data.map((item) => formatDate(item.day)),
       name: "Date",
+      axisLine: {
+        lineStyle: {
+          color: theme === "dark" ? "#fff" : "#333",
+        },
+      },
     },
     yAxis: {
       type: "value",
       name: `Cost (${currency})`,
+      // axisLabel: {
+      //   color: theme === "dark" ? "#fff" : "#333",
+      // },
+      axisLine: {
+        lineStyle: {
+          color: theme === "dark" ? "#fff" : "#333",
+        },
+      },
     },
     series: [
       {

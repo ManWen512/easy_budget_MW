@@ -13,6 +13,7 @@ import {
 } from "@/redux/slices/authSlice";
 import { showSnackbar } from "@/redux/slices/snackBarSlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import Joyride from "react-joyride";
 
 export default function LoginPage() {
   const dispatch = useDispatch();
@@ -26,6 +27,7 @@ export default function LoginPage() {
   const { error, status } = useSelector((state) => state.auth);
   // const { open, message, severity } = useSelector((state) => state.snackbar);
   const [loading, setLoading] = useState(false);
+  const [runGuestUserTour, setRunGuestUserTour] = useState(false);
 
   useEffect(() => {
     const message = searchParams.get("logoutSnackbar");
@@ -34,11 +36,18 @@ export default function LoginPage() {
     }
   }, [searchParams]);
 
-  useEffect(()=>{
-    if(status == 'failed'){
-      dispatch(showSnackbar({ message: error, severity:"error"}))
+  useEffect(() => {
+    if (status == "failed") {
+      dispatch(showSnackbar({ message: error, severity: "error" }));
     }
-  })
+  });
+
+  useEffect(() => {
+    if (!localStorage.getItem("hasSeenGuestUserTour")) {
+      localStorage.setItem("hasSeenGuestUserTour", "true");
+      setRunGuestUserTour(true);
+    }
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -56,8 +65,6 @@ export default function LoginPage() {
       }
     });
   };
-
-  
 
   const handleGuestLogin = async () => {
     setLoading(true);
@@ -87,12 +94,12 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       {loading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-70">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-70 dark:bg-black dark:bg-opacity-70">
           <LoadingSpinner />
         </div>
       )}
       <div className="w-full max-w-sm ">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-gradient-to-br from-teal-50 to-white dark:bg-gradient-to-br dark:from-teal-900 dark:to-black dark:text-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
             <p className="">Please sign in to your account</p>
@@ -186,7 +193,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 mb-5 text-center">
             <p className="text-sm">
               Don&apos;t have an account?{" "}
               <Link
@@ -197,7 +204,7 @@ export default function LoginPage() {
               </Link>
             </p>
           </div>
-          <div className="mt-6 text-center">
+          <div className="guest-user file:mt-6 text-center">
             <button
               className="font-bold text-teal-400 hover:text-teal-500"
               onClick={handleGuestLogin}
@@ -207,6 +214,37 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+      <Joyride
+        run={runGuestUserTour}
+        steps={[
+          {
+            target: ".guest-user",
+            content:
+              " Try Continue as Guest to explore the app without creating an account. Note: This is a test mode — your data will not be saved.",
+            placement: "top",
+            disableBeacon: true,
+          },
+        ]}
+        showSkipButton
+        showProgress
+        continuous
+        locale={{
+          last: "OK",
+        }}
+        styles={{
+          options: {
+            zIndex: 10000,
+            primaryColor: "#14b8a6",
+            backgroundColor: "#fff",
+            textColor: "#333",
+          },
+        }}
+        callback={(data) => {
+          if (data.status === "finished" || data.status === "skipped") {
+            setRunGuestUserTour(false);
+          }
+        }}
+      />
     </div>
   );
 }

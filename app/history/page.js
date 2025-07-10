@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { FaSortDown } from "react-icons/fa";
 import { FaArrowDownWideShort, FaArrowUpShortWide } from "react-icons/fa6";
 import { useRouter } from "next/navigation";
-import { currencySymbol } from "../currency";
+import { selectCurrency , selectTheme} from "@/redux/selectors/settingsSelectors";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAccountsAndCategories,
@@ -12,7 +12,6 @@ import {
   setFilters,
 } from "@/redux/slices/historySlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { FaPenSquare, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -30,6 +29,26 @@ import {
   selectError,
   selectFilters,
 } from "@/redux/selectors/historySelectors";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+
+const darkMuiTheme = createTheme({
+  palette: {
+    mode: "dark",
+    background: {
+      paper: "#1f2937", // Tailwind gray-800
+      default: "#111827", // Tailwind gray-900
+    },
+    text: {
+      primary: "#fff",
+    },
+  },
+});
+
+const lightMuiTheme = createTheme({
+  palette: {
+    mode: "light",
+  },
+});
 
 export default function HistoryPage() {
   const dispatch = useDispatch();
@@ -42,6 +61,8 @@ export default function HistoryPage() {
   const status = useSelector(selectStatus);
   const filters = useSelector(selectFilters);
   const error = useSelector(selectError);
+  const currencySymbol = useSelector(selectCurrency);
+  const theme = useSelector(selectTheme);
 
   // UI State
 
@@ -107,7 +128,7 @@ export default function HistoryPage() {
 
   return (
     <div className=" mt-14 p-5 sm:mt-0">
-      <div className="text-3xl font-bold mb-5">History</div>
+      <div className="text-3xl font-bold mb-5 dark:text-white">History</div>
 
       <div className="grid grid-cols-2 gap-4 sm:flex sm:items-center sm:space-x-4 mb-4">
         {/* Filter Button */}
@@ -264,6 +285,9 @@ export default function HistoryPage() {
         {/* Date Range Pickers */}
         <div className="col-span-2 sm:col-auto sm:flex-1 flex items-center gap-2">
           <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <ThemeProvider
+                theme={theme === "dark" ? darkMuiTheme : lightMuiTheme}
+              >
             <DatePicker
               className="w-full  rounded-md  "
               type="date"
@@ -277,10 +301,13 @@ export default function HistoryPage() {
                   setFilters({ ...filters, startDate: newDate.toISOString() })
                 )
               }
-            />
+            /></ThemeProvider>
           </LocalizationProvider>
           <div className="text-sm">To</div>
           <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <ThemeProvider
+                theme={theme === "dark" ? darkMuiTheme : lightMuiTheme}
+              >
             <DatePicker
               className="w-full  rounded-md  "
               type="date"
@@ -294,7 +321,7 @@ export default function HistoryPage() {
                   setFilters({ ...filters, endDate: newDate.toISOString() })
                 )
               }
-            />
+            /></ThemeProvider>
           </LocalizationProvider>
         </div>
       </div>
@@ -317,11 +344,11 @@ export default function HistoryPage() {
                   onClick={() => handleRowClick(item)}
                 >
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs font-bold text-gray-700">
+                    <span className="text-xs font-bold text-gray-700 dark:text-gray-200">
                       {new Date(item.dateTime).toLocaleDateString()}
                     </span>
 
-                    <span className="text-sm font-bold text-gray-800">
+                    <span className="text-sm font-bold text-gray-800 ">
                       {currencySymbol} {item.cost}
                     </span>
                   </div>
@@ -341,19 +368,19 @@ export default function HistoryPage() {
               <table className="min-w-full">
                 <thead>
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200  uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">
                       Type
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">
                       Category
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">
                       Cost
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-200 uppercase tracking-wider">
                       Account
                     </th>
                     

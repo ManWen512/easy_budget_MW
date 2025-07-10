@@ -6,7 +6,7 @@ import PieChart from "@/components/pieChart";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { currencySymbol } from "../currency";
+import { selectCurrency } from "@/redux/selectors/settingsSelectors";
 import EChartBar from "@/components/EChartBar";
 import {
   selectTotalBalance,
@@ -22,6 +22,7 @@ import {
 import { showSnackbar } from "@/redux/slices/snackBarSlice";
 import Joyride from "react-joyride";
 
+
 export default function Home() {
   const dispatch = useDispatch();
   const totalBalance = useSelector(selectTotalBalance);
@@ -33,6 +34,7 @@ export default function Home() {
   const outcomeCategoryCostList = useSelector(selectOutcomeCategoryCostList);
   const status = useSelector(selectStatus);
   const error = useSelector(selectError);
+  const currencySymbol = useSelector(selectCurrency);
   const [runTour, setRunTour] = useState(false);
   // const { open, message, severity } = useSelector((state) => state.snackbar);
 
@@ -93,7 +95,7 @@ export default function Home() {
 
   return (
     <div className="p-5 mx-auto mt-14 sm:mt-0">
-      <div className="text-3xl font-bold mb-5">Dashboard</div>
+      <div className="text-3xl font-bold mb-5 dark:text-white">Dashboard</div>
       <div>
         {/* Show Loading State */}
         {status === "loading" && <LoadingSpinner />}
@@ -117,7 +119,7 @@ export default function Home() {
             </div>
 
             <div className="mt-8">
-              <div className="m-2 font-bold">Overview ({currentMonthName})</div>
+              <div className="m-2 font-bold dark:text-white">Overview ({currentMonthName})</div>
               {!hasAnyData ? (
                 <div className="text-center text-gray-500 mt-8">
                   No data available for this month. Add some entries to see your
@@ -152,6 +154,7 @@ export default function Home() {
                       <div className="sm:col-span-3 bd-white w-full overflow-x-auto">
                         <EChartBar
                           data={memoOutcomeList}
+                          
                           title={["Outcome"]}
                           currency={currencySymbol}
                         />

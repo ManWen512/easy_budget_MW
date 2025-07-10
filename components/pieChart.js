@@ -1,5 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import * as echarts from 'echarts';
+import { selectTheme } from '@/redux/selectors/settingsSelectors';
+import { useSelector } from 'react-redux';
 
 // Define the colors once to ensure consistency
 const PIE_CHART_COLORS = [
@@ -14,6 +16,7 @@ const PIE_CHART_COLORS = [
 const PieChart = ({ data, cost, currency }) => {
   const chartRef = useRef(null);
   const myChart = useRef(null);
+  const theme = useSelector(selectTheme);
 
   useEffect(() => {
     if (chartRef.current) {
@@ -35,7 +38,7 @@ const PieChart = ({ data, cost, currency }) => {
             avoidLabelOverlap: false,
             itemStyle: {
               borderRadius: 10,
-              borderColor: '#fff',
+              borderColor: theme === "dark" ? "#333" : "#fff",
               borderWidth: 2,
             },
             label: {
@@ -101,13 +104,13 @@ const PieChart = ({ data, cost, currency }) => {
             // Use the globally defined color array for the legend
             const backgroundColor = PIE_CHART_COLORS[index % PIE_CHART_COLORS.length]; // Use modulo for safety if data length > colors
             return (
-              <div key={index} className="flex items-center gap-2 bg-gray-50 p-1 rounded-lg">
+              <div key={index} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-600 p-1 rounded-lg">
                 <div
                   className="w-3 h-3 rounded-full flex-shrink-0"
                   style={{ backgroundColor: backgroundColor }}
                 />
                 <div className="flex flex-col min-w-0">
-                  <span className="font-outfit text-xs truncate">
+                  <span className="font-outfit text-xs truncate dark:text-gray-200">
                     {item.name}: {item.percentage}% {matchingCost && `(${currency} ${matchingCost.total})`}
                   </span>
                   {/* <span className="font-outfit text-xs text-gray-500 truncate">

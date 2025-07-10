@@ -37,6 +37,10 @@ export const fetchEntryData = createAsyncThunk(
   }
 );
 
+const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+const lastDay = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59, 59, 999).toISOString();
+
+
 const historySlice = createSlice({
   name: "history",
   initialState: {
@@ -50,8 +54,8 @@ const historySlice = createSlice({
       type: "ALL",
       account: "",
       category: "",
-      startDate: new Date().toISOString(),
-      endDate: new Date().toISOString(),
+      startDate: firstDay,
+      endDate: lastDay,
       sortOrder: "DESC",
       sortField: "dateTime",
     },

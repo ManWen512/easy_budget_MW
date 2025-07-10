@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { currencySymbol } from "../currency";
+import { selectCurrency } from "@/redux/selectors/settingsSelectors";
 import { BiSolidLeftArrow, BiSolidRightArrow } from "react-icons/bi";
 import { FiPlus } from "react-icons/fi";
 import { useSelector, useDispatch } from "react-redux";
@@ -33,6 +33,7 @@ export default function MonthEntryPage() {
   const month = useSelector(selectMonth);
   const status = useSelector(selectStatus);
   const error = useSelector(selectError);
+  const currencySymbol = useSelector(selectCurrency);
 
   useEffect(() => {
     dispatch(fetchMonthEntries({ year, month }));
@@ -107,7 +108,7 @@ export default function MonthEntryPage() {
       {/* Top bar with month navigation */}
       
       <div className=" p-5 mt-14 sm:mt-0 mx-auto w-[90vw] sm:w-full">
-      <div className="text-3xl font-bold mb-5">Entries</div>
+      <div className="text-3xl font-bold mb-5 dark:text-white">Entries</div>
         <div className="flex justify-center content-center items-center mb-2 w-full">
           <button
             onClick={() => handleMonthChange("prev")}
@@ -131,22 +132,22 @@ export default function MonthEntryPage() {
 
       {/* Summary row (all screens) */}
       <div className="w-full px-4 mb-2">
-        <div className="flex justify-between items-center bg-white rounded-xl shadow p-3 text-center">
+        <div className="flex justify-between items-center bg-white dark:bg-slate-800 rounded-xl shadow p-3 text-center">
           <div>
-            <div className="text-xs text-gray-500">Income</div>
+            <div className="text-xs text-gray-500 dark:text-gray-200">Income</div>
             <div className="text-green-600 font-bold">
               {currencySymbol} {totalIncome}
             </div>
           </div>
           <div>
-            <div className="text-xs text-gray-500">Outcome</div>
-            <div className="text-red-500 font-bold">
+            <div className="text-xs text-gray-500 dark:text-gray-200">Outcome</div>
+            <div className="text-red-500  font-bold">
               {currencySymbol} {totalOutcome}
             </div>
           </div>
           <div>
-            <div className="text-xs text-gray-500">Total</div>
-            <div className="text-gray-800 font-bold">
+            <div className="text-xs text-gray-500 dark:text-gray-200">Total</div>
+            <div className="text-gray-800 dark:text-gray-400 font-bold">
               {currencySymbol} {totalBalance}
             </div>
           </div>

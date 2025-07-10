@@ -13,6 +13,7 @@ import {
 } from "@/redux/slices/authSlice";
 import { showSnackbar } from "@/redux/slices/snackBarSlice";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import Joyride from "react-joyride";
 
 export default function SignupPage() {
   const dispatch = useDispatch();
@@ -29,6 +30,9 @@ export default function SignupPage() {
   const { status, error } = useSelector((state) => state.auth);
   //  const { open, message, severity } = useSelector((state) => state.snackbar);
   const [loading, setLoading] = useState(false);
+  const [ runGuestUserTour, setRunGuestUserTour] = useState(false);
+
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setPasswordError("");
@@ -57,6 +61,13 @@ export default function SignupPage() {
     }
   }, [status, error, passwordError, dispatch]);
 
+  useEffect(() => {
+    if (!localStorage.getItem("hasSeenGuestUserTour")) {
+      localStorage.setItem("hasSeenGuestUserTour", "true");
+      setRunGuestUserTour(true);
+    }
+  }, []);
+
   const handleGuestLogin = () => {
     setLoading(true);
     dispatch(
@@ -78,20 +89,21 @@ export default function SignupPage() {
       }
     });
   };
+  
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 ">
       {loading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white bg-opacity-70">
+        <div className="fixed inset-0 z-50 flex items-center justify-center dark:bg-black dark:bg-opacity-70 bg-white bg-opacity-70">
           <LoadingSpinner />
         </div>
       )}
 
 
       <div className="w-full max-w-sm   ">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-gradient-to-br from-teal-50 to-white dark:bg-gradient-to-br dark:from-teal-900 dark:to-black  rounded-2xl shadow-xl p-8 dark:text-white">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">Create an account</h1>
+            <h1 className="text-3xl font-bold mb-2 ">Create an account</h1>
             <p className="">Please sign up to your account</p>
           </div>
           <form className="space-y-6" onSubmit={handleSubmit}>
@@ -207,7 +219,7 @@ export default function SignupPage() {
             </button>
 
             <div className="text-center mt-4">
-              <span className="text-gray-600">Already have an account? </span>
+              <span className="text-gray-600 dark:text-gray-400">Already have an account? </span>
               <Link
                 href="/login"
                 className="text-teal-500 hover:underline font-semibold"
@@ -216,7 +228,7 @@ export default function SignupPage() {
               </Link>
             </div>
           </form>
-          <div className="mt-6 text-center">
+          <div className="guest-user mt-6 text-center">
             <button
               className="font-bold text-teal-400 hover:text-teal-500"
               onClick={handleGuestLogin}
@@ -226,6 +238,36 @@ export default function SignupPage() {
           </div>
         </div>
       </div>
+      <Joyride
+        run={runGuestUserTour}
+        steps={[
+          {
+            target: ".guest-user",
+            content: " Try Continue as Guest to explore the app without creating an account. Note: This is a test mode — your data will not be saved.",
+            placement: "top",
+            disableBeacon: true,
+          },
+        ]}
+        showSkipButton
+        showProgress
+        continuous
+        locale={{
+          last: "OK",
+        }}
+        styles={{
+          options: {
+            zIndex: 10000,
+            primaryColor: "#14b8a6",
+            backgroundColor: "#fff",
+            textColor: "#333",
+          },
+        }}
+        callback={(data) => {
+          if (data.status === "finished" || data.status === "skipped") {
+            setRunGuestUserTour(false);
+          }
+        }}
+      />
     </div>
   );
 }

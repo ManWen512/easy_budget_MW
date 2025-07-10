@@ -128,6 +128,9 @@ const transformYearData = (dataObject, startYear, endYear) => {
   return yearsArray;
 };
 
+const currentYear = new Date().getFullYear();
+const currentMonth = new Date().getMonth() + 1;
+
 const graphSlice = createSlice({
   name: "graph",
   initialState: {
@@ -137,45 +140,59 @@ const graphSlice = createSlice({
     outcomeList: [],
     incomeCategoryCostList: [],
     outcomeCategoryCostList: [],
+    selected: {
+      selectedOption: "month",
+      selectedMonth: currentMonth,
+      selectedYear: currentYear,
+      selectedYearRange: {
+        startYear:null,
+        endYear:null,
+      },
+    },
     status: "idle",
     error: null,
   },
-  reducers: {},
+  reducers: {
+    setSelected:(state, action)=>{
+      const newSelected = { ...state.selected, ...action.payload };
+      state.selected = newSelected;
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchMonthData.pending, (state) => {
-        state.status = 'loading';
+        state.status = "loading";
       })
       .addCase(fetchMonthData.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+        state.status = "succeeded";
         Object.assign(state, action.payload);
       })
       .addCase(fetchMonthData.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = "failed";
         state.error = action.payload;
       })
 
       .addCase(fetchYearData.pending, (state) => {
-        state.status = 'loading';
+        state.status = "loading";
       })
       .addCase(fetchYearData.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+        state.status = "succeeded";
         Object.assign(state, action.payload);
       })
       .addCase(fetchYearData.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = "failed";
         state.error = action.payload;
       })
 
       .addCase(fetchYearRangeData.pending, (state) => {
-        state.status = 'loading';
+        state.status = "loading";
       })
       .addCase(fetchYearRangeData.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+        state.status = "succeeded";
         Object.assign(state, action.payload);
       })
       .addCase(fetchYearRangeData.rejected, (state, action) => {
-        state.status = 'failed';
+        state.status = "failed";
         state.error = action.payload;
       });
   },
@@ -186,5 +203,6 @@ export const {
   setSelectedMonth,
   setSelectedYear,
   setYearRange,
+  setSelected,
 } = graphSlice.actions;
 export default graphSlice.reducer;

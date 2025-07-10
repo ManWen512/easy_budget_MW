@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { FaPenSquare, FaTrash, FaExclamationTriangle } from "react-icons/fa";
 import BalanceDialogPage from "./balancedialog/page"; // Import the dialog component
 import { useSearchParams } from "next/navigation";
-import { currencySymbol } from "../currency";
+import { selectCurrency } from "@/redux/selectors/settingsSelectors";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAccounts,
@@ -29,6 +29,7 @@ export default function BalancePage() {
   const totalBalance = useSelector(selectTotalBalance);
   const status = useSelector(selectStatus);
   const error = useSelector(selectError);
+  const currencySymbol = useSelector(selectCurrency);
   const [isChecked, setIsChecked] = useState(false);
   const [showDialog, setShowDialog] = useState();
 
@@ -99,7 +100,7 @@ export default function BalancePage() {
       ) : (
         <>
           <div className="grid grid-cols-1 w-full">
-          <div className="text-3xl font-bold mb-5">Accounts</div>
+          <div className="text-3xl font-bold mb-5 dark:text-white">Accounts</div>
             <div className="h-48 rounded-2xl text-center p-6 bg-teal-100 border border-gray-200 shadow-lg hover:bg-teal-200">
               <div className="mb-2 text-2xl font-bold">Total Balance</div>
               <br></br>
@@ -124,7 +125,7 @@ export default function BalancePage() {
                       onClick={() => openDialog(account)}
                       className="ml-3"
                     >
-                      <FaPenSquare size={30} />
+                      <FaPenSquare size={30} className="dark:text-gray-400"/>
                     </button>
                     <button
                       onClick={() => openConfirmDialog(account.id)}
