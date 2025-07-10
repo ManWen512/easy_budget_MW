@@ -14,7 +14,7 @@ import {
   clearStatus,
   clearEditEntry,
 } from "@/redux/slices/entrySlice";
-import LoadingSpinner from "@mui/material/styles";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
