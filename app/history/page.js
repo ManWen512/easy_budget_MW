@@ -344,7 +344,7 @@ export default function HistoryPage() {
                   onClick={() => handleRowClick(item)}
                 >
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs font-bold text-gray-700 dark:text-gray-200">
+                    <span className="text-xs font-bold text-gray-700">
                       {new Date(item.dateTime).toLocaleDateString()}
                     </span>
 
