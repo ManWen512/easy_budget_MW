@@ -76,7 +76,7 @@ const EntryDetailPage = ({ params }) => {
         category: JSON.stringify(entry.categoryDto),
         balance: JSON.stringify(entry.accountDto),
         cost: entry.cost,
-        dateTime: new Date(entry.dateTime).toLocaleString(),
+        date: new Date(entry.date).toLocaleString(),
         description: entry.description,
       })
     );
@@ -106,8 +106,8 @@ const EntryDetailPage = ({ params }) => {
             Date<div>:</div>
           </div>
           <div>
-            {entry.dateTime
-              ? new Date(entry.dateTime).toLocaleDateString("en-US", {
+            {entry.date
+              ? new Date(entry.date).toLocaleDateString("en-US", {
                   dateStyle: "medium",
                 })
               : "N/A"}

@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
-import { currencySymbol } from "@/app/currency";
+
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchCategories,
@@ -38,7 +38,7 @@ import {
 } from "@/redux/selectors/entrySelectors";
 import CategoryDialog from "@/app/category/categorydialog/page";
 import BalanceDialogPage from "@/app/balance/balancedialog/page";
-import { selectTheme } from "@/redux/selectors/settingsSelectors";
+import { selectCurrency, selectTheme } from "@/redux/selectors/settingsSelectors";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 
 const darkMuiTheme = createTheme({
@@ -73,6 +73,7 @@ export default function AddEditEntryPage() {
   const newCategory = useSelector((state) => state.category.newCategory);
   const editEntry = useSelector((state) => state.entry.editEntry);
   const theme = useSelector(selectTheme);
+  const currencySymbol = useSelector(selectCurrency);
 
   const router = useRouter();
 
@@ -100,8 +101,8 @@ export default function AddEditEntryPage() {
     categoryId: parsedCategory?.id || "",
     accountId: parsedAccount?.id || "",
     cost: editEntry.cost || 1,
-    dateTime: editEntry.dateTime
-      ? new Date(editEntry.dateTime)
+    date: editEntry.date
+      ? new Date(editEntry.date)
       : localDate || localDateTime,
     description: editEntry.description || "",
   });
@@ -194,7 +195,7 @@ export default function AddEditEntryPage() {
   const handleDateTimeChange = (newDate) => {
     setFormData((prevData) => ({
       ...prevData,
-      dateTime: newDate,
+      date: newDate,
     }));
   };
 
@@ -432,10 +433,10 @@ export default function AddEditEntryPage() {
                   >
                     <DatePicker
                       className="w-full p-3 border rounded-md focus:outline-none"
-                      id="dateTime"
+                      id="date"
                       label="Date"
-                      name="dateTime"
-                      value={formData.dateTime}
+                      name="date"
+                      value={formData.date}
                       required
                       onChange={handleDateTimeChange}
                       renderInput={(params) => (

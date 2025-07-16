@@ -112,7 +112,7 @@ export default function HistoryPage() {
   //     category: JSON.stringify(category),
   //     balance: JSON.stringify(account),
   //     cost: item.cost,
-  //     dateTime: item.dateTime,
+  //     date: item.date,
   //     description: item.description,
   //   });
   //   router.push(`/entry/addEditEntry?${params.toString()}`);
@@ -257,7 +257,7 @@ export default function HistoryPage() {
                   name="sortField"
                   onMouseDown={(e) => e.stopPropagation()}
                 >
-                  <MenuItem value="dateTime">DateTime</MenuItem>
+                  <MenuItem value="date">Date</MenuItem>
                   <MenuItem value="cost">Cost</MenuItem>
                 </Select>
               </FormControl>
@@ -345,7 +345,7 @@ export default function HistoryPage() {
                 >
                   <div className="flex justify-between items-center mb-1">
                     <span className="text-xs font-bold text-gray-700">
-                      {new Date(item.dateTime).toLocaleDateString()}
+                      {new Date(item.date).toLocaleDateString()}
                     </span>
 
                     <span className="text-sm font-bold text-gray-800 ">
@@ -398,7 +398,7 @@ export default function HistoryPage() {
                       onClick={() => handleRowClick(item)}
                     >
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(item.dateTime).toLocaleDateString()}
+                        {new Date(item.date).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {item.type}

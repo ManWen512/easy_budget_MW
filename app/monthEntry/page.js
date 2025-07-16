@@ -88,7 +88,7 @@ export default function MonthEntryPage() {
   // Group entries by date for all views (memoized)
   const groupedEntries = useMemo(() => {
     return monthEntries.reduce((acc, entry) => {
-      const date = new Date(entry.dateTime).toLocaleDateString("en-GB", {
+      const date = new Date(entry.date).toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",

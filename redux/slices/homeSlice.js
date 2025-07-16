@@ -100,7 +100,11 @@ const transformData = (dataObject) => {
 };
 
 const transformDayData = (dataObject) => {
-  const daysInMonth = new Date().getDate();
+  const currentDate = new Date();
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate(); // Get actual days in month
+  
   return Array.from({ length: daysInMonth }, (_, i) => {
     const day = i + 1;
     return { day, total: dataObject[day] || 0 };

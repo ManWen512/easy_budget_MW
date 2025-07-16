@@ -46,7 +46,7 @@ const entrySlice = createSlice({
       category: null,
       balance: null,
       cost: null,
-      dateTime: new Date().toISOString(),
+      date: new Date().toISOString(),
       description: null,
     },
   },
@@ -66,7 +66,7 @@ const entrySlice = createSlice({
         category: null,
         balance: null,
         cost: null,
-        dateTime: new Date().toISOString(),
+        date: new Date().toISOString(),
         description: null,
       };
     }

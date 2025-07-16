@@ -123,7 +123,7 @@ export default function SignupPage() {
                     setFormData({ ...formData, email: e.target.value })
                   }
                   required
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 outline-none transition-colors"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 outline-none transition-colors dark:text-white dark:bg-gray-800 dark:border-gray-600"
                   placeholder="Enter your email"
                 />
               </div>
@@ -143,7 +143,7 @@ export default function SignupPage() {
                     setFormData({ ...formData, username: e.target.value })
                   }
                   required
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 outline-none transition-colors"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 outline-none transition-colors dark:text-white dark:bg-gray-800 dark:border-gray-600"
                   placeholder="Enter your username"
                 />
               </div>
@@ -163,7 +163,7 @@ export default function SignupPage() {
                     setFormData({ ...formData, password: e.target.value })
                   }
                   required
-                  className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 outline-none transition-colors"
+                  className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 outline-none transition-colors dark:text-white dark:bg-gray-800 dark:border-gray-600"
                   placeholder="Enter your password"
                 />
                 <button
@@ -194,7 +194,7 @@ export default function SignupPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 outline-none transition-colors"
+                  className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 focus:border-teal-400 outline-none transition-colors dark:text-white dark:bg-gray-800 dark:border-gray-600"
                   placeholder="Confirm your password"
                 />
                 <button

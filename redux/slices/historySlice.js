@@ -18,7 +18,15 @@ export const fetchAccountsAndCategories = createAsyncThunk(
 // Fetch Entry Data
 export const fetchEntryData = createAsyncThunk(
   "history/fetchEntryData",
-  async ({ type, account, category, startDate, endDate, sortField, sortOrder }) => {
+  async ({
+    type,
+    account,
+    category,
+    startDate,
+    endDate,
+    sortField,
+    sortOrder,
+  }) => {
     const params = new URLSearchParams();
     if (type && type !== "ALL") params.append("type", type);
     if (account) params.append("accountId", account);
@@ -29,7 +37,6 @@ export const fetchEntryData = createAsyncThunk(
     if (sortOrder) params.append("sortOrder", sortOrder);
 
     const url = `${mainUrl}/entries/history?${params}`;
-  
 
     const response = await authFetch(url);
     const data = await response.json();
@@ -37,9 +44,22 @@ export const fetchEntryData = createAsyncThunk(
   }
 );
 
-const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
-const lastDay = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0, 23, 59, 59, 999).toISOString();
+const today = new Date();
+const year = today.getFullYear(); // 2024
+const month = today.getMonth(); // 8 (September, 0-indexed)
 
+// First day of current month (e.g., "2024-09-01")
+const firstDay = new Date(year, month, 1);
+const formattedFirstDay = `${firstDay.getFullYear()}-${String(
+  firstDay.getMonth() + 1
+).padStart(2, "0")}-${String(firstDay.getDate()).padStart(2, "0")}`;
+
+// Last day of current month (e.g., "2024-09-30")
+const lastDay = new Date(year, month + 1, 0);
+const formattedLastDay = `${lastDay.getFullYear()}-${String(
+  lastDay.getMonth() + 1
+).padStart(2, "0")}-${String(lastDay.getDate()).padStart(2, "0")}`;
+console.log(formattedFirstDay, formattedLastDay);
 
 const historySlice = createSlice({
   name: "history",
@@ -48,62 +68,58 @@ const historySlice = createSlice({
     categoriesData: [],
     entryData: [],
     totalCost: "",
-    status: 'idle',
+    status: "idle",
     error: null,
     filters: {
       type: "ALL",
       account: "",
       category: "",
-      startDate: firstDay,
-      endDate: lastDay,
+      startDate: formattedFirstDay,
+      endDate: formattedLastDay,
       sortOrder: "DESC",
-      sortField: "dateTime",
+      sortField: "date",
     },
   },
   reducers: {
     setFilters: (state, action) => {
       const newFilters = { ...state.filters, ...action.payload };
       if (action.payload.startDate) {
-        newFilters.startDate = new Date(
-          action.payload.startDate
-        ).toISOString();
+        newFilters.startDate = action.payload.startDate;
       }
       if (action.payload.endDate) {
-        newFilters.endDate = new Date(action.payload.endDate).toISOString();
+        newFilters.endDate = action.payload.endDate;
       }
       state.filters = newFilters;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchAccountsAndCategories.pending, (state) => {
-        state.status = 'loading';
+        state.status = "loading";
       })
       .addCase(fetchAccountsAndCategories.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+        state.status = "succeeded";
         state.accountsData = action.payload.accountsData;
         state.categoriesData = action.payload.categoriesData;
       })
       .addCase(fetchAccountsAndCategories.rejected, (state) => {
-        state.status = 'failed';
+        state.status = "failed";
         state.error = "Failed to fetch accountsData and categoriesData.";
       })
       .addCase(fetchEntryData.pending, (state) => {
-        state.status = 'loading';
+        state.status = "loading";
       })
       .addCase(fetchEntryData.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+        state.status = "succeeded";
         state.entryData = action.payload.entryData;
         state.totalCost = action.payload.totalCost;
       })
       .addCase(fetchEntryData.rejected, (state) => {
-        state.status = 'failed';
+        state.status = "failed";
         state.error = "Failed to fetch entries.";
       });
   },
 });
-
-
 
 export const { setFilters } = historySlice.actions;
 
@@ -115,7 +131,5 @@ const formatDate = (dateString) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  return `${year}-${month}-${day}T${hours}:${minutes}:00`;
+  return `${year}-${month}-${day}`;
 };

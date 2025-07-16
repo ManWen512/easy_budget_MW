@@ -64,6 +64,11 @@ export default function Home() {
           Get Started - Login
         </button>
       </div>
+
+      {/* Footer */}
+      <div className="text-center py-6 text-gray-500 dark:text-gray-400 text-sm">
+        © 2025 Easy Budget — Manage your finances with ease. All rights reserved.
+      </div>
     </div>
   );
 }

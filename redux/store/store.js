@@ -14,6 +14,7 @@ import historyReducer from "../slices/historySlice";
 import snackbarReducer from "../slices/snackBarSlice";
 import authReducer from "../slices/authSlice";
 import settingReducer from "../slices/settingSlice";
+import aiChatReducer from "../slices/aiChatSlice";
 
 const persistConfig = {
   key: 'root', // key for the storage
@@ -34,6 +35,7 @@ const rootReducer = combineReducers({
   history: historyReducer,
   snackbar: snackbarReducer,
   setting: settingReducer, 
+  aiChat: aiChatReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

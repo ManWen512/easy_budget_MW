@@ -37,7 +37,7 @@ export default function SettingPage() {
   const router = useRouter();
   const currency = useSelector(selectCurrency);
   const theme = useSelector(selectTheme);
-  const { user, status, error, isAuthenticated } = useSelector(
+  const { user, } = useSelector(
     (state) => state.auth
   );
   const [localCurrency, setLocalCurrency] = useState(null);
@@ -117,6 +117,7 @@ export default function SettingPage() {
               <MenuItem value="MMK">MMK (Ks)</MenuItem>
               <MenuItem value="€">EUR (€)</MenuItem>
               <MenuItem value="£">GBP (£)</MenuItem>
+              <MenuItem value="฿">THB (฿)</MenuItem>
             </Select>
           </ThemeProvider>
         </FormControl>

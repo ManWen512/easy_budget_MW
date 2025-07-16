@@ -60,7 +60,7 @@ export default function Navbar({ children }) {
       icon: <MdAccountBalanceWallet size={25} />,
     },
     { name: "Categories", href: "/category", icon: <MdCategory size={25} /> },
-    { name: "MonthEntry", href: "/monthEntry", icon: <IoCalendar size={25} /> },
+    { name: "Entries", href: "/monthEntry", icon: <IoCalendar size={25} /> },
     { name: "Graphs", href: "/graphs", icon: <VscGraphScatter size={25} /> },
 
     { name: "History", href: "/history", icon: <LuHistory size={25} /> },
