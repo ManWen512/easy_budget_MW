@@ -12,7 +12,6 @@ export const signinUser = createAsyncThunk(
       localStorage.setItem("token", token);
       return { ...res.data, token };
     } catch (error) {
-      
       return thunkAPI.rejectWithValue({ message });
     }
   }
@@ -27,25 +26,43 @@ export const signupUser = createAsyncThunk(
       localStorage.setItem("token", token);
       return { ...res.data, token };
     } catch (error) {
-    
       return thunkAPI.rejectWithValue({ message });
     }
   }
 );
 
-export const fetchUser = createAsyncThunk(
-  "auth/fetchUser",
-  async () => {
-    const response = await authFetch(`${accUrl}/users/user`);
-    return await response.json();
-  }
-);
+export const fetchUser = createAsyncThunk("auth/fetchUser", async () => {
+  const response = await authFetch(`${accUrl}/users/user`);
+  return await response.json();
+});
 
 export const fetchResetData = createAsyncThunk(
   "auth/fetchResetData",
   async () => {
     const response = await authFetch(`${accUrl}/guest/reset-db`);
     return await response.json();
+  }
+);
+
+export const updateCurrency = createAsyncThunk(
+  "auth/updateCurrency",
+  async (localCurrency, thunkAPI) => {
+    try {
+      // 1. Just wait for the update to complete (ignore response)
+      await authFetch(`${accUrl}/users/currency?currency=${localCurrency}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      // 2. Force refresh user data - this will update Redux state
+      
+
+      // 3. Return nothing since fetchUser handles the state update
+      return;
+    } catch (error) {
+      console.error("Currency update error:", error.message);
+      return thunkAPI.rejectWithValue(error.message);
+    }
   }
 );
 
@@ -60,17 +77,16 @@ const authSlice = createSlice({
   },
   reducers: {
     logout: (state) => {
-      
       state.token = null;
       state.user = null;
       state.isAuthenticated = false;
       state.status = "idle";
       localStorage.removeItem("token");
-      
     },
+
     // loadUserFromStorage: (state) => {
     //   state.token = localStorage.getItem("token");
-      
+
     // },
   },
   extraReducers: (builder) => {
@@ -107,10 +123,7 @@ const authSlice = createSlice({
       .addCase(fetchUser.pending, (state) => {
         state.status = "loading";
       })
-      .addCase(fetchUser.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.user = action.payload;
-      })
+
       .addCase(fetchUser.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
@@ -125,6 +138,21 @@ const authSlice = createSlice({
       .addCase(fetchResetData.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
+      })
+      .addCase(updateCurrency.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(updateCurrency.fulfilled, (state) => {
+        state.status = "succeeded";
+        // No need to manually update currency - fetchUser already did it
+      })
+      .addCase(updateCurrency.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
+      })
+      .addCase(fetchUser.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.user = action.payload; // This will have the updated currency
       });
   },
 });

@@ -1,7 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import authFetch from "../lib/authFetch";
-
-const accUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+import { createSlice } from "@reduxjs/toolkit";
 
 const applyThemeClass = (theme) => {
   if (typeof window === "undefined") return;
@@ -15,26 +12,10 @@ const applyThemeClass = (theme) => {
   }
 };
 
-// export const updateCurrency = createAsyncThunk(
-//   "setting/updateCurrency",
-//   async (localCurrency) => {
-//     try {
-//       const response = await authFetch(
-//         `${accUrl}/users/currency?currency=${localCurrency}`,
-//         {
-//           method: "PUT",
-//           headers: { "Content-Type": "application/json" },
-//           body: JSON.stringify(updatedAccount),
-//         }
-//       );
-//     } catch (error) {}
-//   }
-// );
-
 const settingSlice = createSlice({
   name: "setting",
   initialState: {
-    currency: "£",
+    currency: null,
     theme: "light", // default to 'light'
   },
   status: "idle",
@@ -51,9 +32,6 @@ const settingSlice = createSlice({
       applyThemeClass(state.theme);
     },
   },
-  // extraReducers:{
-
-  // }
 });
 
 export const { setCurrency, setTheme, initializeTheme } = settingSlice.actions;

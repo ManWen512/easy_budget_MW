@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "@/redux/slices/authSlice";
+import { fetchUser, logout, updateCurrency } from "@/redux/slices/authSlice";
 import { persistor } from "@/redux/store/store";
 import { useRouter } from "next/navigation";
 import { showSnackbar } from "@/redux/slices/snackBarSlice";
@@ -37,7 +37,7 @@ export default function SettingPage() {
   const router = useRouter();
   const currency = useSelector(selectCurrency);
   const theme = useSelector(selectTheme);
-  const { user, } = useSelector(
+  const { user, status, error, isAuthenticated } = useSelector(
     (state) => state.auth
   );
   const [localCurrency, setLocalCurrency] = useState(null);
@@ -58,16 +58,29 @@ export default function SettingPage() {
     );
   };
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     if (localCurrency) {
-      dispatch(setCurrency(localCurrency));
-      router.push("/dashboard");
-      dispatch(
-        showSnackbar({
-          message: "Successfully changed Currency",
-          severity: "success",
-        })
-      );
+      try {
+        await dispatch(updateCurrency(localCurrency)).unwrap();
+
+        // No need for additional fetchUser() here since it's handled in the thunk
+        dispatch(setCurrency(localCurrency));
+
+        router.push("/dashboard");
+        dispatch(
+          showSnackbar({
+            message: `Currency updated to ${localCurrency}`,
+            severity: "success",
+          })
+        );
+      } catch (error) {
+        dispatch(
+          showSnackbar({
+            message: error || "Currency update failed",
+            severity: "error",
+          })
+        );
+      }
     }
     if (localTheme) {
       dispatch(setTheme(localTheme));
@@ -136,11 +149,10 @@ export default function SettingPage() {
             >
               <MenuItem value="light">Light</MenuItem>
               <MenuItem value="dark">Dark</MenuItem>
-              
             </Select>
           </ThemeProvider>
         </FormControl>
-        <div >
+        <div>
           <button
             onClick={handleSaveChanges}
             className="mt-5 mb-5 w-full px-4 py-2 dark:text-gray-500 bg-teal-200  rounded-lg hover:bg-teal-300 font-semibold transition"

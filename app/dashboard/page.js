@@ -21,6 +21,7 @@ import {
 } from "@/redux/selectors/homeSelectors";
 import { showSnackbar } from "@/redux/slices/snackBarSlice";
 import Joyride from "react-joyride";
+import { fetchUser } from "@/redux/slices/authSlice";
 
 
 export default function Home() {
@@ -41,6 +42,7 @@ export default function Home() {
   useEffect(() => {
     dispatch(fetchTotalBalance());
     dispatch(fetchMonthData());
+   
   }, [dispatch]);
 
   useEffect(() => {

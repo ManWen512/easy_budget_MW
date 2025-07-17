@@ -27,7 +27,7 @@ export const submitEntry = createAsyncThunk(
 
         throw new Error(errorText);
       }
-      console.log(formData)
+   
       return await response.json();
     } catch (error) {
       return rejectWithValue(error.message);

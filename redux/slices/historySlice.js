@@ -59,7 +59,7 @@ const lastDay = new Date(year, month + 1, 0);
 const formattedLastDay = `${lastDay.getFullYear()}-${String(
   lastDay.getMonth() + 1
 ).padStart(2, "0")}-${String(lastDay.getDate()).padStart(2, "0")}`;
-console.log(formattedFirstDay, formattedLastDay);
+
 
 const historySlice = createSlice({
   name: "history",

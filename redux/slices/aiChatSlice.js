@@ -14,7 +14,7 @@ export const fetchChatHistory = createAsyncThunk(
 
 export const addChat = createAsyncThunk(
     "aiChat/addChat",
-    async( newChat , rejectWithValue ) => {
+    async( newChat , {rejectWithValue} ) => {
         try{
             const response = await authFetch(`${accUrl}/ai/chat`, {
                 method: "POST",
@@ -37,7 +37,7 @@ const aiChatSlice = createSlice({
     initialState: {
         status: 'idle',
         error: null,
-        newChat: null,
+        currentChat: null,
         history: [],
     },
     reducers:{},
@@ -59,7 +59,7 @@ const aiChatSlice = createSlice({
          })
          .addCase(addChat.fulfilled, (state, action) => {
             state.status ="succeeded";
-            state.newChat = action.payload;
+            state.currentChat = action.payload;
          })
          .addCase(addChat.rejected, (state,action ) =>{
             state.status = "failed";
